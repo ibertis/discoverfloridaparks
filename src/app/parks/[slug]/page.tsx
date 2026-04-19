@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import {
   MapPin, Phone, Globe, Clock, DollarSign, Star, Users, Calendar,
@@ -128,8 +129,8 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
       {/* ── Hero ────────────────────────────────────────────── */}
       <div style={{ position: 'relative', height: 480, overflow: 'hidden', background: '#a6967c' }}>
         {park.featured_image_url && (
-          <img src={park.featured_image_url} alt={park.name}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          <Image src={park.featured_image_url} alt={park.name} fill
+            sizes="100vw" style={{ objectFit: 'cover' }} priority />
         )}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(30,20,10,0.75) 0%, rgba(30,20,10,0.2) 60%, transparent 100%)' }} />
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '40px 24px', maxWidth: 1278, margin: '0 auto' }}>

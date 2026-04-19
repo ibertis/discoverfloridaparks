@@ -1,6 +1,7 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { MapPin, Star, ArrowRight, Map as MapIcon } from 'lucide-react';
+import { ArrowRight, Map as MapIcon } from 'lucide-react';
 import { WavesIcon, TicketIcon, RocketIcon, PlantIcon, UmbrellaIcon, MountainsIcon, TreeIcon, BirdIcon, StarIcon as PhosphorStar, TreePalmIcon, DropIcon } from '@phosphor-icons/react/dist/ssr';
 import type { Icon } from '@phosphor-icons/react/dist/lib/types';
 import HeroSlider from './HeroSlider';
@@ -10,6 +11,7 @@ import FooterLinks from './FooterLinks';
 import VideoPlayButton from './VideoModal';
 import HomeMapSection from './HomeMapSection';
 import FeaturedExperiences from './FeaturedExperiences';
+import ParkCard from '@/components/ParkCard';
 
 const REGIONS: { name: string; icon: Icon; description: string }[] = [
   { name: 'South Florida',                 icon: WavesIcon,    description: 'Everglades, Keys & Miami' },
@@ -77,14 +79,14 @@ export default async function HomePage() {
               </div>
               <div className="intro-hide-mobile" style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
                 <div style={{ width: '80%', borderRadius: 12, overflow: 'hidden' }}>
-                  <img src="/planning-florida-trip.jpg" alt="Kayaking at sunset in Florida"
-                    style={{ width: '100%', height: 'auto', display: 'block' }} />
+                  <Image src="/planning-florida-trip.jpg" alt="Kayaking at sunset in Florida"
+                    width={600} height={400} style={{ width: '100%', height: 'auto', display: 'block' }} />
                 </div>
               </div>
             </div>
             <div className="intro-hide-mobile" style={{ borderRadius: 12, overflow: 'hidden', width: '90%' }}>
-              <img src="/plan-your-trip.jpg" alt="Couple planning a Florida trip"
-                style={{ width: '100%', height: 'auto', display: 'block' }} />
+              <Image src="/plan-your-trip.jpg" alt="Couple planning a Florida trip"
+                width={600} height={400} style={{ width: '100%', height: 'auto', display: 'block' }} />
             </div>
           </div>
 
@@ -113,8 +115,8 @@ export default async function HomePage() {
             style={{ gridColumn: 3, gridRow: 2 }}
           >
             <div style={{ width: '95%', borderRadius: 12, overflow: 'hidden' }}>
-              <img src="/your-ultimate-park-guide.jpg" alt="Discover Florida Parks on mobile"
-                style={{ width: '100%', height: 'auto', display: 'block' }} />
+              <Image src="/your-ultimate-park-guide.jpg" alt="Discover Florida Parks on mobile"
+                width={600} height={400} style={{ width: '100%', height: 'auto', display: 'block' }} />
             </div>
           </div>
 
@@ -242,53 +244,3 @@ export default async function HomePage() {
   );
 }
 
-function ParkCard({ park }: { park: any }) {
-  return (
-    <Link href={`/parks/${park.slug}`}
-      style={{ display: 'flex', flexDirection: 'column', borderRadius: 16, overflow: 'hidden', border: '1px solid #eeeeee', background: '#fff', transition: 'box-shadow 0.2s' }}
-      className="group hover:shadow-lg">
-      <div style={{ position: 'relative', height: 200, overflow: 'hidden', background: '#f0ece6' }}>
-        {park.featured_image_url ? (
-          <img src={park.featured_image_url} alt={park.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s' }}
-            className="group-hover:scale-105" />
-        ) : (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#e8e0d6' }}>
-            <MapPin size={32} style={{ color: '#a6967c' }} />
-          </div>
-        )}
-        {park.park_type && (
-          <span style={{ position: 'absolute', top: 12, right: 12, background: '#ff7044', color: '#fff', borderRadius: '2.3em', padding: '4px 12px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>
-            {park.park_type}
-          </span>
-        )}
-      </div>
-      <div style={{ padding: '18px 20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <h3 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.5rem', lineHeight: 1.05, color: '#362f35', margin: '0 0 6px' }}>
-          {park.name}
-        </h3>
-        {park.park_region && (
-          <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c', display: 'flex', alignItems: 'center', gap: 4, margin: '0 0 10px' }}>
-            <MapPin size={11} /> {park.park_region}
-          </p>
-        )}
-        {park.short_description && (
-          <p style={{ fontFamily: 'Glegoo, serif', fontSize: '0.82rem', color: '#726d6b', lineHeight: 1.55, flex: 1, margin: '0 0 14px',
-            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {park.short_description}
-          </p>
-        )}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {park.google_rating ? (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', fontWeight: 700, color: '#e8a020' }}>
-              <Star size={13} fill="currentColor" /> {park.google_rating}
-            </span>
-          ) : <span />}
-          <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', fontWeight: 700, color: '#ff7044', display: 'flex', alignItems: 'center', gap: 4 }}>
-            Explore <ArrowRight size={13} />
-          </span>
-        </div>
-      </div>
-    </Link>
-  );
-}
