@@ -31,6 +31,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Discover Florida Parks',
+            url: 'https://discoverfloridaparks.com',
+            logo: 'https://discoverfloridaparks.com/dfp-logo.png',
+            description: 'Your all-in-one guide to Florida\'s best parks, beaches, and outdoor adventures.',
+          }) }}
+        />
       </head>
       <body className="min-h-full flex flex-col antialiased">{children}</body>
     </html>

@@ -141,8 +141,49 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
     { label: 'Accessible',     icon: ParkingCircle, active: amenities.wheelchair_accessible },
   ].filter(a => a.active);
 
+  const parkUrl = `https://discoverfloridaparks.com/parks/${park.slug}`;
+
+  const touristAttractionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'TouristAttraction',
+    name: park.name,
+    description: park.short_description,
+    url: parkUrl,
+    ...(park.featured_image_url && { image: park.featured_image_url }),
+    ...(park.latitude && park.longitude && {
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: park.latitude,
+        longitude: park.longitude,
+      },
+    }),
+    ...(park.address && {
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: park.address,
+        addressLocality: park.city,
+        postalCode: park.zip_code,
+        addressCountry: 'US',
+      },
+    }),
+    ...(park.phone && { telephone: park.phone }),
+    ...(park.website && { sameAs: park.website }),
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://discoverfloridaparks.com' },
+      { '@type': 'ListItem', position: 2, name: 'Parks', item: 'https://discoverfloridaparks.com/parks' },
+      { '@type': 'ListItem', position: 3, name: park.name, item: parkUrl },
+    ],
+  };
+
   return (
     <div style={{ background: '#fff', color: '#413734', minHeight: '100vh' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(touristAttractionSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       <SiteHeader />
 
