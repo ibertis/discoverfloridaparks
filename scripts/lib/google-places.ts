@@ -10,6 +10,7 @@ export interface PlaceResult {
   placeId: string;
   name: string;
   formattedAddress: string;
+  address: string;
   city: string;
   zipCode: string;
   phone: string | null;
@@ -31,6 +32,9 @@ export async function findPark(query: string): Promise<string | null> {
   const url = `${BASE}/findplacefromtext/json?input=${encodeURIComponent(query)}&inputtype=textquery&fields=place_id&key=${API_KEY}`;
   const res = await fetch(url);
   const data = await res.json() as any;
+  if (data.status === 'REQUEST_DENIED') {
+    throw new Error(`Google Places API denied: ${data.error_message ?? 'Check billing and API key restrictions.'}`);
+  }
   if (data.status !== 'OK' || !data.candidates?.length) return null;
   return data.candidates[0].place_id as string;
 }
@@ -73,6 +77,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceResult | nu
     placeId,
     name: r.name ?? '',
     formattedAddress: r.formatted_address ?? '',
+    address,
     city,
     zipCode: zip,
     phone: r.formatted_phone_number ?? null,

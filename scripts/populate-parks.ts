@@ -196,14 +196,15 @@ Respond ONLY with valid JSON in this exact shape:
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
+      model: 'claude-haiku-4-5',
       max_tokens: 1024,
       messages: [{ role: 'user', content: prompt }],
     }),
   });
 
   if (!res.ok) {
-    console.warn(`  AI API error for "${park.name}": ${res.status}`);
+    const body = await res.text();
+    console.warn(`  AI API error for "${park.name}": ${res.status} — ${body}`);
     return null;
   }
 
@@ -211,14 +212,16 @@ Respond ONLY with valid JSON in this exact shape:
   const text: string = data.content?.[0]?.text ?? '';
 
   try {
-    return JSON.parse(text) as {
+    // Strip markdown code fences if present
+    const clean = text.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim();
+    return JSON.parse(clean) as {
       short_description: string;
       full_description: string;
       visitor_tips: string;
       wildlife_summary: string;
     };
   } catch {
-    console.warn(`  Failed to parse AI response for "${park.name}"`);
+    console.warn(`  Failed to parse AI response for "${park.name}": ${text.slice(0, 120)}`);
     return null;
   }
 }
@@ -359,14 +362,20 @@ async function main() {
     for (const park of toEnrich) {
       process.stdout.write(`  ${park.name}... `);
       const query = `${park.name} ${park.city ?? ''} Florida`;
-      const placeId = await findPark(query);
+      let placeId: string | null = null;
+      try {
+        placeId = await findPark(query);
+      } catch (e) {
+        console.log(`\n⚠️  Google Places unavailable: ${(e as Error).message}\n   Skipping Google pass.`);
+        break;
+      }
       if (!placeId) { console.log('not found'); continue; }
 
       const details = await getPlaceDetails(placeId);
       if (!details) { console.log('no details'); continue; }
 
       const fieldMap: [keyof ParkRow, string | number | null, string | number | null][] = [
-        ['address',         details.city ? details.formattedAddress.split(',')[0].trim() : null, details.formattedAddress.split(',')[0].trim()],
+        ['address',         park.address, details.address],
         ['city',            park.city,    details.city],
         ['zip_code',        park.zip_code, details.zipCode],
         ['phone',           park.phone,   details.phone],
@@ -408,9 +417,14 @@ async function main() {
 
       let details = null;
       if (!sourceFilter || sourceFilter === 'google') {
-        const query = `${candidate.name} Florida`;
-        const placeId = await findPark(query);
-        if (placeId) details = await getPlaceDetails(placeId);
+        try {
+          const query = `${candidate.name} Florida`;
+          const placeId = await findPark(query);
+          if (placeId) details = await getPlaceDetails(placeId);
+        } catch (e) {
+          console.log(`\n⚠️  Google Places unavailable — skipping Google pass for new parks.`);
+          // Still add the park stub using NPS data if available
+        }
       }
 
       // Override with NPS data if available
@@ -428,7 +442,7 @@ async function main() {
         park_type: candidate.park_type,
         park_region: '',
         city: npsAddress?.city ?? details?.city ?? '',
-        address: npsAddress?.line1 ?? details?.formattedAddress?.split(',')[0]?.trim() ?? '',
+        address: npsAddress?.line1 ?? details?.address ?? '',
         zip_code: npsAddress?.postalCode ?? details?.zipCode ?? '',
         phone: npsPhone ?? details?.phone ?? '',
         website: nps?.url ?? details?.website ?? '',

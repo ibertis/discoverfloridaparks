@@ -1,7 +1,6 @@
 export interface FlStatePark {
   name: string;
   slug: string;
-  url: string;
 }
 
 function toSlug(name: string): string {
@@ -12,34 +11,27 @@ function toSlug(name: string): string {
     .replace(/^-|-$/g, '');
 }
 
+// Exclude non-park entries from the Wikipedia links list
+const EXCLUDE = new Set([
+  'AmeriCorps Florida State Parks',
+  'Florida Department of Environmental Protection',
+  'Florida State Parks',
+  'National Register of Historic Places',
+]);
+
 export async function fetchFlStateParksList(): Promise<FlStatePark[]> {
-  const res = await fetch('https://www.floridastateparks.org/parks-and-trails/');
-  if (!res.ok) throw new Error(`Failed to fetch FL State Parks list: ${res.status}`);
-  const html = await res.text();
+  const url = 'https://en.wikipedia.org/w/api.php?action=parse&page=List_of_Florida_state_parks&prop=links&format=json&pllimit=500';
+  const res = await fetch(url, { headers: { 'User-Agent': 'DiscoverFloridaParks/1.0 (data enrichment script)' } });
+  if (!res.ok) throw new Error(`Wikipedia API error: ${res.status}`);
 
-  // Parse anchor tags pointing to park pages: /parks-and-trails/park-slug-here
-  const pattern = /href="(\/parks-and-trails\/[a-z0-9-]+(?:\/[a-z0-9-]+)?)"/g;
-  const seen = new Set<string>();
-  const parks: FlStatePark[] = [];
+  const data = await res.json() as any;
+  const links: { ns: number; '*': string }[] = data.parse?.links ?? [];
 
-  let match: RegExpExecArray | null;
-  while ((match = pattern.exec(html)) !== null) {
-    const href = match[1];
-    // Skip the listing page itself and any sub-pages (e.g. /parks-and-trails/park/activities)
-    const parts = href.split('/').filter(Boolean);
-    if (parts.length !== 2) continue;
-    const slug = parts[1];
-    if (seen.has(slug)) continue;
-    seen.add(slug);
-
-    // Derive a display name from the slug (best-effort; Google Places will provide the canonical name)
-    const name = slug
-      .split('-')
-      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
-
-    parks.push({ name, slug, url: `https://www.floridastateparks.org${href}` });
-  }
-
-  return parks;
+  return links
+    .filter(l =>
+      l.ns === 0 &&
+      !EXCLUDE.has(l['*']) &&
+      /State (Park|Forest|Preserve|Reserve|Trail|Garden|Recreation Area|Beach|Museum)/i.test(l['*'])
+    )
+    .map(l => ({ name: l['*'], slug: toSlug(l['*']) }));
 }
