@@ -124,7 +124,7 @@ export default function ParkMap({ parks }: { parks: Park[] }) {
       {/* Filter chips */}
       <div style={{
         background: '#fff', borderBottom: '1px solid #eeeeee',
-        padding: '12px 24px', display: 'flex', gap: 8, flexWrap: 'wrap',
+        padding: '10px 24px', display: 'flex', gap: 8, flexWrap: 'wrap',
         alignItems: 'center',
       }}>
         <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600, color: '#a6967c', marginRight: 4 }}>
@@ -146,6 +146,9 @@ export default function ParkMap({ parks }: { parks: Park[] }) {
             {type}
           </button>
         ))}
+        <span style={{ marginLeft: 'auto', fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', fontWeight: 600, color: '#a6967c', whiteSpace: 'nowrap' }}>
+          {parks.length} parks
+        </span>
       </div>
 
       {/* Map container */}

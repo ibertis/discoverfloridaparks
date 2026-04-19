@@ -224,6 +224,12 @@ a { color: inherit; text-decoration: none; }
 
 /* iOS Safari: dvh can collapse when the browser toolbar is visible; svh is stable */
 .map-viewport {
-  height: calc(100svh - 108px - 81px);
-  height: calc(100dvh - 108px - 81px);
+  height: calc(100svh - 108px);
+  height: calc(100dvh - 108px);
+}
+@media (max-width: 640px) {
+  .map-viewport {
+    height: 90svh;
+    height: 90dvh;
+  }
 }

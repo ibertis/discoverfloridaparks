@@ -37,27 +37,7 @@ export default async function MapPage() {
 
       <SiteHeader />
 
-      {/* Page title bar */}
-      <div style={{
-        background: '#f9f7f5', borderBottom: '1px solid #eeeeee',
-        padding: '20px 24px',
-      }}>
-        <div style={{ maxWidth: 1278, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-          <div>
-            <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 4px' }}>
-              Interactive Map
-            </p>
-            <h1 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '2rem', color: '#362f35', margin: 0, letterSpacing: '-0.04em', lineHeight: 1 }}>
-              Florida Parks Map
-            </h1>
-          </div>
-          <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#a6967c', margin: 0 }}>
-            {parks?.length ?? 0} parks — click any marker to explore
-          </p>
-        </div>
-      </div>
-
-      {/* Map — fills viewport below header + title bar */}
+      {/* Map — fills viewport below header */}
       <div style={{ minHeight: 400 }} className="map-viewport">
         <MapLoader parks={parks ?? []} />
       </div>
