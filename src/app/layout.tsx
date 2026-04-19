@@ -7,6 +7,8 @@ export const metadata: Metadata = {
     template: '%s | Discover Florida Parks',
   },
   description: 'Explore Florida\'s best state parks, national parks, nature preserves, and outdoor attractions.',
+  alternates: { canonical: 'https://discoverfloridaparks.com' },
+  robots: { index: true, follow: true },
   openGraph: {
     siteName: 'Discover Florida Parks',
     type: 'website',
