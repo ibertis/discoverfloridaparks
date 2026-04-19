@@ -45,7 +45,7 @@ export default async function MapPage() {
       </div>
 
       {/* Map — fills viewport below header + title bar */}
-      <div style={{ height: 'calc(100dvh - 108px - 81px)', minHeight: 400 }}>
+      <div style={{ minHeight: 400 }} className="map-viewport">
         <MapLoader parks={parks ?? []} />
       </div>
 

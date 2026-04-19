@@ -7,7 +7,7 @@ export default function SiteHeader() {
       <div className="site-header-inner" style={{ maxWidth: 1278, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
         <Link href="/" style={{ flexShrink: 0 }}>
-          <Image src="/dfp-logo.png" alt="Discover Florida Parks" width={200} height={52} style={{ objectFit: 'contain', display: 'block' }} priority />
+          <Image src="/dfp-logo.png" alt="Discover Florida Parks" width={260} height={66} style={{ objectFit: 'contain', display: 'block' }} className="header-logo" priority />
         </Link>
 
         {/* Nav links — hidden on mobile */}

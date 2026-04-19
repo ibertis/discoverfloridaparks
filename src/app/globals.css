@@ -202,3 +202,28 @@ a { color: inherit; text-decoration: none; }
     gap: 32px 16px;
   }
 }
+
+/* Hero section: taller min-height on mobile to prevent button/indicator overlap */
+@media (max-width: 640px) {
+  .hero-section {
+    min-height: 720px !important;
+  }
+}
+
+/* Header logo: smaller on mobile, full size on desktop */
+.header-logo {
+  width: 200px !important;
+  height: 52px !important;
+}
+@media (min-width: 1024px) {
+  .header-logo {
+    width: 260px !important;
+    height: 66px !important;
+  }
+}
+
+/* iOS Safari: dvh can collapse when the browser toolbar is visible; svh is stable */
+.map-viewport {
+  height: calc(100svh - 108px - 81px);
+  height: calc(100dvh - 108px - 81px);
+}

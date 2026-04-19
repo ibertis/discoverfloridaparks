@@ -49,7 +49,7 @@ export default function HeroSlider({ parkCount: _parkCount }: { parkCount: numbe
   const slide = SLIDES[current];
 
   return (
-    <section style={{ position: 'relative', height: '88vh', minHeight: 600, overflow: 'hidden' }}>
+    <section style={{ position: 'relative', height: '88vh', minHeight: 600, overflow: 'hidden' }} className="hero-section">
       {/* Background image */}
       <div
         style={{
