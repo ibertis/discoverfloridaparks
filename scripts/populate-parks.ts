@@ -157,6 +157,44 @@ function toSlug(name: string): string {
     .replace(/^-|-$/g, '');
 }
 
+// ─── Photo upload to Supabase Storage ───────────────────────────────────────
+
+const PHOTO_BUCKET = 'park-photos';
+
+async function ensurePhotoBucket() {
+  const { error } = await supabaseAdmin.storage.createBucket(PHOTO_BUCKET, { public: true });
+  // Ignore "already exists" errors
+  if (error && !error.message.includes('already exists')) {
+    console.warn(`  Could not create storage bucket: ${error.message}`);
+  }
+}
+
+async function uploadPhotoToStorage(photoUrl: string, slug: string): Promise<string | null> {
+  try {
+    const res = await fetch(photoUrl);
+    if (!res.ok) return null;
+    const buffer = await res.arrayBuffer();
+    const contentType = res.headers.get('content-type') ?? 'image/jpeg';
+    const ext = contentType.includes('png') ? 'png' : 'jpg';
+    const fileName = `${slug}.${ext}`;
+
+    const { error } = await supabaseAdmin.storage
+      .from(PHOTO_BUCKET)
+      .upload(fileName, Buffer.from(buffer), { contentType, upsert: true });
+
+    if (error) {
+      console.warn(`  Storage upload failed for ${slug}: ${error.message}`);
+      return null;
+    }
+
+    const { data } = supabaseAdmin.storage.from(PHOTO_BUCKET).getPublicUrl(fileName);
+    return data.publicUrl;
+  } catch (e) {
+    console.warn(`  Photo upload error for ${slug}: ${(e as Error).message}`);
+    return null;
+  }
+}
+
 // ─── AI content generation ───────────────────────────────────────────────────
 
 async function generateParkContent(park: { name: string; park_type: string | null; city: string | null; park_region: string | null }) {
@@ -302,6 +340,7 @@ async function main() {
 
   // ── DRY-RUN MODE ──────────────────────────────────────────────────────────
   console.log('🔍 Dry-run mode — fetching data and generating CSVs...\n');
+  await ensurePhotoBucket();
 
   // Fetch existing parks from Supabase
   const { data: existingParks, error: dbError } = await supabaseAdmin
@@ -387,7 +426,8 @@ async function main() {
       ];
 
       if (!park.featured_image_url && details.photoUrl) {
-        fieldMap.push(['featured_image_url', null, details.photoUrl]);
+        const storedUrl = await uploadPhotoToStorage(details.photoUrl, park.slug);
+        if (storedUrl) fieldMap.push(['featured_image_url', null, storedUrl]);
       }
 
       let changes = 0;
@@ -448,7 +488,7 @@ async function main() {
         website: nps?.url ?? details?.website ?? '',
         google_rating: details?.rating ? String(details.rating) : '',
         operating_hours: npsHours ?? details?.operatingHours ?? '',
-        featured_image_url: npsImage ?? details?.photoUrl ?? '',
+        featured_image_url: npsImage ?? (details?.photoUrl ? (await uploadPhotoToStorage(details.photoUrl, candidate.slug)) ?? '' : ''),
         latitude: details?.lat ? String(details.lat) : (nps?.latitude ?? ''),
         longitude: details?.lng ? String(details.lng) : (nps?.longitude ?? ''),
         short_description: npsShortDesc ?? '',
