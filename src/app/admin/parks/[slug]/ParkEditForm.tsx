@@ -50,7 +50,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 const inputCls = 'w-full border border-[#dfdfdf] rounded-lg px-3 py-2.5 text-sm text-[#413734] outline-none focus:border-[#ff7044] transition bg-white';
 const textareaCls = `${inputCls} resize-y`;
 
-export default function ParkEditForm({ park }: { park: Park | null }) {
+export default function ParkEditForm({ park, role }: { park: Park | null; role?: string | null }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
@@ -107,7 +107,7 @@ export default function ParkEditForm({ park }: { park: Park | null }) {
     showToast('Photo uploaded');
   }
 
-  async function handleSave(e: React.FormEvent) {
+  async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSaving(true);
 
@@ -294,7 +294,7 @@ export default function ParkEditForm({ park }: { park: Park | null }) {
         {/* Actions */}
         <div className="flex items-center justify-between pb-8">
           <div>
-            {!isNew && (
+            {!isNew && role === 'admin' && (
               <button
                 type="button"
                 onClick={handleDelete}

@@ -251,8 +251,11 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
             {park.full_description && (
               <section>
                 <SectionHeading>About {park.name}</SectionHeading>
-                <div style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '1rem', color: '#726d6b', lineHeight: 1.65 }}
-                  dangerouslySetInnerHTML={{ __html: park.full_description }} />
+                <div style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '1rem', color: '#726d6b', lineHeight: 1.65 }}>
+                  {park.full_description.split('\n').map((line, i) => (
+                    <p key={i} style={{ margin: '0 0 1em' }}>{line}</p>
+                  ))}
+                </div>
               </section>
             )}
 

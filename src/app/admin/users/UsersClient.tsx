@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
 import { UserPlus } from 'lucide-react';
 
 const inputCls = 'w-full border border-[#dfdfdf] rounded-lg px-3 py-2.5 text-sm text-[#413734] outline-none focus:border-[#ff7044] transition bg-white';
@@ -12,30 +11,22 @@ export default function UsersClient() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  async function invite(e: React.FormEvent) {
+  async function invite(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setResult(null);
 
-    // Sign up the user — they'll receive a confirmation email
-    const { error } = await supabase.auth.signUp({
-      email,
-      password: crypto.randomUUID(), // temporary — user sets their own via email link
-      options: {
-        data: { role },
-        emailRedirectTo: `${window.location.origin}/admin`,
-      },
+    const res = await fetch('/api/admin/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, role }),
     });
 
+    const json = await res.json();
     setLoading(false);
 
-    if (error) {
-      setResult({ ok: false, msg: error.message });
+    if (!res.ok) {
+      setResult({ ok: false, msg: json.error ?? 'Invite failed' });
       return;
     }
 

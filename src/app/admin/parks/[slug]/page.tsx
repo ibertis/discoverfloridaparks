@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { createSupabaseServerClient, getAdminUser, getUserRole } from '@/lib/supabase-server';
 import ParkEditForm from './ParkEditForm';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -13,7 +13,8 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function ParkEditPage({ params }: Props) {
   const { slug } = await params;
-  const supabase = await createSupabaseServerClient();
+  const [supabase, user] = await Promise.all([createSupabaseServerClient(), getAdminUser()]);
+  const role = getUserRole(user);
 
   let park = null;
   if (slug !== 'new') {
@@ -46,7 +47,7 @@ export default async function ParkEditPage({ params }: Props) {
         </div>
       )}
 
-      <ParkEditForm park={park} />
+      <ParkEditForm park={park} role={role} />
     </div>
   );
 }
