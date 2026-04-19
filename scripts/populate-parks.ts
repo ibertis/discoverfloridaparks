@@ -101,8 +101,9 @@ interface NewParkRow {
 // ─── CSV helpers ─────────────────────────────────────────────────────────────
 
 function escapeCsv(val: unknown): string {
-  const s = val == null ? '' : String(val);
-  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+  // Replace real newlines with literal \n so the CSV stays single-line per row
+  const s = (val == null ? '' : String(val)).replace(/\n/g, '\\n');
+  if (s.includes(',') || s.includes('"')) {
     return `"${s.replace(/"/g, '""')}"`;
   }
   return s;
@@ -124,7 +125,7 @@ function readCsv(filePath: string): Record<string, string>[] {
   const headers = lines[0].split(',');
   return lines.slice(1).map(line => {
     const values = parseCsvLine(line);
-    return Object.fromEntries(headers.map((h, i) => [h, values[i] ?? '']));
+    return Object.fromEntries(headers.map((h, i) => [(h as string), (values[i] ?? '').replace(/\\n/g, '\n')]));
   });
 }
 
