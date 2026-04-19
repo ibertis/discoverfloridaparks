@@ -5,7 +5,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Only protect /admin routes (except /admin/login)
-  if (!pathname.startsWith('/admin') || pathname === '/admin/login') {
+  if (!pathname.startsWith('/admin') || pathname === '/admin/login' || pathname === '/admin/reset-password') {
     return NextResponse.next();
   }
 
