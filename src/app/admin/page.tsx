@@ -25,7 +25,7 @@ export default async function AdminDashboard() {
   return (
     <div className="p-8 max-w-4xl">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-[#362f35]" style={{ fontFamily: 'Shrikhand, cursive', letterSpacing: '-0.04em' }}>
+        <h1 className="text-lg font-bold text-[#362f35]" style={{ fontFamily: 'Shrikhand, cursive', letterSpacing: '-0.04em' }}>
           Dashboard
         </h1>
         {role === 'admin' && (
@@ -43,7 +43,7 @@ export default async function AdminDashboard() {
         {stats.map(s => (
           <div key={s.label} className="bg-white rounded-xl border border-[#eeeeee] p-5">
             <p className="text-xs text-[#a6967c] font-medium mb-1">{s.label}</p>
-            <p className="text-3xl font-bold" style={{ color: s.color, fontFamily: 'Shrikhand, cursive' }}>{s.value}</p>
+            <p className="text-2xl font-bold" style={{ color: s.color, fontFamily: 'Shrikhand, cursive' }}>{s.value}</p>
           </div>
         ))}
       </div>

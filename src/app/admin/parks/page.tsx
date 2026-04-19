@@ -27,8 +27,8 @@ export default async function AdminParksPage({ searchParams }: Props) {
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[#362f35]" style={{ fontFamily: 'Shrikhand, cursive', letterSpacing: '-0.04em' }}>
-          Parks {parks?.length ? <span className="text-[#a6967c] text-lg">({parks.length})</span> : null}
+        <h1 className="text-lg font-bold text-[#362f35]" style={{ fontFamily: 'Shrikhand, cursive', letterSpacing: '-0.04em' }}>
+          Parks {parks?.length ? <span className="text-[#a6967c] text-sm">({parks.length})</span> : null}
         </h1>
         <Link
           href="/admin/parks/new"

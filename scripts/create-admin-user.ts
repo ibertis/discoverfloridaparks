@@ -34,9 +34,11 @@ async function main() {
     // Update role to admin
     const { error } = await supabase.auth.admin.updateUserById(found.id, {
       user_metadata: { ...found.user_metadata, role: 'admin' },
+      email_confirm: true,
+      ...(password ? { password } : {}),
     });
     if (error) throw error;
-    console.log(`✅ Updated ${email} → role: admin`);
+    console.log(`✅ Updated ${email} → role: admin${password ? ' + password' : ''}`);
   } else {
     if (!password) {
       console.error('New user requires a password: npx tsx scripts/create-admin-user.ts email password');

@@ -11,7 +11,7 @@ export default async function UsersPage() {
 
   return (
     <div className="p-8 max-w-2xl">
-      <h1 className="text-2xl font-bold text-[#362f35] mb-6" style={{ fontFamily: 'Shrikhand, cursive', letterSpacing: '-0.04em' }}>
+      <h1 className="text-lg font-bold text-[#362f35] mb-6" style={{ fontFamily: 'Shrikhand, cursive', letterSpacing: '-0.04em' }}>
         Users
       </h1>
       <UsersClient />
