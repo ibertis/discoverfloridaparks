@@ -9,6 +9,19 @@ import ParkCard from '@/components/ParkCard';
 export const metadata: Metadata = {
   title: 'Explore Florida Parks',
   description: 'Browse all 49 Florida parks, nature preserves, and outdoor attractions. Filter by type, region, and amenities.',
+  openGraph: {
+    title: 'Explore Florida Parks',
+    description: 'Browse all 49 Florida parks, nature preserves, and outdoor attractions. Filter by type, region, and amenities.',
+    url: 'https://discoverfloridaparks.com/parks',
+    images: [{ url: 'https://discoverfloridaparks.com/hero-2.jpg', width: 1280, height: 853, alt: 'Florida Parks Directory' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Explore Florida Parks',
+    description: 'Browse all 49 Florida parks, nature preserves, and outdoor attractions.',
+    images: ['https://discoverfloridaparks.com/hero-2.jpg'],
+  },
+  alternates: { canonical: 'https://discoverfloridaparks.com/parks' },
 };
 
 const PARK_TYPES = [

@@ -7,6 +7,19 @@ import MapLoader from './MapLoader';
 export const metadata: Metadata = {
   title: 'Interactive Park Map — Discover Florida Parks',
   description: 'Explore all 49 Florida parks on an interactive map. Click any marker to learn more.',
+  openGraph: {
+    title: 'Interactive Florida Parks Map',
+    description: 'Explore all 49 Florida parks on an interactive map. Click any marker to learn more.',
+    url: 'https://discoverfloridaparks.com/map',
+    images: [{ url: 'https://discoverfloridaparks.com/hero-3.jpg', width: 1280, height: 853, alt: 'Florida Parks Interactive Map' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Interactive Florida Parks Map',
+    description: 'Explore all 49 Florida parks on an interactive map.',
+    images: ['https://discoverfloridaparks.com/hero-3.jpg'],
+  },
+  alternates: { canonical: 'https://discoverfloridaparks.com/map' },
 };
 
 export default async function MapPage() {

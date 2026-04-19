@@ -66,9 +66,29 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const park = await getPark(slug);
   if (!park) return { title: 'Park Not Found' };
+
+  const title = park.seo_title || park.name;
+  const description = park.seo_description || park.short_description;
+  const url = `https://discoverfloridaparks.com/parks/${park.slug}`;
+  const image = park.featured_image_url || 'https://discoverfloridaparks.com/hero-1.jpg';
+
   return {
-    title: park.seo_title || park.name,
-    description: park.seo_description || park.short_description,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url,
+      type: 'website',
+      images: [{ url: image, alt: park.name }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
+    alternates: { canonical: url },
   };
 }
 

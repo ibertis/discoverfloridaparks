@@ -1,6 +1,25 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+
+export const metadata: Metadata = {
+  title: 'Discover Florida Parks — State Parks, National Parks & Outdoor Attractions',
+  description: 'Your all-in-one guide to Florida\'s best parks, beaches, and outdoor adventures. Browse 49+ state parks, national parks, wildlife refuges, and more.',
+  openGraph: {
+    title: 'Discover Florida Parks',
+    description: 'Your all-in-one guide to Florida\'s best parks, beaches, and outdoor adventures.',
+    url: 'https://discoverfloridaparks.com',
+    images: [{ url: 'https://discoverfloridaparks.com/hero-1.jpg', width: 1280, height: 853, alt: 'Discover Florida Parks' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Discover Florida Parks',
+    description: 'Your all-in-one guide to Florida\'s best parks, beaches, and outdoor adventures.',
+    images: ['https://discoverfloridaparks.com/hero-1.jpg'],
+  },
+  alternates: { canonical: 'https://discoverfloridaparks.com' },
+};
 import { ArrowRight, Map as MapIcon } from 'lucide-react';
 import { WavesIcon, TicketIcon, RocketIcon, PlantIcon, UmbrellaIcon, MountainsIcon, TreeIcon, BirdIcon, StarIcon as PhosphorStar, TreePalmIcon, DropIcon } from '@phosphor-icons/react/dist/ssr';
 import type { Icon } from '@phosphor-icons/react/dist/lib/types';

@@ -7,6 +7,22 @@ export const metadata: Metadata = {
     template: '%s | Discover Florida Parks',
   },
   description: 'Explore Florida\'s best state parks, national parks, nature preserves, and outdoor attractions.',
+  openGraph: {
+    siteName: 'Discover Florida Parks',
+    type: 'website',
+    locale: 'en_US',
+    images: [
+      {
+        url: 'https://discoverfloridaparks.com/hero-1.jpg',
+        width: 1280,
+        height: 853,
+        alt: 'Discover Florida Parks',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
