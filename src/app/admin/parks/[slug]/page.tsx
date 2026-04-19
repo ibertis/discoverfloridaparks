@@ -18,7 +18,11 @@ export default async function ParkEditPage({ params }: Props) {
 
   let park = null;
   if (slug !== 'new') {
-    const { data } = await supabase.from('parks').select('*').eq('slug', slug).single();
+    const { data } = await supabase
+      .from('parks')
+      .select('*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*)')
+      .eq('slug', slug)
+      .single();
     if (!data) notFound();
     park = data;
   }
