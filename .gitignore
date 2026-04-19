@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# data population review output
+scripts/review/*.csv
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
