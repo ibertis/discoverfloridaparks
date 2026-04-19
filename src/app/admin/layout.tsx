@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation';
 import { getAdminUser, getUserRole } from '@/lib/supabase-server';
 import AdminNav from './AdminNav';
 
@@ -9,7 +8,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const role = getUserRole(user);
 
   if (!user || (role !== 'admin' && role !== 'editor')) {
-    redirect('/admin/login');
+    // Render children without the nav shell (login page lives here)
+    return <>{children}</>;
   }
 
   return (
