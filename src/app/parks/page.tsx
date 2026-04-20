@@ -6,7 +6,7 @@ import SiteFooter from '../SiteFooter';
 import FooterLinks from '../FooterLinks';
 import ParkCard from '@/components/ParkCard';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Explore Florida Parks',
@@ -91,7 +91,7 @@ export default async function ParksPage({ searchParams }: { searchParams: Promis
             Find Your Next Adventure
           </p>
           <h1 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2.5rem, 5vw, 4.14rem)', lineHeight: 0.98, color: '#362f35', margin: '0 0 12px', letterSpacing: '-0.04em' }}>
-            Explore Florida Parks
+            Explore Our Parks
           </h1>
           <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.95rem', color: '#726d6b', margin: 0 }}>
             {filtered.length} park{filtered.length !== 1 ? 's' : ''}{' '}
