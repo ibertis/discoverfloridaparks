@@ -57,6 +57,8 @@ async function getPark(slug: string): Promise<Park | null> {
   return data as Park;
 }
 
+export const revalidate = 60;
+
 export async function generateStaticParams() {
   const { data } = await supabase.from('parks').select('slug');
   return (data ?? []).map((p) => ({ slug: p.slug }));

@@ -6,6 +6,8 @@ import SiteFooter from '../SiteFooter';
 import FooterLinks from '../FooterLinks';
 import ParkCard from '@/components/ParkCard';
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: 'Explore Florida Parks',
   description: 'Browse all 49 Florida parks, nature preserves, and outdoor attractions. Filter by type, region, and amenities.',
