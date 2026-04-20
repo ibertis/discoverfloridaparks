@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Map, ChevronRight as ChevronRightIcon } from 'lucide-react';
 
@@ -42,9 +42,19 @@ const SLIDES: Slide[] = [
 
 export default function HeroSlider({ parkCount: _parkCount }: { parkCount: number }) {
   const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
 
-  const prev = () => setCurrent(i => (i - 1 + SLIDES.length) % SLIDES.length);
-  const next = () => setCurrent(i => (i + 1) % SLIDES.length);
+  const next = useCallback(() => setCurrent(i => (i + 1) % SLIDES.length), []);
+
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(next, 5000);
+    return () => clearInterval(id);
+  }, [paused, next]);
+
+  const prev = () => { setPaused(true); setCurrent(i => (i - 1 + SLIDES.length) % SLIDES.length); };
+  const goTo = (i: number) => { setPaused(true); setCurrent(i); };
+  const nextManual = () => { setPaused(true); next(); };
 
   const slide = SLIDES[current];
 
@@ -106,7 +116,7 @@ export default function HeroSlider({ parkCount: _parkCount }: { parkCount: numbe
       </button>
 
       {/* Arrow — Right */}
-      <button onClick={next} aria-label="Next slide"
+      <button onClick={nextManual} aria-label="Next slide"
         style={{ position: 'absolute', right: 24, top: '50%', transform: 'translateY(-50%)', zIndex: 2, background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.4)', borderRadius: '50%', width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff', backdropFilter: 'blur(4px)', transition: 'background 0.2s' }}
         className="hover:bg-white/30">
         <ChevronRight size={22} />
@@ -115,7 +125,7 @@ export default function HeroSlider({ parkCount: _parkCount }: { parkCount: numbe
       {/* Dot indicators */}
       <div style={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 2, display: 'flex', gap: 10 }}>
         {SLIDES.map((_, i) => (
-          <button key={i} onClick={() => setCurrent(i)} aria-label={`Go to slide ${i + 1}`}
+          <button key={i} onClick={() => goTo(i)} aria-label={`Go to slide ${i + 1}`}
             style={{ width: i === current ? 28 : 10, height: 10, borderRadius: 5, border: 'none', cursor: 'pointer', background: i === current ? '#ff7044' : 'rgba(255,255,255,0.5)', transition: 'all 0.3s', padding: 0 }} />
         ))}
       </div>
