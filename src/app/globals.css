@@ -75,6 +75,8 @@ a { color: inherit; text-decoration: none; }
   width: 240px;
   flex-shrink: 0;
 }
+.filter-mobile-btn   { display: none; }
+.filter-sidebar-content { display: block; }
 .park-detail-layout {
   display: grid;
   grid-template-columns: 1fr 300px;
@@ -108,8 +110,10 @@ a { color: inherit; text-decoration: none; }
   .grid-regions       { grid-template-columns: 1fr; }
   .grid-types         { grid-template-columns: repeat(3, 1fr); }
   .park-cards-grid    { grid-template-columns: 1fr; }
-  .parks-page-layout  { flex-direction: column; gap: 32px; }
-  .park-sidebar       { width: 100%; }
+  .parks-page-layout      { flex-direction: column; gap: 16px; }
+  .park-sidebar           { width: 100%; }
+  .filter-sidebar-content { display: none; }
+  .filter-mobile-btn      { display: flex; }
   .site-footer-inner  { flex-direction: column; text-align: center; gap: 20px; }
   .hero-content-pad   { padding: 0 24px; }
   .site-header-inner  { height: 72px; padding: 0 16px; }

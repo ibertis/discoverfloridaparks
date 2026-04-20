@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
-import { Search, X } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { Search, X, SlidersHorizontal } from 'lucide-react';
 
 interface AmenityOption { key: string; label: string; }
 
@@ -14,12 +14,14 @@ interface Props {
   currentRegion?: string;
   currentAmenities: string[];
   currentQ?: string;
+  parkCount?: number;
 }
 
-export default function FilterBar({ types, regions, amenities, currentType, currentRegion, currentAmenities, currentQ }: Props) {
+export default function FilterBar({ types, regions, amenities, currentType, currentRegion, currentAmenities, currentQ, parkCount }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [open, setOpen] = useState(false);
 
   const update = useCallback((key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -42,6 +44,7 @@ export default function FilterBar({ types, regions, amenities, currentType, curr
   }, [router, pathname]);
 
   const hasFilters = !!(currentType || currentRegion || currentAmenities.length || currentQ);
+  const activeCount = [currentType, currentRegion, currentQ, ...currentAmenities].filter(Boolean).length;
 
   const labelStyle = {
     fontFamily: 'Archivo, sans-serif',
@@ -69,7 +72,7 @@ export default function FilterBar({ types, regions, amenities, currentType, curr
     transition: 'background 0.15s, color 0.15s',
   });
 
-  return (
+  const renderFilters = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
 
       {/* Search */}
@@ -174,5 +177,109 @@ export default function FilterBar({ types, regions, amenities, currentType, curr
         </button>
       )}
     </div>
+  );
+
+  return (
+    <>
+      {/* Mobile trigger — shown only on mobile via CSS */}
+      <div className="filter-mobile-btn" style={{ alignItems: 'center', gap: 10 }}>
+        <button
+          onClick={() => setOpen(true)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: hasFilters ? '#fff3f0' : '#f5f3f0',
+            border: `1.5px solid ${hasFilters ? '#ff7044' : '#eeeeee'}`,
+            borderRadius: '2.3em',
+            padding: '9px 18px',
+            fontFamily: 'Archivo, sans-serif',
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            color: hasFilters ? '#ff7044' : '#726d6b',
+            cursor: 'pointer',
+          }}
+        >
+          <SlidersHorizontal size={15} />
+          Filters
+          {activeCount > 0 && (
+            <span style={{
+              background: '#ff7044', color: '#fff',
+              fontSize: '0.68rem', fontWeight: 700,
+              borderRadius: '50%', width: 18, height: 18,
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              lineHeight: 1,
+            }}>
+              {activeCount}
+            </span>
+          )}
+        </button>
+        {hasFilters && (
+          <button
+            onClick={clearAll}
+            style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', fontWeight: 600, color: '#a6967c', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Desktop sidebar content — hidden on mobile via CSS */}
+      <div className="filter-sidebar-content">
+        {renderFilters()}
+      </div>
+
+      {/* Mobile drawer */}
+      {open && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setOpen(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 40 }}
+          />
+          {/* Sheet */}
+          <div style={{
+            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
+            background: '#fff', borderRadius: '20px 20px 0 0',
+            maxHeight: '85vh',
+            display: 'flex', flexDirection: 'column',
+            boxShadow: '0 -4px 32px rgba(0,0,0,0.12)',
+          }}>
+            {/* Handle */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0' }}>
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: '#dfdfdf' }} />
+            </div>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px 16px' }}>
+              <span style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.4rem', color: '#362f35', letterSpacing: '-0.03em' }}>
+                Filter Parks
+              </span>
+              <button
+                onClick={() => setOpen(false)}
+                style={{ background: '#f5f3f0', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#726d6b' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            {/* Scrollable body */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 8px' }}>
+              {renderFilters()}
+            </div>
+            {/* Footer */}
+            <div style={{ padding: '16px 20px', borderTop: '1px solid #eeeeee' }}>
+              <button
+                onClick={() => setOpen(false)}
+                style={{
+                  width: '100%', background: '#ff7044', color: '#fff', border: 'none',
+                  borderRadius: '2.3em', padding: '12px',
+                  fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer',
+                }}
+                className="hover:opacity-85 transition-opacity"
+              >
+                {parkCount != null ? `Show ${parkCount} Park${parkCount !== 1 ? 's' : ''}` : 'Done'}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }

@@ -113,6 +113,7 @@ export default async function ParksPage({ searchParams }: { searchParams: Promis
             currentRegion={region}
             currentAmenities={amenityList}
             currentQ={q}
+            parkCount={filtered.length}
           />
         </aside>
 
