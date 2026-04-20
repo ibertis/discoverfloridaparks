@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
-import { Trees, Users, LayoutDashboard, LogOut } from 'lucide-react';
+import { Trees, Compass, Users, LayoutDashboard, LogOut } from 'lucide-react';
 
 const NAV = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/parks', label: 'Parks', icon: Trees },
+  { href: '/admin/experiences', label: 'Experiences', icon: Compass },
 ];
 
 export default function AdminNav({ role, userEmail }: { role: string; userEmail: string }) {
