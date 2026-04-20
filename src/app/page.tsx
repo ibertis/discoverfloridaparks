@@ -230,7 +230,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── In Our Backyard (decorative map) ───────────────── */}
-      <HomeMapSection />
+      <HomeMapSection totalCount={count ?? undefined} />
 
       {/* ── Featured Experiences ─────────────────────────────── */}
       <FeaturedExperiences />

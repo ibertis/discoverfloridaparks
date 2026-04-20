@@ -17,7 +17,7 @@ function toSvg(lat: number, lng: number) {
   return { x: Math.round(x), y: Math.round(y) };
 }
 
-export default async function HomeMapSection() {
+export default async function HomeMapSection({ totalCount }: { totalCount?: number }) {
   const { data: parks } = await supabase
     .from('parks')
     .select('id, slug, name, latitude, longitude, park_type')
@@ -53,7 +53,7 @@ export default async function HomeMapSection() {
             fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.88rem',
             color: '#726d6b', lineHeight: 1.65, margin: '0 0 32px', maxWidth: 260,
           }}>
-            {pins.length} parks, preserves, and outdoor gems — all across the Sunshine State.
+            {totalCount ?? pins.length} parks, preserves, and outdoor gems — all across the Sunshine State.
           </p>
           <Link
             href="/map"
