@@ -2,13 +2,19 @@ import { createSupabaseServerClient } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { Plus, Search } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Parks' };
 
 interface Props {
   searchParams: Promise<{ q?: string; type?: string }>;
 }
 
-const PARK_TYPES = ['State Parks', 'National Parks', 'County Parks', 'Theme Parks', 'Water Parks'];
+const PARK_TYPES = [
+  'State Parks', 'National Parks', 'National Wildlife Refuge',
+  'County Parks', 'Community Parks', 'Theme Parks', 'Water Parks',
+  'Seasonal Attractions', 'National Estuarine Research Reserve',
+  'Nature Preserve', 'Wildlife Refuge', 'State Forest', 'State Trail', 'Other',
+];
 
 export default async function AdminParksPage({ searchParams }: Props) {
   const { q, type } = await searchParams;
@@ -22,7 +28,7 @@ export default async function AdminParksPage({ searchParams }: Props) {
   if (q) query = query.ilike('name', `%${q}%`);
   if (type) query = query.eq('park_type', type);
 
-  const { data: parks } = await query.limit(200);
+  const { data: parks } = await query;
 
   return (
     <div className="p-8">
