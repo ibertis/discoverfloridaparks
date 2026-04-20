@@ -203,7 +203,7 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
     if (!file) return;
     setUploadingPhoto(true);
     const ext = file.name.split('.').pop() ?? 'jpg';
-    const fileName = `${form.slug || Date.now()}.${ext}`;
+    const fileName = `${form.slug || 'park'}-${Date.now()}.${ext}`;
     const fd = new FormData();
     fd.append('file', file);
     fd.append('fileName', fileName);
