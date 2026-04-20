@@ -205,10 +205,13 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
     setUploadingPhoto(true);
     const ext = file.name.split('.').pop() ?? 'jpg';
     const fileName = `${form.slug || Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from('park-photos').upload(fileName, file, { upsert: true, contentType: file.type });
-    if (error) { showToast(`Upload failed: ${error.message}`, false); setUploadingPhoto(false); return; }
-    const { data } = supabase.storage.from('park-photos').getPublicUrl(fileName);
-    set('featured_image_url', data.publicUrl);
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('fileName', fileName);
+    const res = await fetch('/admin/api/upload-park-photo', { method: 'POST', body: fd });
+    const json = await res.json();
+    if (!res.ok) { showToast(`Upload failed: ${json.error}`, false); setUploadingPhoto(false); return; }
+    set('featured_image_url', json.url);
     setUploadingPhoto(false);
     showToast('Photo uploaded');
   }
