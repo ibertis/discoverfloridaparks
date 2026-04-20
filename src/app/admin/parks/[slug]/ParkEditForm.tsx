@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Upload, Trash2, Save, Plus, X } from 'lucide-react';
@@ -185,11 +184,6 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
   const [facts, setFacts] = useState<FunFact[]>(park?.park_fun_facts ?? []);
   const [events, setEvents] = useState<SeasonalEvent[]>(park?.park_seasonal_events ?? []);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   function set(field: keyof Park, value: unknown) {
     setForm(f => ({ ...f, [field]: value === '' ? null : value }));
   }
@@ -216,54 +210,22 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
     showToast('Photo uploaded');
   }
 
-  async function saveChildRecords(parkId: string) {
-    // Amenities — upsert
-    const { id: _id, park_id: _pid, ...amenityFields } = amenities;
-    await supabase.from('park_amenities').upsert({ park_id: parkId, ...amenityFields }, { onConflict: 'park_id' });
-
-    // Trails — delete all, re-insert
-    await supabase.from('park_trails').delete().eq('park_id', parkId);
-    if (trails.length > 0) {
-      await supabase.from('park_trails').insert(
-        trails.map((t, i) => ({ park_id: parkId, name: t.name, difficulty: t.difficulty, length_miles: t.length_miles, description: t.description, sort_order: i }))
-      );
-    }
-
-    // Fun facts — delete all, re-insert
-    await supabase.from('park_fun_facts').delete().eq('park_id', parkId);
-    if (facts.length > 0) {
-      await supabase.from('park_fun_facts').insert(
-        facts.map((f, i) => ({ park_id: parkId, fact: f.fact, sort_order: i }))
-      );
-    }
-
-    // Seasonal events — delete all, re-insert
-    await supabase.from('park_seasonal_events').delete().eq('park_id', parkId);
-    if (events.length > 0) {
-      await supabase.from('park_seasonal_events').insert(
-        events.map((e, i) => ({ park_id: parkId, event_name: e.event_name, month: e.month, description: e.description, sort_order: i }))
-      );
-    }
-  }
-
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSaving(true);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { park_amenities, park_trails, park_fun_facts, park_seasonal_events, ...payload } = form;
+    const res = await fetch('/admin/api/save-park', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ park: form, amenities, trails, facts, events }),
+    });
+    const json = await res.json();
+    setSaving(false);
+    if (!res.ok) { showToast(json.error, false); return; }
 
     if (isNew) {
-      const { data, error } = await supabase.from('parks').insert(payload).select('id').single();
-      setSaving(false);
-      if (error) { showToast(error.message, false); return; }
-      await saveChildRecords(data.id);
-      router.push(`/admin/parks/${form.slug}`);
+      router.push(`/admin/parks/${json.slug}`);
     } else {
-      const { error } = await supabase.from('parks').update(payload).eq('id', park!.id!);
-      if (error) { setSaving(false); showToast(error.message, false); return; }
-      await saveChildRecords(park!.id!);
-      setSaving(false);
       showToast('Saved!');
       router.refresh();
     }
@@ -272,7 +234,11 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
   async function handleDelete() {
     if (!confirm(`Delete "${form.name}"? This cannot be undone.`)) return;
     setDeleting(true);
-    await supabase.from('parks').delete().eq('id', park!.id!);
+    await fetch('/admin/api/save-park', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: park!.id }),
+    });
     router.push('/admin/parks');
   }
 
