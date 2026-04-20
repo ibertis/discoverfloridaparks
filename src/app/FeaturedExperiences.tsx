@@ -103,7 +103,7 @@ export default function FeaturedExperiences() {
             Explore &amp; Experience
           </p>
           <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2.4rem, 3.5vw, 3.6rem)', lineHeight: 0.95, color: '#362f35', margin: '0 0 40px', letterSpacing: '-0.04em' }}>
-            Plan your next Florida<br />Adventure
+            Plan your next<br />Adventure
           </h2>
 
           {LISTINGS.map((item, i) => (
