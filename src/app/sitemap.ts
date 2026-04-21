@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
-import { sanityClient } from '@/sanity/client';
+import { client as sanityClient } from '@/sanity/lib/client';
 import { postSlugsQuery } from '@/sanity/queries';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     sanityClient.fetch(postSlugsQuery).catch(() => [] as { slug: string }[]),
   ]);
 
-  const parkUrls: MetadataRoute.Sitemap = (parks ?? []).map(park => ({
+  const parkUrls: MetadataRoute.Sitemap = (parks ?? []).map((park: { slug: string; updated_at: string | null }) => ({
     url: `https://discoverfloridaparks.com/parks/${park.slug}`,
     lastModified: park.updated_at ? new Date(park.updated_at) : new Date(),
     changeFrequency: 'monthly',

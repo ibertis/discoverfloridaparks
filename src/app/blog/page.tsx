@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import SiteHeader from '../SiteHeader';
 import SiteFooter from '../SiteFooter';
 import FooterLinks from '../FooterLinks';
-import { sanityClient } from '@/sanity/client';
+import { client as sanityClient } from '@/sanity/lib/client';
 import { postsListQuery } from '@/sanity/queries';
 import { urlFor } from '@/sanity/imageUrl';
 
