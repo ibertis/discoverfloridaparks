@@ -91,9 +91,9 @@ export default async function HomePage() {
                 <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 10px' }}>
                   Welcome to
                 </p>
-                <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '2.2rem', lineHeight: 0.97, color: '#362f35', margin: '0 0 20px', letterSpacing: '-0.04em' }}>
+                <h1 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '2.2rem', lineHeight: 0.97, color: '#362f35', margin: '0 0 20px', letterSpacing: '-0.04em' }}>
                   Discover<br />Florida Parks
-                </h2>
+                </h1>
                 <VideoPlayButton />
               </div>
               <div className="intro-hide-mobile" style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
@@ -114,9 +114,9 @@ export default async function HomePage() {
             <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 10px' }}>
               Your Guide to the Sunshine State&apos;s
             </p>
-            <h1 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(3.2rem, 5.8vw, 6.4rem)', lineHeight: 0.88, color: '#362f35', margin: '0 0 28px', letterSpacing: '-0.04em' }}>
+            <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(3.2rem, 5.8vw, 6.4rem)', lineHeight: 0.88, color: '#362f35', margin: '0 0 28px', letterSpacing: '-0.04em' }}>
               Great<br />Outdoors!
-            </h1>
+            </h2>
             <div style={{ width: 44, height: 3, background: '#a6967c', marginBottom: 28, borderRadius: 2 }} />
             <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.82rem', color: '#726d6b', lineHeight: 1.7, marginBottom: 40 }}>
               DiscoverFloridaParks.com is your all-in-one guide to the best parks, natural attractions, and outdoor experiences across Florida. From world-famous national parks to neighborhood nature trails, we make it easy to find the perfect place to explore, relax, or plan your next getaway.
