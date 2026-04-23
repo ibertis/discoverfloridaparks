@@ -39,6 +39,15 @@ const OTHER_COLUMNS = [
     ],
   },
   {
+    heading: 'Styles',
+    links: [
+      { label: 'Hot Deals',   href: '#' },
+      { label: 'Clearance',   href: '#' },
+      { label: 'New Deals',   href: '#' },
+      { label: 'Our Shop',    href: '#' },
+    ],
+  },
+  {
     heading: 'We Care',
     links: [
       { label: 'Conservation',  href: '#' },
