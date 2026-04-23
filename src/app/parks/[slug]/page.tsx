@@ -21,7 +21,7 @@ interface FunFact { id: string; fact: string; sort_order: number; }
 interface SeasonalEvent { id: string; event_name: string; month: string; description: string; sort_order: number; }
 interface Park {
   id: string; slug: string; name: string; short_description: string; full_description: string;
-  park_type: string; park_region: string; county: string; park_status: string;
+  park_type: string; park_regions: string[]; county: string; park_status: string;
   featured_image_url: string; gallery_urls: string[];
   address: string; city: string; zip_code: string;
   latitude: number; longitude: number;
@@ -208,11 +208,11 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                 {park.park_type}
               </span>
             )}
-            {park.park_region && (
-              <span style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', borderRadius: '2.3em', padding: '4px 14px', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600 }}>
-                {park.park_region}
+            {park.park_regions?.length > 0 && park.park_regions.map(r => (
+              <span key={r} style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', borderRadius: '2.3em', padding: '4px 14px', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600 }}>
+                {r}
               </span>
-            )}
+            ))}
           </div>
           <h1 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2.5rem, 5vw, 4.14rem)', lineHeight: 0.98, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.04em' }}>
             {park.name}

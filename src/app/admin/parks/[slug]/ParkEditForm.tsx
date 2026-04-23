@@ -87,7 +87,7 @@ interface Park {
   slug: string;
   name: string;
   park_type: string | null;
-  park_region: string | null;
+  park_regions: string[] | null;
   county: string | null;
   park_status: string | null;
   city: string | null;
@@ -169,7 +169,7 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
   const isNew = !park?.id;
 
   const [form, setForm] = useState<Park>(park ?? {
-    slug: '', name: '', park_type: null, park_region: null, county: null, park_status: null,
+    slug: '', name: '', park_type: null, park_regions: [], county: null, park_status: null,
     city: null, address: null, zip_code: null, phone: null, website: null, email: null,
     google_rating: null, google_maps_link: null, operating_hours: null, featured_image_url: null,
     gallery_urls: null, latitude: null, longitude: null,
@@ -308,10 +308,25 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
             </select>
           </Field>
           <Field label="Region">
-            <select value={form.park_region ?? ''} onChange={e => set('park_region', e.target.value)} className={inputCls}>
-              <option value="">— Select —</option>
-              {PARK_REGIONS.map(r => <option key={r}>{r}</option>)}
-            </select>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {PARK_REGIONS.map(r => {
+                const checked = (form.park_regions ?? []).includes(r);
+                return (
+                  <label key={r} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.85rem', color: '#413734' }}>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => {
+                        const current = form.park_regions ?? [];
+                        set('park_regions', checked ? current.filter(x => x !== r) : [...current, r]);
+                      }}
+                      style={{ accentColor: '#ff7044', width: 15, height: 15 }}
+                    />
+                    {r}
+                  </label>
+                );
+              })}
+            </div>
           </Field>
           <Field label="County">
             <input value={form.county ?? ''} onChange={e => set('county', e.target.value)} className={inputCls} placeholder="Miami-Dade" />

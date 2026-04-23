@@ -22,7 +22,7 @@ export default async function AdminParksPage({ searchParams }: Props) {
 
   let query = supabase
     .from('parks')
-    .select('id,slug,name,park_type,park_region,city,featured_image_url,short_description,updated_at')
+    .select('id,slug,name,park_type,park_regions,city,featured_image_url,short_description,updated_at')
     .order('name');
 
   if (q) query = query.ilike('name', `%${q}%`);
@@ -90,7 +90,7 @@ export default async function AdminParksPage({ searchParams }: Props) {
               <tr key={park.id} className={`border-b border-[#f0f0f0] hover:bg-[#fafaf9] transition ${i % 2 === 0 ? '' : 'bg-[#fdfcfc]'}`}>
                 <td className="px-4 py-3 font-medium text-[#362f35]">{park.name}</td>
                 <td className="px-4 py-3 text-[#726d6b]">{park.park_type ?? '—'}</td>
-                <td className="px-4 py-3 text-[#726d6b]">{park.park_region ?? '—'}</td>
+                <td className="px-4 py-3 text-[#726d6b]">{park.park_regions?.join(', ') || '—'}</td>
                 <td className="px-4 py-3">
                   {park.featured_image_url
                     ? <span className="text-xs text-green-600 font-medium">✓</span>

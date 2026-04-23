@@ -33,8 +33,9 @@ const PARK_TYPES = [
 ];
 
 const REGIONS = [
-  'South Florida', 'Central Florida', 'East Coast',
-  'North Florida', 'Northwest Florida / Panhandle',
+  'North Florida', 'Northeast Florida', 'Central Florida',
+  'Southwest Florida', 'Southeast Florida', 'South Florida',
+  'Northwest Florida / Panhandle', 'East Coast', 'West Coast',
 ];
 
 const AMENITY_OPTIONS = [
@@ -60,11 +61,11 @@ export default async function ParksPage({ searchParams }: { searchParams: Promis
 
   let query = supabase
     .from('parks')
-    .select('id, slug, name, short_description, park_type, park_region, featured_image_url, google_rating, crowd_level, is_featured, park_amenities(*)')
+    .select('id, slug, name, short_description, park_type, park_regions, featured_image_url, google_rating, crowd_level, is_featured, park_amenities(*)')
     .order('name', { ascending: true });
 
   if (type)   query = query.eq('park_type', type);
-  if (region) query = query.eq('park_region', region);
+  if (region) query = query.contains('park_regions', [region]);
   if (q)      query = query.ilike('name', `%${q}%`);
 
   const { data: parks } = await query;
