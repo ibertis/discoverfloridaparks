@@ -11,6 +11,7 @@ import Link from 'next/link';
 import SiteHeader from '../../SiteHeader';
 import SiteFooter from '../../SiteFooter';
 import FooterLinks from '../../FooterLinks';
+import PhotoGallery from './PhotoGallery';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -258,6 +259,14 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                     <p key={i} style={{ margin: '0 0 1em' }}>{line}</p>
                   ))}
                 </div>
+              </section>
+            )}
+
+            {/* Gallery */}
+            {park.gallery_urls?.length > 0 && (
+              <section>
+                <SectionHeading>Photos</SectionHeading>
+                <PhotoGallery urls={park.gallery_urls} />
               </section>
             )}
 
@@ -509,3 +518,4 @@ function DistanceRow({ city, miles }: { city: string; miles: number }) {
     </div>
   );
 }
+

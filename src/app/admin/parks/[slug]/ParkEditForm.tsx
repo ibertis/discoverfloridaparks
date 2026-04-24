@@ -161,9 +161,11 @@ function normalizeAmenities(raw: Amenities | Amenities[] | null | undefined): Am
 export default function ParkEditForm({ park, role }: { park: Park | null; role?: string | null }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
+  const galleryFileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
   const isNew = !park?.id;
@@ -213,6 +215,28 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
     set('featured_image_url', json.url);
     setUploadingPhoto(false);
     showToast('Photo uploaded');
+  }
+
+  async function handleGalleryUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingGallery(true);
+    const ext = file.name.split('.').pop() ?? 'jpg';
+    const fileName = `${form.slug || 'park'}-gallery-${Date.now()}.${ext}`;
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('fileName', fileName);
+    const res = await fetch('/admin/api/upload-park-photo', { method: 'POST', body: fd });
+    const json = await res.json();
+    if (!res.ok) { showToast(`Upload failed: ${json.error}`, false); setUploadingGallery(false); return; }
+    set('gallery_urls', [...(form.gallery_urls ?? []), json.url]);
+    setUploadingGallery(false);
+    showToast('Photo added');
+    if (galleryFileRef.current) galleryFileRef.current.value = '';
+  }
+
+  function removeGalleryPhoto(url: string) {
+    set('gallery_urls', (form.gallery_urls ?? []).filter(u => u !== url));
   }
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
@@ -285,6 +309,35 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
               <p className="text-xs text-[#a6967c]">JPG or PNG, max 10 MB</p>
             </div>
           </div>
+        </Section>
+
+        {/* ── Gallery Photos ── */}
+        <Section title="Gallery Photos">
+          <div className="flex flex-wrap gap-3 mb-3">
+            {(form.gallery_urls ?? []).map(url => (
+              <div key={url} className="relative w-40 h-28 rounded-lg overflow-hidden border border-[#eeeeee] shrink-0 group">
+                <Image src={url} alt="" fill className="object-cover" unoptimized />
+                <button
+                  type="button"
+                  onClick={() => removeGalleryPhoto(url)}
+                  className="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <input ref={galleryFileRef} type="file" accept="image/*" onChange={handleGalleryUpload} className="hidden" />
+          <button
+            type="button"
+            onClick={() => galleryFileRef.current?.click()}
+            disabled={uploadingGallery}
+            className="flex items-center gap-2 text-sm font-semibold border border-[#dfdfdf] rounded-lg px-4 py-2 hover:bg-[#f7f5f2] transition disabled:opacity-50"
+          >
+            <Plus size={14} />
+            {uploadingGallery ? 'Uploading…' : 'Add Photo'}
+          </button>
+          <p className="text-xs text-[#a6967c] mt-2">JPG or PNG, max 10 MB. Hover a photo to remove it.</p>
         </Section>
 
         {/* ── Core Info ── */}
