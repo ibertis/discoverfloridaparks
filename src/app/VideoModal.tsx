@@ -58,7 +58,7 @@ export default function VideoPlayButton() {
             }}
           >
             <iframe
-              src={`https://www.youtube-nocookie.com/embed/${VIDEO_ID}?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3`}
+              src={`https://www.youtube-nocookie.com/embed/${VIDEO_ID}?autoplay=1&controls=1&rel=0&modestbranding=1&iv_load_policy=3`}
               title="Florida Parks"
               allow="autoplay; encrypted-media"
               allowFullScreen
