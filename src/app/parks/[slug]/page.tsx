@@ -13,6 +13,7 @@ import SiteFooter from '../../SiteFooter';
 import FooterLinks from '../../FooterLinks';
 import PhotoGallery from './PhotoGallery';
 import WeatherWidget from './WeatherWidget';
+import ParkMap from './ParkMap';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -559,23 +560,11 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
 
             {/* Map */}
             {mapSrc && (
-              <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid #eeeeee' }}>
-                <iframe
-                  src={mapSrc}
-                  title={`Map of ${park.name}`}
-                  style={{ width: '100%', height: 220, border: 'none', display: 'block' }}
-                  loading="lazy"
-                />
-                {park.google_maps_link && (
-                  <div style={{ padding: '10px 16px', background: '#f9f7f5', borderTop: '1px solid #eeeeee' }}>
-                    <a href={park.google_maps_link} target="_blank" rel="noopener noreferrer"
-                      style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 700, color: '#ff7044', textDecoration: 'none' }}
-                      className="hover:underline">
-                      Open in Google Maps →
-                    </a>
-                  </div>
-                )}
-              </div>
+              <ParkMap
+                src={mapSrc}
+                parkName={park.name}
+                googleMapsLink={park.google_maps_link}
+              />
             )}
 
             {/* Distances */}
