@@ -12,7 +12,7 @@ import SiteHeader from '../../SiteHeader';
 import SiteFooter from '../../SiteFooter';
 import FooterLinks from '../../FooterLinks';
 import PhotoGallery from './PhotoGallery';
-import WeatherWidget from './WeatherWidget';
+import WeatherStatCard from './WeatherStatCard';
 import ParkMap from './ParkMap';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -313,6 +313,9 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
           {park.best_season && (
             <StatCard icon={<Calendar size={17} style={{ color: '#a6967c' }} />} label="Best Season" value={SEASON_LABELS[park.best_season] ?? park.best_season} />
           )}
+          {park.latitude && park.longitude && (
+            <WeatherStatCard lat={park.latitude} lng={park.longitude} />
+          )}
         </div>
 
         <div className="park-detail-layout">
@@ -552,11 +555,6 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                 )}
               </div>
             </div>
-
-            {/* Weather */}
-            {park.latitude && park.longitude && (
-              <WeatherWidget lat={park.latitude} lng={park.longitude} />
-            )}
 
             {/* Map */}
             {mapSrc && (

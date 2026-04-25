@@ -26,14 +26,14 @@ export default function ParkMap({ src, parkName, googleMapsLink }: Props) {
         <iframe
           src={src}
           title={`Map of ${parkName}`}
-          style={{ width: '100%', height: 220, border: 'none', display: 'block' }}
+          style={{ width: '100%', height: 300, border: 'none', display: 'block' }}
           loading="lazy"
         />
         <button
           onClick={() => setExpanded(true)}
           aria-label="Expand map"
           style={{
-            position: 'absolute', top: 10, right: 10,
+            position: 'absolute', top: 10, left: 10,
             background: '#fff', border: '1px solid #dfdfdf', borderRadius: 8,
             width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', color: '#413734', boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
@@ -67,34 +67,40 @@ export default function ParkMap({ src, parkName, googleMapsLink }: Props) {
           <div
             onClick={e => e.stopPropagation()}
             style={{
-              position: 'relative', width: '100%', maxWidth: 1000,
+              width: '100%', maxWidth: 1000,
               borderRadius: 16, overflow: 'hidden',
               boxShadow: '0 32px 80px rgba(0,0,0,0.4)',
+              display: 'flex', flexDirection: 'column',
             }}
           >
+            {/* Header — park name + close button, fully outside the map */}
+            <div style={{ padding: '12px 16px', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #eeeeee' }}>
+              <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.85rem', fontWeight: 700, color: '#413734' }}>{parkName}</span>
+              <button
+                onClick={() => setExpanded(false)}
+                aria-label="Close map"
+                style={{
+                  background: '#f9f7f5', border: '1px solid #dfdfdf', borderRadius: 8,
+                  width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', color: '#413734',
+                }}
+                className="hover:bg-[#f0ece6] transition-colors"
+              >
+                <X size={15} />
+              </button>
+            </div>
+
             <iframe
               src={src}
               title={`Map of ${parkName}`}
               style={{ width: '100%', height: '70vh', border: 'none', display: 'block' }}
             />
-            <button
-              onClick={() => setExpanded(false)}
-              aria-label="Close map"
-              style={{
-                position: 'absolute', top: 12, right: 12,
-                background: '#fff', border: '1px solid #dfdfdf', borderRadius: 8,
-                width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', color: '#413734', boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
-              }}
-              className="hover:bg-[#f9f7f5] transition-colors"
-            >
-              <X size={16} />
-            </button>
+
+            {/* Footer — Google Maps link */}
             {googleMapsLink && (
-              <div style={{ padding: '12px 20px', background: '#fff', borderTop: '1px solid #eeeeee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700, color: '#413734' }}>{parkName}</span>
+              <div style={{ padding: '10px 16px', background: '#f9f7f5', borderTop: '1px solid #eeeeee' }}>
                 <a href={googleMapsLink} target="_blank" rel="noopener noreferrer"
-                  style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', fontWeight: 700, color: '#ff7044', textDecoration: 'none' }}
+                  style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 700, color: '#ff7044', textDecoration: 'none' }}
                   className="hover:underline">
                   Open in Google Maps →
                 </a>
