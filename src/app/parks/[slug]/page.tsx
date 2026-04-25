@@ -5,13 +5,14 @@ import { supabase } from '@/lib/supabase';
 import {
   MapPin, Phone, Globe, Clock, DollarSign, Star, Users, Calendar,
   Tent, Fish, Waves, Dog, Ship, TreePine, ParkingCircle, AlertTriangle,
-  Leaf, Footprints, Sparkles, ArrowLeft,
+  Leaf, Footprints, Sparkles, ArrowLeft, Mail, Hash,
 } from 'lucide-react';
 import Link from 'next/link';
 import SiteHeader from '../../SiteHeader';
 import SiteFooter from '../../SiteFooter';
 import FooterLinks from '../../FooterLinks';
 import PhotoGallery from './PhotoGallery';
+import WeatherWidget from './WeatherWidget';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -36,6 +37,7 @@ interface Park {
   distance_from_miami: number; distance_from_orlando: number; distance_from_tampa: number;
   seo_title: string; seo_description: string;
   reservation_required: boolean; camping_url: string; reservation_url: string;
+  updated_at: string;
   park_amenities: {
     dog_friendly: boolean; camping_available: boolean; swimming_allowed: boolean;
     fishing_allowed: boolean; boat_launch: boolean; picnic_areas: boolean;
@@ -44,6 +46,12 @@ interface Park {
   park_trails: Trail[];
   park_fun_facts: FunFact[];
   park_seasonal_events: SeasonalEvent[];
+}
+
+interface NearbyPark {
+  id: string; slug: string; name: string; city: string;
+  featured_image_url: string | null; latitude: number; longitude: number;
+  park_type: string; distance: number;
 }
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
@@ -56,6 +64,31 @@ async function getPark(slug: string): Promise<Park | null> {
     .single();
   if (error || !data) return null;
   return data as Park;
+}
+
+function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 3959;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+async function getNearbyParks(currentSlug: string, lat: number | null, lng: number | null): Promise<NearbyPark[]> {
+  if (!lat || !lng) return [];
+  const { data } = await supabase
+    .from('parks')
+    .select('id, slug, name, city, featured_image_url, latitude, longitude, park_type')
+    .neq('slug', currentSlug)
+    .not('latitude', 'is', null)
+    .not('longitude', 'is', null);
+  if (!data) return [];
+  return (data as Omit<NearbyPark, 'distance'>[])
+    .map(p => ({ ...p, distance: haversine(lat, lng, p.latitude, p.longitude) }))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 4);
 }
 
 export const revalidate = 60;
@@ -78,19 +111,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title,
     description,
-    openGraph: {
-      title,
-      description,
-      url,
-      type: 'website',
-      images: [{ url: image, alt: park.name }],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [image],
-    },
+    openGraph: { title, description, url, type: 'website', images: [{ url: image, alt: park.name }] },
+    twitter: { card: 'summary_large_image', title, description, images: [image] },
     alternates: { canonical: url },
   };
 }
@@ -120,6 +142,11 @@ const DIFFICULTY_COLORS: Record<string, { bg: string; color: string }> = {
   hard:      { bg: '#ffedd5', color: '#9a3412' },
   strenuous: { bg: '#fee2e2', color: '#991b1b' },
 };
+const STATUS_STYLES: Record<string, { bg: string; border: string; iconColor: string; text: string }> = {
+  'Closed':           { bg: '#fee2e2', border: '#fca5a5', iconColor: '#dc2626', text: 'This park is currently closed to visitors.' },
+  'Under Renovation': { bg: '#fef9c3', border: '#fde047', iconColor: '#ca8a04', text: 'This park is currently under renovation. Some areas may be inaccessible.' },
+  'Seasonal':         { bg: '#eff6ff', border: '#93c5fd', iconColor: '#2563eb', text: 'This park operates seasonally. Please verify hours before your visit.' },
+};
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -127,6 +154,8 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const park = await getPark(slug);
   if (!park) notFound();
+
+  const nearbyParks = await getNearbyParks(slug, park.latitude, park.longitude);
 
   const amenities = park.park_amenities ?? {};
   const trails = park.park_trails?.sort((a, b) => a.sort_order - b.sort_order) ?? [];
@@ -146,6 +175,16 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
 
   const parkUrl = `https://discoverfloridaparks.com/parks/${park.slug}`;
 
+  const mapSrc = park.latitude && park.longitude
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${park.longitude - 0.03}%2C${park.latitude - 0.03}%2C${park.longitude + 0.03}%2C${park.latitude + 0.03}&layer=mapnik&marker=${park.latitude}%2C${park.longitude}`
+    : null;
+
+  const statusStyle = park.park_status ? STATUS_STYLES[park.park_status] : null;
+
+  const updatedAt = park.updated_at
+    ? new Date(park.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : null;
+
   const touristAttractionSchema = {
     '@context': 'https://schema.org',
     '@type': 'TouristAttraction',
@@ -154,11 +193,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
     url: parkUrl,
     ...(park.featured_image_url && { image: park.featured_image_url }),
     ...(park.latitude && park.longitude && {
-      geo: {
-        '@type': 'GeoCoordinates',
-        latitude: park.latitude,
-        longitude: park.longitude,
-      },
+      geo: { '@type': 'GeoCoordinates', latitude: park.latitude, longitude: park.longitude },
     }),
     ...(park.address && {
       address: {
@@ -209,6 +244,11 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                 {park.park_type}
               </span>
             )}
+            {park.terrain && (
+              <span style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', borderRadius: '2.3em', padding: '4px 14px', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600 }}>
+                {park.terrain}
+              </span>
+            )}
             {park.park_regions?.length > 0 && park.park_regions.map(r => (
               <span key={r} style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', borderRadius: '2.3em', padding: '4px 14px', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600 }}>
                 {r}
@@ -226,8 +266,37 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
         </div>
       </div>
 
+      {/* ── Status Banner ───────────────────────────────────── */}
+      {statusStyle && (
+        <div style={{ background: statusStyle.bg, borderBottom: `1px solid ${statusStyle.border}`, padding: '14px 24px' }}>
+          <div style={{ maxWidth: 1278, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <AlertTriangle size={16} style={{ flexShrink: 0, color: statusStyle.iconColor }} />
+            <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.88rem', color: '#362f35' }}>
+              {statusStyle.text}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* ── Body ────────────────────────────────────────────── */}
       <div style={{ maxWidth: 1278, margin: '0 auto', padding: '48px 24px' }}>
+
+        {/* Breadcrumb */}
+        <nav style={{ marginBottom: 36, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px 6px' }}>
+          <Link href="/" style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c', textDecoration: 'none' }} className="hover:text-[#ff7044] transition-colors">Home</Link>
+          <span style={{ color: '#dfdfdf', fontSize: '0.78rem' }}>/</span>
+          <Link href="/parks" style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c', textDecoration: 'none' }} className="hover:text-[#ff7044] transition-colors">Parks</Link>
+          {park.park_type && (
+            <>
+              <span style={{ color: '#dfdfdf', fontSize: '0.78rem' }}>/</span>
+              <Link href={`/parks?type=${encodeURIComponent(park.park_type)}`} style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c', textDecoration: 'none' }} className="hover:text-[#ff7044] transition-colors">
+                {park.park_type}
+              </Link>
+            </>
+          )}
+          <span style={{ color: '#dfdfdf', fontSize: '0.78rem' }}>/</span>
+          <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', fontWeight: 600, color: '#413734' }}>{park.name}</span>
+        </nav>
 
         {/* Quick stats */}
         <div className="park-stats-grid" style={{ marginBottom: 56 }}>
@@ -247,18 +316,25 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
 
         <div className="park-detail-layout">
 
-          {/* Main content */}
+          {/* ── Main content ──────────────────────────────── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 48 }}>
 
             {/* About */}
-            {park.full_description && (
+            {(park.short_description || park.full_description) && (
               <section>
                 <SectionHeading>About {park.name}</SectionHeading>
-                <div style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '1rem', color: '#726d6b', lineHeight: 1.65 }}>
-                  {park.full_description.split('\n').map((line, i) => (
-                    <p key={i} style={{ margin: '0 0 1em' }}>{line}</p>
-                  ))}
-                </div>
+                {park.short_description && (
+                  <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '1.05rem', color: '#413734', lineHeight: 1.6, margin: '0 0 24px', paddingBottom: 24, borderBottom: '1px solid #f0ece6' }}>
+                    {park.short_description}
+                  </p>
+                )}
+                {park.full_description && (
+                  <div style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '1rem', color: '#726d6b', lineHeight: 1.65 }}>
+                    {park.full_description.split('\n').map((line, i) => (
+                      <p key={i} style={{ margin: '0 0 1em' }}>{line}</p>
+                    ))}
+                  </div>
+                )}
               </section>
             )}
 
@@ -392,25 +468,58 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
               </section>
             )}
 
+            {/* Share / Instagram */}
+            {park.instagram_hashtag && (
+              <section>
+                <SectionHeading>Share Your Visit</SectionHeading>
+                <div style={{ borderRadius: 16, padding: '20px 24px', border: '1px solid #eeeeee', background: '#fff5f2', display: 'flex', gap: 14, alignItems: 'center' }}>
+                  <Hash size={20} style={{ flexShrink: 0, color: '#ff7044' }} />
+                  <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.9rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>
+                    Tag your photos <span style={{ color: '#ff7044', fontFamily: 'Archivo, sans-serif', fontWeight: 700 }}>#{park.instagram_hashtag}</span> and share your experience with the community!
+                  </p>
+                </div>
+              </section>
+            )}
+
           </div>
 
-          {/* Sidebar */}
+          {/* ── Sidebar ───────────────────────────────────── */}
           <aside style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
             {/* Info card */}
             <div style={{ borderRadius: 16, padding: '24px', border: '1px solid #eeeeee', background: '#fff' }}>
-              <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 20px' }}>
+              <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 16px' }}>
                 Park Info
               </p>
+
+              {park.reservation_required && (
+                <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                  <Calendar size={13} style={{ color: '#ea580c', flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 700, color: '#9a3412' }}>Reservations Required</span>
+                </div>
+              )}
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
                 {park.entrance_fee     && <InfoRow icon={<DollarSign size={14} />} label="Entrance Fee" value={park.entrance_fee} />}
                 {park.operating_hours  && <InfoRow icon={<Clock size={14} />}      label="Hours"        value={park.operating_hours} />}
                 {park.phone            && <InfoRow icon={<Phone size={14} />}      label="Phone"        value={park.phone} />}
+                {park.email            && (
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <span style={{ flexShrink: 0, marginTop: 2, color: '#ff7044' }}><Mail size={14} /></span>
+                    <div>
+                      <span style={{ display: 'block', fontFamily: 'Archivo, sans-serif', fontSize: '0.7rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>Email</span>
+                      <a href={`mailto:${park.email}`} style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#ff7044', textDecoration: 'none' }} className="hover:underline">
+                        {park.email}
+                      </a>
+                    </div>
+                  </div>
+                )}
                 {park.address          && <InfoRow icon={<MapPin size={14} />}     label="Address"      value={`${park.address}${park.city ? `, ${park.city}` : ''}${park.zip_code ? ` ${park.zip_code}` : ''}`} />}
                 {park.managing_agency  && <InfoRow icon={<TreePine size={14} />}   label="Managed By"   value={AGENCY_LABELS[park.managing_agency] ?? park.managing_agency} />}
                 {park.year_established && <InfoRow icon={<Calendar size={14} />}   label="Established"  value={String(park.year_established)} />}
                 {park.park_size_acres  && <InfoRow icon={<Leaf size={14} />}       label="Size"         value={`${park.park_size_acres.toLocaleString()} acres`} />}
               </div>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {park.website && (
                   <a href={park.website} target="_blank" rel="noopener noreferrer"
@@ -433,8 +542,41 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                     <Tent size={14} /> Book Camping
                   </a>
                 )}
+                {park.reservation_url && (
+                  <a href={park.reservation_url} target="_blank" rel="noopener noreferrer"
+                    style={{ background: 'transparent', color: '#413734', border: '2px solid #dfdfdf', borderRadius: '2.3em', padding: '11px 20px', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textDecoration: 'none' }}
+                    className="hover:border-[#413734] transition-colors">
+                    <Calendar size={14} /> Make a Reservation
+                  </a>
+                )}
               </div>
             </div>
+
+            {/* Weather */}
+            {park.latitude && park.longitude && (
+              <WeatherWidget lat={park.latitude} lng={park.longitude} />
+            )}
+
+            {/* Map */}
+            {mapSrc && (
+              <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid #eeeeee' }}>
+                <iframe
+                  src={mapSrc}
+                  title={`Map of ${park.name}`}
+                  style={{ width: '100%', height: 220, border: 'none', display: 'block' }}
+                  loading="lazy"
+                />
+                {park.google_maps_link && (
+                  <div style={{ padding: '10px 16px', background: '#f9f7f5', borderTop: '1px solid #eeeeee' }}>
+                    <a href={park.google_maps_link} target="_blank" rel="noopener noreferrer"
+                      style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 700, color: '#ff7044', textDecoration: 'none' }}
+                      className="hover:underline">
+                      Open in Google Maps →
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Distances */}
             {(park.distance_from_miami || park.distance_from_orlando || park.distance_from_tampa) && (
@@ -460,6 +602,16 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
               </div>
             )}
 
+            {/* Nearby Cities */}
+            {park.nearby_cities && (
+              <div style={{ borderRadius: 16, padding: '24px', border: '1px solid #eeeeee', background: '#fff' }}>
+                <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 12px' }}>
+                  Nearby Cities
+                </p>
+                <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>{park.nearby_cities}</p>
+              </div>
+            )}
+
             {/* Back to directory */}
             <Link href="/parks"
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#f9f7f5', border: '1px solid #eeeeee', borderRadius: '2.3em', padding: '12px 20px', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: '#413734', textDecoration: 'none' }}
@@ -467,8 +619,42 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
               <ArrowLeft size={14} /> Back to All Parks
             </Link>
 
+            {/* Last updated */}
+            {updatedAt && (
+              <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.68rem', color: '#a6967c', textAlign: 'center', margin: 0 }}>
+                Last updated {updatedAt}
+              </p>
+            )}
+
           </aside>
         </div>
+
+        {/* ── Nearby Parks ────────────────────────────────── */}
+        {nearbyParks.length > 0 && (
+          <section style={{ marginTop: 64 }}>
+            <SectionHeading>Parks Nearby</SectionHeading>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+              {nearbyParks.map(p => (
+                <Link key={p.id} href={`/parks/${p.slug}`}
+                  style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid #eeeeee', textDecoration: 'none', display: 'block', background: '#fff' }}
+                  className="hover:border-[#dfdfdf] hover:shadow-sm transition-all">
+                  <div style={{ position: 'relative', height: 130, background: '#f0ece6' }}>
+                    {p.featured_image_url && (
+                      <Image src={p.featured_image_url} alt={p.name} fill style={{ objectFit: 'cover' }} sizes="280px" />
+                    )}
+                  </div>
+                  <div style={{ padding: '14px 16px' }}>
+                    <p style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: '#362f35', margin: '0 0 4px', lineHeight: 1.3 }}>{p.name}</p>
+                    <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', color: '#a6967c', margin: 0 }}>
+                      {p.city} · {Math.round(p.distance)} mi away
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
       </div>
 
       <FooterLinks />
@@ -518,4 +704,3 @@ function DistanceRow({ city, miles }: { city: string; miles: number }) {
     </div>
   );
 }
-
