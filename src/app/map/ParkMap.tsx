@@ -26,6 +26,7 @@ const TYPE_FILTERS = [
   'Theme Parks',
   'Water Parks',
   'County Parks',
+  'Community Parks',
 ];
 
 const PIN_SVG = `
