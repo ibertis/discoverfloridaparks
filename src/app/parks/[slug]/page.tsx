@@ -83,6 +83,7 @@ async function getNearbyParks(currentSlug: string, lat: number | null, lng: numb
     .from('parks')
     .select('id, slug, name, city, featured_image_url, latitude, longitude, park_type')
     .neq('slug', currentSlug)
+    .neq('park_type', 'Seasonal Attractions')
     .not('latitude', 'is', null)
     .not('longitude', 'is', null);
   if (!data) return [];
