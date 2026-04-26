@@ -480,7 +480,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                 <div style={{ borderRadius: 16, padding: '20px 24px', border: '1px solid #eeeeee', background: '#fff5f2', display: 'flex', gap: 14, alignItems: 'center' }}>
                   <Hash size={20} style={{ flexShrink: 0, color: '#ff7044' }} />
                   <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.9rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>
-                    Tag your photos <span style={{ color: '#ff7044', fontFamily: 'Archivo, sans-serif', fontWeight: 700 }}>#{park.instagram_hashtag}</span> and share your experience with the community!
+                    Tag your photos <span style={{ color: '#ff7044', fontFamily: 'Archivo, sans-serif', fontWeight: 700 }}>{park.instagram_hashtag}</span> and share your experience with the community!
                   </p>
                 </div>
               </section>
