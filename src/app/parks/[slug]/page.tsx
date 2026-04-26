@@ -461,15 +461,24 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
             )}
 
             {/* Visitor Tips */}
-            {park.visitor_tips && (
-              <section>
-                <SectionHeading>Visitor Tips</SectionHeading>
-                <div style={{ borderRadius: 16, padding: '20px 24px', border: '1px solid #eeeeee', background: '#fff', display: 'flex', gap: 14 }}>
-                  <Sparkles size={18} style={{ flexShrink: 0, marginTop: 2, color: '#ff7044' }} />
-                  <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.9rem', color: '#726d6b', lineHeight: 1.65, margin: 0 }}>{park.visitor_tips}</p>
-                </div>
-              </section>
-            )}
+            {park.visitor_tips && (() => {
+              const tips = park.visitor_tips.split('•').map(t => t.trim()).filter(Boolean);
+              return (
+                <section>
+                  <SectionHeading>Visitor Tips</SectionHeading>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    {tips.map((tip, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                        <span style={{ flexShrink: 0, width: 28, height: 28, borderRadius: '50%', background: '#ff7044', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>
+                          {i + 1}
+                        </span>
+                        <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.9rem', color: '#726d6b', lineHeight: 1.6, margin: 0, paddingTop: 4 }}>{tip}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            })()}
 
             {/* Safety */}
             {park.safety_notes && (
