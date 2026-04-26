@@ -369,12 +369,6 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
               })}
             </div>
           </Field>
-          <Field label="Park Status">
-            <select value={form.park_status ?? ''} onChange={e => set('park_status', e.target.value)} className={inputCls}>
-              <option value="">— Select —</option>
-              {PARK_STATUSES.map(s => <option key={s}>{s}</option>)}
-            </select>
-          </Field>
           <Field label="Region">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {PARK_REGIONS.map(r => {
@@ -395,6 +389,12 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
                 );
               })}
             </div>
+          </Field>
+          <Field label="Park Status">
+            <select value={form.park_status ?? ''} onChange={e => set('park_status', e.target.value)} className={inputCls}>
+              <option value="">— Select —</option>
+              {PARK_STATUSES.map(s => <option key={s}>{s}</option>)}
+            </select>
           </Field>
           <Field label="County">
             <input value={form.county ?? ''} onChange={e => set('county', e.target.value)} className={inputCls} placeholder="Miami-Dade" />
