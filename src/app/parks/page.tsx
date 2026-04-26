@@ -30,6 +30,7 @@ const PARK_TYPES = [
   'National Parks', 'State Parks', 'National Wildlife Refuge',
   'County Parks', 'Community Parks', 'Theme Parks',
   'Water Parks', 'Seasonal Attractions', 'National Estuarine Research Reserve',
+  'Nature Preserve', 'Wildlife Refuge', 'State Forest', 'State Trail',
 ];
 
 const REGIONS = [
