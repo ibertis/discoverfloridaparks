@@ -24,7 +24,7 @@ interface FunFact { id: string; fact: string; sort_order: number; }
 interface SeasonalEvent { id: string; event_name: string; month: string; description: string; sort_order: number; }
 interface Park {
   id: string; slug: string; name: string; short_description: string; full_description: string;
-  park_type: string; park_regions: string[]; county: string; park_status: string;
+  park_types: string[]; park_regions: string[]; county: string; park_status: string;
   featured_image_url: string; gallery_urls: string[];
   address: string; city: string; zip_code: string;
   latitude: number; longitude: number;
@@ -52,7 +52,7 @@ interface Park {
 interface NearbyPark {
   id: string; slug: string; name: string; city: string;
   featured_image_url: string | null; latitude: number; longitude: number;
-  park_type: string; distance: number;
+  park_types: string[]; distance: number;
 }
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
@@ -81,9 +81,9 @@ async function getNearbyParks(currentSlug: string, lat: number | null, lng: numb
   if (!lat || !lng) return [];
   const { data } = await supabase
     .from('parks')
-    .select('id, slug, name, city, featured_image_url, latitude, longitude, park_type')
+    .select('id, slug, name, city, featured_image_url, latitude, longitude, park_types')
     .neq('slug', currentSlug)
-    .neq('park_type', 'Seasonal Attractions')
+    .not('park_types', 'cs', '{"Seasonal Attractions"}')
     .not('latitude', 'is', null)
     .not('longitude', 'is', null);
   if (!data) return [];
@@ -241,11 +241,11 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
             <ArrowLeft size={14} /> All Parks
           </Link>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-            {park.park_type && (
-              <span style={{ background: '#ff7044', color: '#fff', borderRadius: '2.3em', padding: '4px 14px', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 700 }}>
-                {park.park_type}
+            {park.park_types?.map(t => (
+              <span key={t} style={{ background: '#ff7044', color: '#fff', borderRadius: '2.3em', padding: '4px 14px', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 700 }}>
+                {t}
               </span>
-            )}
+            ))}
             {park.terrain && (
               <span style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', borderRadius: '2.3em', padding: '4px 14px', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600 }}>
                 {park.terrain}
@@ -288,11 +288,11 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
           <Link href="/" style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c', textDecoration: 'none' }} className="hover:text-[#ff7044] transition-colors">Home</Link>
           <span style={{ color: '#dfdfdf', fontSize: '0.78rem' }}>/</span>
           <Link href="/parks" style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c', textDecoration: 'none' }} className="hover:text-[#ff7044] transition-colors">Parks</Link>
-          {park.park_type && (
+          {park.park_types?.[0] && (
             <>
               <span style={{ color: '#dfdfdf', fontSize: '0.78rem' }}>/</span>
-              <Link href={`/parks?type=${encodeURIComponent(park.park_type)}`} style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c', textDecoration: 'none' }} className="hover:text-[#ff7044] transition-colors">
-                {park.park_type}
+              <Link href={`/parks?type=${encodeURIComponent(park.park_types[0])}`} style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c', textDecoration: 'none' }} className="hover:text-[#ff7044] transition-colors">
+                {park.park_types[0]}
               </Link>
             </>
           )}

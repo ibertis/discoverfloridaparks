@@ -88,7 +88,7 @@ async function uploadPhotoToStorage(photoUrl: string, slug: string): Promise<str
   }
 }
 
-async function generateParkContent(park: { name: string; park_type?: string | null; city?: string | null; park_region?: string | null }) {
+async function generateParkContent(park: { name: string; park_types?: string[] | null; city?: string | null; park_region?: string | null }) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     console.warn(`  ${c.yellow}Skipping AI content — ANTHROPIC_API_KEY not set${c.reset}`);
@@ -98,7 +98,7 @@ async function generateParkContent(park: { name: string; park_type?: string | nu
   const prompt = `You are writing concise, accurate content for a Florida parks directory website.
 
 Park: ${park.name}
-Type: ${park.park_type ?? 'Unknown'}
+Type: ${park.park_types?.join(', ') ?? 'Unknown'}
 City/Area: ${park.city ?? 'Florida'}
 Region: ${park.park_region ?? 'Florida'}
 
@@ -260,7 +260,7 @@ async function main() {
   } else {
     const aiResult = await generateParkContent({
       name: parkName!,
-      park_type: existing?.park_type ?? null,
+      park_types: existing?.park_types ?? null,
       city: (placeData.city as string) ?? existing?.city ?? null,
       park_region: existing?.park_region ?? null,
     });

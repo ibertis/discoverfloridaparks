@@ -20,7 +20,7 @@ function toSvg(lat: number, lng: number) {
 export default async function HomeMapSection({ totalCount }: { totalCount?: number }) {
   const { data: parks } = await supabase
     .from('parks')
-    .select('id, slug, name, latitude, longitude, park_type')
+    .select('id, slug, name, latitude, longitude')
     .gte('latitude', 24.0)
     .lte('latitude', 31.5)
     .lte('longitude', -79.0)

@@ -61,10 +61,10 @@ export default async function ParksPage({ searchParams }: { searchParams: Promis
 
   let query = supabase
     .from('parks')
-    .select('id, slug, name, short_description, park_type, park_regions, featured_image_url, google_rating, crowd_level, is_featured, park_amenities(*)')
+    .select('id, slug, name, short_description, park_types, park_regions, featured_image_url, google_rating, crowd_level, is_featured, park_amenities(*)')
     .order('name', { ascending: true });
 
-  if (type)   query = query.eq('park_type', type);
+  if (type)   query = query.contains('park_types', [type]);
   if (region) query = query.contains('park_regions', [region]);
   if (q)      query = query.ilike('name', `%${q}%`);
 

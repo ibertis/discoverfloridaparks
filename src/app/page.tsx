@@ -52,7 +52,7 @@ const TYPES: { name: string; icon: Icon }[] = [
 export default async function HomePage() {
   const { data: featuredParks } = await supabase
     .from('parks')
-    .select('id, slug, name, short_description, park_type, park_regions, featured_image_url, google_rating')
+    .select('id, slug, name, short_description, park_types, park_regions, featured_image_url, google_rating')
     .eq('is_featured', true)
     .order('name')
     .limit(6);

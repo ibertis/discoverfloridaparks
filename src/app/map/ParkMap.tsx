@@ -10,7 +10,7 @@ interface Park {
   id: string;
   slug: string;
   name: string;
-  park_type: string;
+  park_types: string[];
   latitude: number;
   longitude: number;
   google_rating?: number;
@@ -76,7 +76,7 @@ export default function ParkMap({ parks }: { parks: Park[] }) {
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
 
-    const filtered = type === 'All' ? allParks : allParks.filter(p => p.park_type === type);
+    const filtered = type === 'All' ? allParks : allParks.filter(p => p.park_types?.includes(type));
 
     filtered.forEach(park => {
       if (!park.latitude || !park.longitude) return;
@@ -92,7 +92,7 @@ export default function ParkMap({ parks }: { parks: Park[] }) {
               ? `<img src="${park.featured_image_url}" alt="${park.name}" style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:10px;display:block"/>`
               : ''}
             <span style="background:#ff7044;color:#fff;padding:2px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;font-family:Archivo,sans-serif">
-              ${park.park_type || 'Park'}
+              ${park.park_types?.[0] || 'Park'}
             </span>
             <p style="font-family:Shrikhand,cursive;font-weight:400;font-size:1.1rem;color:#362f35;margin:8px 0 6px;line-height:1">
               ${park.name}

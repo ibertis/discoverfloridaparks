@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function MapPage() {
   const { data: parks } = await supabase
     .from('parks')
-    .select('id, slug, name, park_type, latitude, longitude, google_rating, featured_image_url, short_description')
+    .select('id, slug, name, park_types, latitude, longitude, google_rating, featured_image_url, short_description')
     .neq('latitude', 0)
     .neq('longitude', 0)
     .not('latitude', 'is', null)

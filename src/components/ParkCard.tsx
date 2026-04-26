@@ -7,7 +7,7 @@ export interface ParkCardData {
   slug: string;
   name: string;
   short_description?: string | null;
-  park_type?: string | null;
+  park_types?: string[] | null;
   park_regions?: string[] | null;
   featured_image_url?: string | null;
   google_rating?: number | null;
@@ -39,14 +39,14 @@ export default function ParkCard({ park }: { park: ParkCardData }) {
             <MapPin size={32} style={{ color: '#a6967c' }} />
           </div>
         )}
-        {park.park_type && (
+        {park.park_types?.[0] && (
           <span style={{
             position: 'absolute', top: 12, right: 12,
             background: '#ff7044', color: '#fff', borderRadius: '2.3em',
             padding: '4px 12px', fontFamily: 'Archivo, sans-serif',
             fontSize: '0.72rem', fontWeight: 700,
           }}>
-            {park.park_type}
+            {park.park_types[0]}
           </span>
         )}
       </div>

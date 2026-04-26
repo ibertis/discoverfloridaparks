@@ -13,7 +13,7 @@ export default async function AdminDashboard() {
     supabase.from('parks').select('*', { count: 'exact', head: true }),
     supabase.from('parks').select('*', { count: 'exact', head: true }).is('featured_image_url', null),
     supabase.from('parks').select('*', { count: 'exact', head: true }).is('short_description', null),
-    supabase.from('parks').select('id,slug,name,park_type,updated_at').order('updated_at', { ascending: false }).limit(8),
+    supabase.from('parks').select('id,slug,name,park_types,updated_at').order('updated_at', { ascending: false }).limit(8),
   ]);
 
   const stats = [
@@ -63,7 +63,7 @@ export default async function AdminDashboard() {
               <div className="flex items-center gap-3">
                 <Trees size={15} className="text-[#a6967c]" />
                 <span className="text-sm text-[#413734] font-medium">{park.name}</span>
-                <span className="text-xs text-[#a6967c]">{park.park_type}</span>
+                <span className="text-xs text-[#a6967c]">{park.park_types?.join(', ')}</span>
               </div>
               <span className="text-xs text-[#a6967c] group-hover:text-[#ff7044] transition">Edit →</span>
             </Link>

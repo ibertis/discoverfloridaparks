@@ -86,7 +86,7 @@ interface Park {
   id?: string;
   slug: string;
   name: string;
-  park_type: string | null;
+  park_types: string[] | null;
   park_regions: string[] | null;
   county: string | null;
   park_status: string | null;
@@ -171,7 +171,7 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
   const isNew = !park?.id;
 
   const [form, setForm] = useState<Park>(park ?? {
-    slug: '', name: '', park_type: null, park_regions: [], county: null, park_status: null,
+    slug: '', name: '', park_types: [], park_regions: [], county: null, park_status: null,
     city: null, address: null, zip_code: null, phone: null, website: null, email: null,
     google_rating: null, google_maps_link: null, operating_hours: null, featured_image_url: null,
     gallery_urls: null, latitude: null, longitude: null,
@@ -349,10 +349,25 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
             <input required value={form.slug ?? ''} onChange={e => set('slug', e.target.value)} className={inputCls} placeholder="everglades-national-park" />
           </Field>
           <Field label="Park Type">
-            <select value={form.park_type ?? ''} onChange={e => set('park_type', e.target.value)} className={inputCls}>
-              <option value="">— Select —</option>
-              {PARK_TYPES.map(t => <option key={t}>{t}</option>)}
-            </select>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {PARK_TYPES.map(t => {
+                const checked = (form.park_types ?? []).includes(t);
+                return (
+                  <label key={t} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.85rem', color: '#413734' }}>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => {
+                        const current = form.park_types ?? [];
+                        set('park_types', checked ? current.filter(x => x !== t) : [...current, t]);
+                      }}
+                      style={{ accentColor: '#ff7044', width: 15, height: 15 }}
+                    />
+                    {t}
+                  </label>
+                );
+              })}
+            </div>
           </Field>
           <Field label="Park Status">
             <select value={form.park_status ?? ''} onChange={e => set('park_status', e.target.value)} className={inputCls}>
