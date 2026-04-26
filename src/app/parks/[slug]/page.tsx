@@ -664,8 +664,8 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div style={{ borderRadius: 16, padding: '20px', border: '1px solid #eeeeee', background: '#fff', display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-        {icon} {label}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.08em', lineHeight: '1.25' }}>
+        <span style={{ flexShrink: 0, lineHeight: 0, paddingTop: 2 }}>{icon}</span>{label}
       </div>
       <p style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '1rem', color: '#413734', margin: 0 }}>{value}</p>
     </div>
@@ -674,12 +674,12 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div style={{ display: 'flex', gap: 12 }}>
-      <span style={{ flexShrink: 0, marginTop: 2, color: '#ff7044' }}>{icon}</span>
-      <div>
-        <span style={{ display: 'block', fontFamily: 'Archivo, sans-serif', fontSize: '0.7rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>{label}</span>
-        <span style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#413734' }}>{value}</span>
-      </div>
+    <div>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 7, fontFamily: 'Archivo, sans-serif', fontSize: '0.7rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+        <span style={{ color: '#ff7044', lineHeight: 0, flexShrink: 0 }}>{icon}</span>
+        {label}
+      </span>
+      <span style={{ display: 'block', paddingLeft: 21, fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#413734' }}>{value}</span>
     </div>
   );
 }

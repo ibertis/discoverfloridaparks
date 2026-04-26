@@ -167,7 +167,7 @@ export default async function HomePage() {
                 Featured Parks
               </h2>
             </div>
-            <Link href="/parks" style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.9rem', fontWeight: 700, color: '#ff7044', display: 'flex', alignItems: 'center', gap: 6 }}
+            <Link href="/parks" style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.9rem', fontWeight: 700, color: '#ff7044', display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}
               className="hover:opacity-70 transition-opacity">
               View all parks <ArrowRight size={15} />
             </Link>
