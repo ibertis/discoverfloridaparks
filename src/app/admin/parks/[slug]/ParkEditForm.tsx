@@ -53,6 +53,10 @@ interface Amenities {
   camping_available: boolean;
   swimming_allowed: boolean;
   fishing_allowed: boolean;
+  hiking_available: boolean;
+  biking_available: boolean;
+  horseback_riding: boolean;
+  hunting_allowed: boolean;
   boat_launch: boolean;
   picnic_areas: boolean;
   visitor_center: boolean;
@@ -148,8 +152,9 @@ const textareaCls = `${inputCls} resize-y`;
 
 const EMPTY_AMENITIES: Amenities = {
   dog_friendly: false, camping_available: false, swimming_allowed: false,
-  fishing_allowed: false, boat_launch: false, picnic_areas: false,
-  visitor_center: false, wheelchair_accessible: false,
+  fishing_allowed: false, hiking_available: false, biking_available: false,
+  horseback_riding: false, hunting_allowed: false, boat_launch: false,
+  picnic_areas: false, visitor_center: false, wheelchair_accessible: false,
 };
 
 function normalizeAmenities(raw: Amenities | Amenities[] | null | undefined): Amenities {
@@ -425,6 +430,10 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
               ['camping_available', 'Camping'],
               ['swimming_allowed', 'Swimming'],
               ['fishing_allowed', 'Fishing'],
+              ['hiking_available', 'Hiking'],
+              ['biking_available', 'Biking'],
+              ['horseback_riding', 'Horseback Riding'],
+              ['hunting_allowed', 'Hunting'],
               ['boat_launch', 'Boat Launch'],
               ['picnic_areas', 'Picnic Areas'],
               ['visitor_center', 'Visitor Center'],
