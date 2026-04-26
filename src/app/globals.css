@@ -151,6 +151,7 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 480px) {
   .grid-types      { grid-template-columns: repeat(2, 1fr); }
   .park-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .park-stats-grid > *:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
 
 /* ── Home map section ────────────────────────────────────────────────── */
