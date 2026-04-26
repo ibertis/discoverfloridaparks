@@ -287,7 +287,8 @@ async function main() {
     if (value === null || value === undefined || value === '') continue;
     if (!isNew) {
       const currentVal = existing[key];
-      const isEmpty = currentVal === null || currentVal === undefined || currentVal === '';
+      const isEmpty = currentVal === null || currentVal === undefined || currentVal === '' ||
+        (['latitude', 'longitude'].includes(key) && currentVal === 0);
       if (!isEmpty && !overwrite) continue;
     }
     toApply[key] = value;
