@@ -10,7 +10,7 @@ interface Condition {
   iconColor: string;
 }
 
-const CONDITIONS: Record<string, Condition> = {
+const DAY_CONDITIONS: Record<string, Condition> = {
   clear:         { label: 'Clear sky',     emoji: '☀️', bg: 'linear-gradient(135deg, #fff8e1 0%, #fff0c0 100%)', iconColor: '#e8a020' },
   mainly_clear:  { label: 'Mainly clear',  emoji: '🌤️', bg: 'linear-gradient(135deg, #fffae5 0%, #fff3cc 100%)', iconColor: '#e8a020' },
   partly_cloudy: { label: 'Partly cloudy', emoji: '⛅', bg: 'linear-gradient(135deg, #f6f8fc 0%, #edf1f7 100%)', iconColor: '#a6967c' },
@@ -24,7 +24,21 @@ const CONDITIONS: Record<string, Condition> = {
   storm:         { label: 'Thunderstorm',  emoji: '⛈️', bg: 'linear-gradient(135deg, #edeaf6 0%, #ddd5ee 100%)', iconColor: '#7c5cbf' },
 };
 
-const WMO_MAP: Record<number, keyof typeof CONDITIONS> = {
+const NIGHT_CONDITIONS: Record<string, Condition> = {
+  clear:         { label: 'Clear night',        emoji: '🌙', bg: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', iconColor: '#a8b4d8' },
+  mainly_clear:  { label: 'Mainly clear',        emoji: '🌙', bg: 'linear-gradient(135deg, #1c1c30 0%, #181828 100%)', iconColor: '#a8b4d8' },
+  partly_cloudy: { label: 'Partly cloudy night', emoji: '☁️', bg: 'linear-gradient(135deg, #252535 0%, #1e1e2e 100%)', iconColor: '#8890aa' },
+  overcast:      { label: 'Overcast',            emoji: '☁️', bg: 'linear-gradient(135deg, #f0f2f4 0%, #e6e9ec 100%)', iconColor: '#726d6b' },
+  foggy:         { label: 'Foggy',               emoji: '🌫️', bg: 'linear-gradient(135deg, #f4f2ef 0%, #ebe7e2 100%)', iconColor: '#a6967c' },
+  drizzle:       { label: 'Drizzle',             emoji: '🌦️', bg: 'linear-gradient(135deg, #eef5fb 0%, #ddedf7 100%)', iconColor: '#4a90c4' },
+  rain:          { label: 'Rain',                emoji: '🌧️', bg: 'linear-gradient(135deg, #e8f1f9 0%, #d2e6f4 100%)', iconColor: '#3a7abd' },
+  heavy_rain:    { label: 'Heavy rain',          emoji: '🌧️', bg: 'linear-gradient(135deg, #e2edf8 0%, #c8dff2 100%)', iconColor: '#2d6ba8' },
+  snow:          { label: 'Snow',                emoji: '❄️', bg: 'linear-gradient(135deg, #f0f8ff 0%, #e0f0ff 100%)', iconColor: '#5ba3d9' },
+  showers:       { label: 'Rain showers',        emoji: '🌧️', bg: 'linear-gradient(135deg, #eef3fb 0%, #dce8f8 100%)', iconColor: '#5a7fbf' },
+  storm:         { label: 'Thunderstorm',        emoji: '⛈️', bg: 'linear-gradient(135deg, #edeaf6 0%, #ddd5ee 100%)', iconColor: '#7c5cbf' },
+};
+
+const WMO_MAP: Record<number, keyof typeof DAY_CONDITIONS> = {
   0: 'clear', 1: 'mainly_clear', 2: 'partly_cloudy', 3: 'overcast',
   45: 'foggy', 48: 'foggy',
   51: 'drizzle', 53: 'drizzle', 55: 'drizzle',
@@ -35,25 +49,38 @@ const WMO_MAP: Record<number, keyof typeof CONDITIONS> = {
 };
 
 interface Props { lat: number; lng: number; }
-interface Weather { temp: number; code: number; wind: number; }
+interface Weather { temp: number; code: number; wind: number; isDay: boolean; }
 
 export default function WeatherStatCard({ lat, lng }: Props) {
   const [weather, setWeather] = useState<Weather | null>(null);
 
   useEffect(() => {
     fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weathercode,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weathercode,wind_speed_10m,is_day&temperature_unit=fahrenheit&wind_speed_unit=mph`
     )
       .then(r => r.json())
       .then(d => {
         const c = d.current;
-        setWeather({ temp: Math.round(c.temperature_2m), code: c.weathercode, wind: Math.round(c.wind_speed_10m) });
+        setWeather({
+          temp: Math.round(c.temperature_2m),
+          code: c.weathercode,
+          wind: Math.round(c.wind_speed_10m),
+          isDay: c.is_day === 1,
+        });
       })
       .catch(() => {});
   }, [lat, lng]);
 
   const conditionKey = weather ? (WMO_MAP[weather.code] ?? 'overcast') : null;
+  const CONDITIONS = weather?.isDay ? DAY_CONDITIONS : NIGHT_CONDITIONS;
   const condition = conditionKey ? CONDITIONS[conditionKey] : null;
+
+  const textColor = weather && !weather.isDay && ['clear', 'mainly_clear', 'partly_cloudy'].includes(conditionKey ?? '')
+    ? '#c8d0e8'
+    : '#413734';
+  const subTextColor = weather && !weather.isDay && ['clear', 'mainly_clear', 'partly_cloudy'].includes(conditionKey ?? '')
+    ? '#8890aa'
+    : '#726d6b';
 
   return (
     <div style={{
@@ -81,10 +108,10 @@ export default function WeatherStatCard({ lat, lng }: Props) {
 
       {weather && condition ? (
         <>
-          <p style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '1rem', color: '#413734', margin: 0, position: 'relative' }}>
+          <p style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '1rem', color: textColor, margin: 0, position: 'relative' }}>
             {weather.temp}°F · {condition.label}
           </p>
-          <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#726d6b', margin: 0, position: 'relative' }}>
+          <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: subTextColor, margin: 0, position: 'relative' }}>
             Wind {weather.wind} mph
           </p>
         </>
