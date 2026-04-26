@@ -6,6 +6,7 @@ import {
   MapPin, Phone, Globe, Clock, DollarSign, Star, Users, Calendar,
   Tent, Fish, Waves, Dog, Ship, TreePine, ParkingCircle, AlertTriangle,
   Leaf, Footprints, Sparkles, ArrowLeft, Mail, Hash,
+  Bike, Bird, Crosshair, MountainSnow, Sailboat,
 } from 'lucide-react';
 import Link from 'next/link';
 import SiteHeader from '../../SiteHeader';
@@ -41,7 +42,9 @@ interface Park {
   updated_at: string;
   park_amenities: {
     dog_friendly: boolean; camping_available: boolean; swimming_allowed: boolean;
-    fishing_allowed: boolean; boat_launch: boolean; picnic_areas: boolean;
+    fishing_allowed: boolean; hiking_available: boolean; biking_available: boolean;
+    horseback_riding: boolean; hunting_allowed: boolean; paddling_available: boolean;
+    wildlife_viewing: boolean; boat_launch: boolean; picnic_areas: boolean;
     visitor_center: boolean; wheelchair_accessible: boolean;
   };
   park_trails: Trail[];
@@ -165,14 +168,20 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
   const events = park.park_seasonal_events?.sort((a, b) => a.sort_order - b.sort_order) ?? [];
 
   const amenityList = [
-    { label: 'Dog Friendly',   icon: Dog,           active: amenities.dog_friendly },
-    { label: 'Camping',        icon: Tent,          active: amenities.camping_available },
-    { label: 'Swimming',       icon: Waves,         active: amenities.swimming_allowed },
-    { label: 'Fishing',        icon: Fish,          active: amenities.fishing_allowed },
-    { label: 'Boat Launch',    icon: Ship,          active: amenities.boat_launch },
-    { label: 'Picnic Areas',   icon: TreePine,      active: amenities.picnic_areas },
-    { label: 'Visitor Center', icon: MapPin,        active: amenities.visitor_center },
-    { label: 'Accessible',     icon: ParkingCircle, active: amenities.wheelchair_accessible },
+    { label: 'Dog Friendly',      icon: Dog,           active: amenities.dog_friendly },
+    { label: 'Camping',           icon: Tent,          active: amenities.camping_available },
+    { label: 'Swimming',          icon: Waves,         active: amenities.swimming_allowed },
+    { label: 'Fishing',           icon: Fish,          active: amenities.fishing_allowed },
+    { label: 'Hiking',            icon: MountainSnow,  active: amenities.hiking_available },
+    { label: 'Biking',            icon: Bike,          active: amenities.biking_available },
+    { label: 'Horseback Riding',  icon: Footprints,    active: amenities.horseback_riding },
+    { label: 'Hunting',           icon: Crosshair,     active: amenities.hunting_allowed },
+    { label: 'Paddling',          icon: Sailboat,      active: amenities.paddling_available },
+    { label: 'Wildlife Viewing',  icon: Bird,          active: amenities.wildlife_viewing },
+    { label: 'Boat Launch',       icon: Ship,          active: amenities.boat_launch },
+    { label: 'Picnic Areas',      icon: TreePine,      active: amenities.picnic_areas },
+    { label: 'Visitor Center',    icon: MapPin,        active: amenities.visitor_center },
+    { label: 'Accessible',        icon: ParkingCircle, active: amenities.wheelchair_accessible },
   ].filter(a => a.active);
 
   const parkUrl = `https://discoverfloridaparks.com/parks/${park.slug}`;

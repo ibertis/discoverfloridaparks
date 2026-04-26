@@ -40,12 +40,18 @@ const REGIONS = [
 ];
 
 const AMENITY_OPTIONS = [
-  { key: 'dog_friendly',      label: 'Dog Friendly' },
-  { key: 'camping_available', label: 'Camping' },
-  { key: 'swimming_allowed',  label: 'Swimming' },
-  { key: 'fishing_allowed',   label: 'Fishing' },
-  { key: 'boat_launch',       label: 'Boat Launch' },
-  { key: 'picnic_areas',      label: 'Picnic Areas' },
+  { key: 'dog_friendly',        label: 'Dog Friendly' },
+  { key: 'camping_available',   label: 'Camping' },
+  { key: 'swimming_allowed',    label: 'Swimming' },
+  { key: 'fishing_allowed',     label: 'Fishing' },
+  { key: 'hiking_available',    label: 'Hiking' },
+  { key: 'biking_available',    label: 'Biking' },
+  { key: 'horseback_riding',    label: 'Horseback Riding' },
+  { key: 'hunting_allowed',     label: 'Hunting' },
+  { key: 'paddling_available',  label: 'Paddling' },
+  { key: 'wildlife_viewing',    label: 'Wildlife Viewing' },
+  { key: 'boat_launch',         label: 'Boat Launch' },
+  { key: 'picnic_areas',        label: 'Picnic Areas' },
 ];
 
 interface SearchParams {
