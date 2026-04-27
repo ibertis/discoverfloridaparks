@@ -90,9 +90,12 @@ export default function FooterLinks() {
     setErrors({});
     setStatus('submitting');
     try {
-      // Replace with your preferred form endpoint (e.g. Resend, Formspree, Web3Forms)
-      // const res = await fetch(process.env.NEXT_PUBLIC_CONTACT_FORM_ENDPOINT!, { method: 'POST', ... })
-      await new Promise(r => setTimeout(r, 800));
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message }),
+      });
+      if (!res.ok) throw new Error('Send failed');
       setStatus('success');
       setName(''); setEmail(''); setMessage(''); setConsent(false);
     } catch {
