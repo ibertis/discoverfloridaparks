@@ -2,9 +2,9 @@
 
 ## Project Overview
 
-**Discover Florida Parks** is a Next.js + Supabase park directory covering 49 Florida parks, nature preserves, and outdoor attractions. Migrated from a WordPress + Bricks Builder site (decommissioned). The goal is a fast, SEO-friendly public directory with future monetization (featured placements, affiliate links, user accounts, trip planning).
+**Discover Florida Parks** is a Next.js + Supabase park directory covering Florida parks, nature preserves, and outdoor attractions. Migrated from a WordPress + Bricks Builder site (decommissioned). The goal is a fast, SEO-friendly public directory with future monetization (featured placements, affiliate links, user accounts, trip planning).
 
-**User profile:** Non-coder, vibe codes with AI. Big feature ambitions. Same workflow as PremierPersona.
+**User profile:** Non-coder, vibe codes with AI. Big feature ambitions.
 
 ---
 
@@ -12,20 +12,38 @@
 
 - **Framework:** Next.js (App Router, TypeScript, Tailwind v4)
 - **Database:** Supabase — PostgreSQL, project ID `dteajahghspuqrczutgp`
-- **Hosting:** Vercel (planned)
+- **CMS:** Sanity (blog posts only) — Studio at `/studio`
+- **Hosting:** Vercel — auto-deploys from `main` branch
+- **Map:** Mapbox GL JS via `NEXT_PUBLIC_MAPBOX_TOKEN`
+- **Email:** Resend — contact form via `/api/contact` Next.js API route
 - **Icons:** `@phosphor-icons/react` (decorative fill icons) + `lucide-react` (functional UI icons)
 - **Fonts:** Google Fonts — Shrikhand, Glegoo, Archivo
+- **Weather:** Open-Meteo API (no key required) — used on park detail pages
 
 ---
 
 ## Environment Variables
 
 ```
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://dteajahghspuqrczutgp.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_R1x939gIKnoOXW9EMJDTUQ_YQOmeIRq
+
+# Mapbox (map page)
+NEXT_PUBLIC_MAPBOX_TOKEN=pk.your-mapbox-token
+
+# Sanity (blog)
+NEXT_PUBLIC_SANITY_PROJECT_ID=your-project-id
+NEXT_PUBLIC_SANITY_DATASET=production
+NEXT_PUBLIC_SANITY_API_VERSION=2026-04-21
+
+# Resend (contact form) — server-side only, NOT NEXT_PUBLIC_
+RESEND_API_KEY=re_your_api_key_here
 ```
 
-Supabase client: `src/lib/supabase.ts`
+- Public Supabase client: `src/lib/supabase.ts`
+- Server-only Supabase client: `src/lib/supabase-server.ts` — used in admin routes and middleware
+- Admin role stored in `app_metadata.role` (values: `"admin"` or `"editor"`)
 
 ---
 
@@ -87,23 +105,88 @@ style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.85rem', fontWeight: 600
 ```
 src/
 ├── app/
-│   ├── globals.css              # Font imports + CSS variables (Birdily tokens)
-│   ├── layout.tsx               # Root layout — clean, no Geist fonts
-│   ├── page.tsx                 # Homepage
-│   ├── HeroSlider.tsx           # 'use client' — 3-slide hero with arrows + dots
-│   ├── ScrollToTop.tsx          # 'use client' — orange scroll-to-top button
-│   └── parks/
-│       ├── page.tsx             # Park directory — server component, URL-param filtering
-│       ├── FilterBar.tsx        # 'use client' — sidebar filters (type, region, amenities, search)
-│       └── [slug]/
-│           └── page.tsx         # Individual park — SSG via generateStaticParams
+│   ├── globals.css                        # Font imports + Birdily CSS tokens
+│   ├── layout.tsx                         # Root layout
+│   ├── page.tsx                           # Homepage
+│   ├── not-found.tsx                      # 404 page
+│   ├── sitemap.ts                         # Auto-generated sitemap (parks + blog)
+│   ├── robots.ts                          # robots.txt
+│   ├── SiteHeader.tsx                     # Global nav header
+│   ├── SiteFooter.tsx                     # Global footer
+│   ├── FooterLinks.tsx                    # 'use client' — contact form + footer columns
+│   ├── HeroSlider.tsx                     # 'use client' — 3-slide hero
+│   ├── HomeMapSection.tsx                 # Homepage map preview section
+│   ├── FeaturedExperiences.tsx            # Featured experiences carousel
+│   ├── NewsletterForm.tsx                 # Newsletter signup form
+│   ├── ScrollToTop.tsx                    # 'use client' — scroll-to-top button
+│   ├── VideoModal.tsx                     # 'use client' — video lightbox
+│   ├── api/
+│   │   ├── contact/route.ts               # POST — Resend contact form email
+│   │   └── admin/invite/route.ts          # POST — invite new admin/editor user
+│   ├── admin/
+│   │   ├── layout.tsx                     # Admin shell layout
+│   │   ├── AdminNav.tsx                   # Admin sidebar nav
+│   │   ├── page.tsx                       # Dashboard — stats + recently updated
+│   │   ├── login/page.tsx                 # Login page (email + password)
+│   │   ├── reset-password/page.tsx        # Password reset
+│   │   ├── parks/
+│   │   │   ├── page.tsx                   # Parks list — search + type filter
+│   │   │   ├── new/page.tsx               # New park form
+│   │   │   └── [slug]/
+│   │   │       ├── page.tsx               # Edit park wrapper
+│   │   │       └── ParkEditForm.tsx       # 'use client' — full park edit form
+│   │   ├── experiences/
+│   │   │   ├── page.tsx                   # Experiences list
+│   │   │   ├── new/page.tsx               # New experience form
+│   │   │   └── [id]/
+│   │   │       ├── page.tsx               # Edit experience wrapper
+│   │   │       └── ExperienceEditForm.tsx # 'use client' — experience edit form
+│   │   ├── users/
+│   │   │   ├── page.tsx                   # Users list (admin only)
+│   │   │   └── UsersClient.tsx            # 'use client' — invite + manage users
+│   │   └── api/
+│   │       ├── save-park/route.ts         # POST/DELETE — park upsert + delete
+│   │       ├── save-experience/route.ts   # POST/DELETE — experience upsert + delete
+│   │       ├── upload-park-photo/route.ts # POST — park photo upload to Supabase storage
+│   │       └── upload-experience-photo/route.ts
+│   ├── parks/
+│   │   ├── page.tsx                       # Park directory — server, URL-param filtering
+│   │   ├── FilterBar.tsx                  # 'use client' — type, region, amenity, search filters
+│   │   └── [slug]/
+│   │       ├── page.tsx                   # Park detail — SSG
+│   │       ├── ParkMap.tsx                # 'use client' — single park Mapbox map
+│   │       ├── PhotoGallery.tsx           # 'use client' — lightbox gallery
+│   │       └── WeatherStatCard.tsx        # 'use client' — live weather via Open-Meteo
+│   ├── map/
+│   │   ├── page.tsx                       # Full map page — all parks
+│   │   ├── ParkMap.tsx                    # 'use client' — Mapbox map + type filter chips
+│   │   └── MapLoader.tsx                  # Loading skeleton for map
+│   ├── blog/
+│   │   ├── page.tsx                       # Blog index — fetches from Sanity
+│   │   └── [slug]/page.tsx               # Blog post — fetches from Sanity
+│   └── studio/[[...tool]]/page.tsx        # Sanity Studio embedded at /studio
+├── components/
+│   └── ParkCard.tsx                       # Reusable park card (used on homepage + directory)
 ├── lib/
-│   └── supabase.ts              # Supabase client (anon key, server-safe)
-public/
-├── dfp-logo.png                 # Orange "Discover" script + "FLORIDA PARKS" all-caps
-├── hero-1.jpg                   # Hero slide 1 background
-├── hero-2.jpg                   # Hero slide 2 background
-└── hero-3.jpg                   # Hero slide 3 background
+│   ├── supabase.ts                        # Public Supabase client (anon key)
+│   └── supabase-server.ts                 # Server-only client + getAdminUser() + getUserRole()
+├── middleware.ts                           # Protects /admin routes — checks app_metadata.role
+└── sanity/
+    ├── env.ts                             # Sanity env var validation
+    ├── queries.ts                         # GROQ queries (postSlugsQuery, etc.)
+    ├── structure.ts                       # Sanity Studio structure
+    ├── lib/
+    │   ├── client.ts                      # Sanity client
+    │   ├── image.ts                       # Image URL builder
+    │   └── live.ts                        # Live content client
+    └── schemaTypes/
+        ├── index.ts
+        └── post.ts                        # Blog post schema
+
+supabase/
+└── rls.sql                                # All RLS policies — re-run to reset
+scripts/
+└── enrich-one-park.ts                     # CLI: enrich a park with Google Places + AI content
 ```
 
 ---
@@ -122,7 +205,9 @@ public/
 | `park_nearby` | Junction — park_id ↔ nearby_park_id. Public read-only. |
 | `experiences` | Featured experiences/attractions linked to parks |
 
-Key `parks` fields: `slug` (unique), `name`, `short_description`, `full_description`, `park_type`, `park_region`, `county`, `park_status`, `featured_image_url`, `gallery_urls` (text[]), `address`, `city`, `zip_code`, `latitude`, `longitude`, `park_size_acres`, `year_established`, `managing_agency`, `best_season`, `typical_visit_duration`, `crowd_level`, `google_rating`, `website`, `phone`, `email`, `entrance_fee`, `operating_hours`, `google_maps_link`, `reservation_url`, `camping_url`, `reservation_required`, `visitor_tips`, `instagram_hashtag`, `terrain`, `wildlife_summary`, `safety_notes`, `parking_info`, `nearby_cities`, `distance_from_miami`, `distance_from_orlando`, `distance_from_tampa`, `seo_title`, `seo_description`, `is_featured`
+Key `parks` fields: `slug` (unique), `name`, `short_description`, `full_description`, `park_types` (text[]), `park_regions` (text[]), `county`, `park_status`, `featured_image_url`, `gallery_urls` (text[]), `address`, `city`, `zip_code`, `latitude`, `longitude`, `park_size_acres`, `year_established`, `managing_agency`, `best_season`, `typical_visit_duration`, `crowd_level`, `google_rating`, `website`, `phone`, `email`, `entrance_fee`, `operating_hours`, `google_maps_link`, `reservation_url`, `camping_url`, `reservation_required`, `visitor_tips`, `instagram_hashtag`, `terrain`, `wildlife_summary`, `safety_notes`, `parking_info`, `nearby_cities`, `distance_from_miami`, `distance_from_orlando`, `distance_from_tampa`, `seo_title`, `seo_description`, `is_featured`
+
+**Important:** `park_types` and `park_regions` are `text[]` arrays. Use `.contains('park_types', [value])` for filtering, not `.eq()`. A park can belong to multiple types and regions.
 
 ---
 
@@ -155,7 +240,13 @@ Used for all functional UI icons (navigation arrows, map pin, star, search, X, e
 
 3. **Phosphor `Icon` type import:** `import type { Icon } from '@phosphor-icons/react/dist/lib/types'`
 
-4. **No `export-parks.php` or migration scripts** — these have been cleaned up. All parks are live in Supabase.
+4. **`park_types` and `park_regions` are arrays** — use `.contains('park_types', [value])` for filtering. Never use `.eq()` on these fields.
+
+5. **Visitor tips format** — stored as a single `•`-delimited string (e.g. `"Tip one • Tip two"`). Split with `.split('•').map(t => t.trim()).filter(Boolean)` at render time. Do not change the storage format.
+
+6. **WeatherStatCard** — uses Open-Meteo API, no key needed. Fetches `is_day` for day/night theming. Night variants apply dark navy gradients for clear/partly cloudy conditions only.
+
+7. **No `export-parks.php` or migration scripts** — these have been cleaned up. All parks are live in Supabase.
 
 ---
 
@@ -177,9 +268,32 @@ Used for all functional UI icons (navigation arrows, map pin, star, search, X, e
 - `FilterBar` client component — sidebar with type list, region list, amenity checkboxes, search input
 
 ### `/parks/[slug]` — Park Detail (`src/app/parks/[slug]/page.tsx`)
-- SSG: `generateStaticParams()` → all 49 slugs
+- SSG: `generateStaticParams()` → all park slugs
 - `generateMetadata()` → seo_title / seo_description per park
 - Full join: `parks(*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*))`
+- `WeatherStatCard` — live weather from Open-Meteo (lat/lng), day/night detection via `is_day` field
+- `PhotoGallery` — lightbox over `gallery_urls[]`
+- `ParkMap` — single Mapbox marker
+- Visitor tips: stored as `•`-delimited text, split at render time into individual bullet rows
+- Nearby parks: excludes `Seasonal Attractions` via `.not('park_types', 'cs', '{"Seasonal Attractions"}')`
+
+### `/map` — Interactive Map (`src/app/map/page.tsx`)
+- Mapbox GL JS — all parks as markers, click → popup with link
+- Filter chips by park type
+- Park count in `generateMetadata()` — dynamic, not hardcoded
+- Excludes parks with `latitude = 0` or `longitude = 0`
+
+### `/blog` — Blog (`src/app/blog/`)
+- Powered by Sanity CMS — posts authored in `/studio`
+- Blog index + individual post pages fetch via GROQ queries in `src/sanity/queries.ts`
+
+### `/admin` — Admin Panel (`src/app/admin/`)
+- Protected by `middleware.ts` — requires `app_metadata.role` of `admin` or `editor`
+- Dashboard: park count, missing photo/description counts, recently updated parks
+- Parks: full CRUD — list with search/filter, edit form with all fields, photo upload, gallery
+- Experiences: full CRUD — similar pattern to parks
+- Users: admin-only — invite new users, manage roles
+- All write operations go through API routes in `src/app/admin/api/` which re-check auth server-side
 
 ---
 
