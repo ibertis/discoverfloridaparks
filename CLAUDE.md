@@ -110,16 +110,17 @@ public/
 
 ## Supabase Schema
 
-**RLS is disabled on all tables** — add policies before production launch.
+**RLS is enabled on all tables.** All policies are documented in `supabase/rls.sql` — re-run that file any time policies need to be reset.
 
 | Table | Description |
 |---|---|
-| `parks` | 49 parks — all core fields (slug, name, descriptions, type, region, coords, etc.) |
-| `park_amenities` | Boolean flags per park (dog_friendly, camping_available, swimming_allowed, fishing_allowed, boat_launch, picnic_areas, visitor_center, wheelchair_accessible) |
+| `parks` | Core park records — all fields (slug, name, descriptions, types, regions, coords, etc.) |
+| `park_amenities` | Boolean flags per park (dog_friendly, camping_available, swimming_allowed, fishing_allowed, hiking_available, biking_available, horseback_riding, hunting_allowed, paddling_available, wildlife_viewing, boat_launch, picnic_areas, visitor_center, wheelchair_accessible) |
 | `park_trails` | Repeater — name, difficulty, length_miles, description, sort_order |
 | `park_fun_facts` | Repeater — fact text, sort_order |
 | `park_seasonal_events` | Repeater — event_name, month, description, sort_order |
-| `park_nearby` | Junction — park_id ↔ nearby_park_id |
+| `park_nearby` | Junction — park_id ↔ nearby_park_id. Public read-only. |
+| `experiences` | Featured experiences/attractions linked to parks |
 
 Key `parks` fields: `slug` (unique), `name`, `short_description`, `full_description`, `park_type`, `park_region`, `county`, `park_status`, `featured_image_url`, `gallery_urls` (text[]), `address`, `city`, `zip_code`, `latitude`, `longitude`, `park_size_acres`, `year_established`, `managing_agency`, `best_season`, `typical_visit_duration`, `crowd_level`, `google_rating`, `website`, `phone`, `email`, `entrance_fee`, `operating_hours`, `google_maps_link`, `reservation_url`, `camping_url`, `reservation_required`, `visitor_tips`, `instagram_hashtag`, `terrain`, `wildlife_summary`, `safety_notes`, `parking_info`, `nearby_cities`, `distance_from_miami`, `distance_from_orlando`, `distance_from_tampa`, `seo_title`, `seo_description`, `is_featured`
 
@@ -154,9 +155,7 @@ Used for all functional UI icons (navigation arrows, map pin, star, search, X, e
 
 3. **Phosphor `Icon` type import:** `import type { Icon } from '@phosphor-icons/react/dist/lib/types'`
 
-4. **RLS disabled** on all Supabase tables — safe for public read, but add policies before launch.
-
-5. **No `export-parks.php` or migration scripts** — these have been cleaned up. All 49 parks are live in Supabase.
+4. **No `export-parks.php` or migration scripts** — these have been cleaned up. All parks are live in Supabase.
 
 ---
 
@@ -186,13 +185,40 @@ Used for all functional UI icons (navigation arrows, map pin, star, search, X, e
 
 ## Pending / Roadmap
 
-- [ ] Apply Birdily design to `/parks` directory page and `FilterBar`
-- [ ] Apply Birdily design to `/parks/[slug]` single park page
-- [ ] Build `/map` — react-leaflet, 49 markers, click → popup with link
-- [ ] Build `/admin` — park CRUD, protected (Supabase Auth), repeater UIs
-- [ ] Add Supabase RLS policies before launch
-- [ ] Deploy to Vercel + point `discoverfloridaparks.com`
 - [ ] Monetization: featured placements, affiliate links, user accounts, trip planning
+- [ ] Connect Resend contact form (RESEND_API_KEY needed in Vercel env vars + domain verified in Resend)
+
+---
+
+## Security
+
+Security is a first-class priority on this project. Follow these rules without exception.
+
+### RLS Policy Rules
+- **Every new table must have RLS enabled immediately** — never leave a table in the public schema without RLS, even temporarily
+- **Add the RLS block to `supabase/rls.sql` in the same task** as creating the table — document it before moving on
+- **Use `app_metadata` for role checks** in all policies — not `user_metadata` (user_metadata can be written by the client; app_metadata is server-only)
+- Policy pattern for all write-protected tables:
+  ```sql
+  ALTER TABLE new_table ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "new_table_public_read"   ON new_table FOR SELECT USING (true);
+  CREATE POLICY "new_table_editor_insert" ON new_table FOR INSERT WITH CHECK (((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor'));
+  CREATE POLICY "new_table_editor_update" ON new_table FOR UPDATE USING (((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor'));
+  CREATE POLICY "new_table_admin_delete"  ON new_table FOR DELETE USING (((auth.jwt() -> 'app_metadata') ->> 'role') = 'admin');
+  ```
+
+### Storage Bucket Rules
+- Every new storage bucket must have SELECT, INSERT, and DELETE policies
+- Document all buckets in `supabase/rls.sql`
+- Restrict INSERT/DELETE to `admin`/`editor` roles via `app_metadata`
+
+### Admin API Routes
+- Every admin API route must call `getAdminUser()` and return 401 if no user before doing any database work
+- Never expose service-role keys to the browser — only use them server-side
+
+### Ongoing Audits
+- Check Supabase **Security Advisor** (Dashboard → Advisors → Security) periodically — at minimum when adding new tables or features
+- Run **Rerun linter** after any schema changes to confirm no new issues
 
 ---
 
@@ -214,3 +240,6 @@ Used for all functional UI icons (navigation arrows, map pin, star, search, X, e
 - Don't import `Map` from lucide-react without aliasing as `MapIcon`
 - Don't use deprecated Phosphor icon names (without `Icon` suffix)
 - Don't add RLS-bypassing anon writes to production without proper policies
+- Don't create a new Supabase table without immediately adding its RLS block to `supabase/rls.sql`
+- Don't use `user_metadata` for role checks in RLS policies — always use `app_metadata`
+- Don't store sensitive credentials or API keys in `user_metadata`
