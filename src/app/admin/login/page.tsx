@@ -35,7 +35,7 @@ export default function AdminLogin() {
       return;
     }
 
-    const role = data.user?.user_metadata?.role;
+    const role = data.user?.app_metadata?.role;
     if (role !== 'admin' && role !== 'editor') {
       await supabase.auth.signOut();
       setError('Your account does not have admin access.');

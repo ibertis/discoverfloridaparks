@@ -25,6 +25,6 @@ export async function getAdminUser() {
   return user;
 }
 
-export function getUserRole(user: { user_metadata?: Record<string, unknown> } | null): string | null {
-  return (user?.user_metadata?.role as string) ?? null;
+export function getUserRole(user: { app_metadata?: Record<string, unknown> } | null): string | null {
+  return (user?.app_metadata?.role as string) ?? null;
 }
