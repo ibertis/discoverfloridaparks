@@ -136,6 +136,33 @@ CREATE POLICY "park_seasonal_events_admin_delete" ON park_seasonal_events
     ((auth.jwt() -> 'user_metadata') ->> 'role') = 'admin'
   );
 
+-- ─── experiences ─────────────────────────────────────────────────────────────
+
+ALTER TABLE experiences ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "experiences_public_read"   ON experiences;
+DROP POLICY IF EXISTS "experiences_editor_insert" ON experiences;
+DROP POLICY IF EXISTS "experiences_editor_update" ON experiences;
+DROP POLICY IF EXISTS "experiences_admin_delete"  ON experiences;
+
+CREATE POLICY "experiences_public_read" ON experiences
+  FOR SELECT USING (true);
+
+CREATE POLICY "experiences_editor_insert" ON experiences
+  FOR INSERT WITH CHECK (
+    ((auth.jwt() -> 'user_metadata') ->> 'role') IN ('admin', 'editor')
+  );
+
+CREATE POLICY "experiences_editor_update" ON experiences
+  FOR UPDATE USING (
+    ((auth.jwt() -> 'user_metadata') ->> 'role') IN ('admin', 'editor')
+  );
+
+CREATE POLICY "experiences_admin_delete" ON experiences
+  FOR DELETE USING (
+    ((auth.jwt() -> 'user_metadata') ->> 'role') = 'admin'
+  );
+
 -- ─── Storage: park-photos bucket ──────────────────────────────────────────────
 -- Run these separately in Storage > Policies if the SQL editor doesn't support storage policies.
 -- Restricts uploads to authenticated admin/editor users; public download remains open.
