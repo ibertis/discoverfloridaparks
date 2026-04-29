@@ -41,10 +41,10 @@ const OTHER_COLUMNS = [
   {
     heading: 'Styles',
     links: [
-      { label: 'Hot Deals',   href: '#' },
-      { label: 'Clearance',   href: '#' },
-      { label: 'New Deals',   href: '#' },
-      { label: 'Our Shop',    href: '#' },
+      { label: 'Hot Deals',   href: '/shop' },
+      { label: 'Clearance',   href: '/shop' },
+      { label: 'New Deals',   href: '/shop' },
+      { label: 'Our Shop',    href: '/shop' },
     ],
   },
   {
