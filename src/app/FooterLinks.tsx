@@ -50,10 +50,10 @@ const OTHER_COLUMNS = [
   {
     heading: 'We Care',
     links: [
-      { label: 'Conservation',  href: '#' },
-      { label: 'Preservation',  href: '#' },
+      { label: 'Conservation',  href: '/conservation' },
+      { label: 'Preservation',  href: '/preservation' },
       { label: 'Useful Links',  href: '#' },
-      { label: 'Our Efforts',   href: '#' },
+      { label: 'Our Efforts',   href: '/our-efforts' },
     ],
   },
 ];

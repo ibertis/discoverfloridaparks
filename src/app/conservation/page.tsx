@@ -1,0 +1,33 @@
+import WeCarePage from '@/components/WeCarePage';
+
+export const metadata = {
+  title: 'Conservation | Discover Florida Parks',
+  description: "Florida's ecosystems are among the most biodiverse in North America. Learn how Discover Florida Parks supports conservation efforts across the state.",
+};
+
+export default function ConservationPage() {
+  return (
+    <WeCarePage
+      eyebrow="We Care · Conservation"
+      headline="Protect What We Love"
+      subhead="Florida's ecosystems — its wetlands, coral reefs, and wildlife corridors — are among the most biodiverse in North America. We believe exploring these spaces comes with a responsibility to protect them."
+      heroBg="/hero-1.jpg"
+      pillars={[
+        {
+          title: 'Wildlife Habitat',
+          body: 'Preserving the corridors and ecosystems that Florida\'s native species depend on to survive and thrive.',
+        },
+        {
+          title: 'Water Conservation',
+          body: 'From the Everglades to the Springs, clean water is the lifeblood of Florida\'s natural spaces.',
+        },
+        {
+          title: 'Ecosystem Health',
+          body: 'Healthy ecosystems sustain the parks we love. We advocate for science-led conservation efforts across the state.',
+        },
+      ]}
+      partnerIntro="We're building a directory of conservation organizations working to protect Florida's living ecosystems. Know a group that deserves recognition?"
+      pageSlug="conservation"
+    />
+  );
+}
