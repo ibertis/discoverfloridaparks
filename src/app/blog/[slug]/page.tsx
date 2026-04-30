@@ -235,6 +235,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
         </div>
 
+        {/* Disclaimer */}
+        <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#b8b0a8', lineHeight: 1.6, marginTop: 40, paddingTop: 24, borderTop: '1px solid #eeeeee' }}>
+          Discover Florida Parks is an independent guide to Florida&apos;s parks and outdoor attractions. We are not affiliated with the Florida State Parks system, the National Park Service, or any government agency.
+        </p>
+
       </article>
 
       <FooterLinks />
