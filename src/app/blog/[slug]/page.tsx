@@ -8,6 +8,7 @@ import { ArrowLeft } from 'lucide-react';
 import SiteHeader from '../../SiteHeader';
 import SiteFooter from '../../SiteFooter';
 import FooterLinks from '../../FooterLinks';
+import NewsletterForm from '../../NewsletterForm';
 import { client as sanityClient } from '@/sanity/lib/client';
 import { postBySlugQuery, postSlugsQuery } from '@/sanity/queries';
 import { urlFor } from '@/sanity/imageUrl';
@@ -217,6 +218,22 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <PortableText value={post.body as Parameters<typeof PortableText>[0]['value']} components={portableTextComponents} />
           </div>
         )}
+
+        {/* Newsletter signup */}
+        <div style={{ background: '#f9f7f5', borderRadius: 20, padding: '40px 36px', marginTop: 64, textAlign: 'center' }}>
+          <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.74rem', fontWeight: 700, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.14em', margin: '0 0 10px' }}>
+            Stay in the know
+          </p>
+          <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '2rem', color: '#362f35', letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 10px' }}>
+            More Florida, please.
+          </h2>
+          <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 400, fontSize: '0.88rem', color: '#726d6b', lineHeight: 1.6, margin: '0 auto 24px', maxWidth: 360 }}>
+            Get new park guides, travel tips, and seasonal picks delivered to your inbox.
+          </p>
+          <div style={{ maxWidth: 400, margin: '0 auto' }}>
+            <NewsletterForm />
+          </div>
+        </div>
 
       </article>
 
