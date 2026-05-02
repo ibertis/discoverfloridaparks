@@ -180,8 +180,8 @@ export interface CinematicHeroProps extends React.HTMLAttributes<HTMLDivElement>
 export function CinematicHero({
   brandName = "DFP",
   tagline1 = "Your Florida,",
-  tagline2 = "explored...",
-  tagline3 = "in your pocket.",
+  tagline2 = "in your pocket.",
+  tagline3 = "",
   cardHeading = "Every park. Every deal. Right here.",
   cardDescription = (
     <>
@@ -243,7 +243,7 @@ export function CinematicHero({
 
     const ctx = gsap.context(() => {
       gsap.set(".text-track", { autoAlpha: 0, y: 60, scale: 0.85, filter: "blur(20px)", rotationX: -20 });
-      gsap.set(".text-days", { autoAlpha: 0, y: 50, filter: "blur(15px)" });
+      gsap.set(".text-days", { autoAlpha: 0, y: 50 });
       gsap.set(".text-line3", { autoAlpha: 0, y: 40, filter: "blur(12px)" });
       gsap.set(".main-card", { y: window.innerHeight + 200, autoAlpha: 1 });
       gsap.set([".card-left-text", ".card-right-text", ".mockup-scroll-wrapper", ".floating-badge", ".phone-widget"], { autoAlpha: 0 });
@@ -252,7 +252,7 @@ export function CinematicHero({
       const introTl = gsap.timeline({ delay: 0.3 });
       introTl
         .to(".text-track", { duration: 1.8, autoAlpha: 1, y: 0, scale: 1, filter: "blur(0px)", rotationX: 0, ease: "expo.out" })
-        .to(".text-days", { duration: 1.4, autoAlpha: 1, y: 0, filter: "blur(0px)", ease: "expo.out" }, "-=1.0")
+        .to(".text-days", { duration: 1.4, autoAlpha: 1, y: 0, ease: "expo.out" }, "-=1.0")
         .to(".text-line3", { duration: 1.2, autoAlpha: 1, y: 0, filter: "blur(0px)", ease: "expo.out" }, "-=0.6");
 
       const scrollTl = gsap.timeline({
@@ -318,7 +318,7 @@ export function CinematicHero({
         <h1 className="text-track gsap-reveal text-3d-matte text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tight mb-2">
           {tagline1}
         </h1>
-        <h1 className="text-days gsap-reveal text-silver-matte text-5xl md:text-7xl lg:text-[6rem] font-extrabold tracking-tighter">
+        <h1 className="text-days gsap-reveal text-3d-matte text-5xl md:text-7xl lg:text-[6rem] font-extrabold tracking-tighter">
           {tagline2}
         </h1>
         {tagline3 && (
@@ -343,7 +343,7 @@ export function CinematicHero({
         <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight text-silver-matte">
           {ctaHeading}
         </h2>
-        <p className="text-muted-foreground text-lg md:text-xl mb-12 max-w-xl mx-auto font-light leading-relaxed">
+        <p className="text-muted-foreground text-lg md:text-xl mb-12 max-w-2xl mx-auto font-light leading-relaxed">
           {ctaDescription}
         </p>
         <div className="flex flex-col sm:flex-row gap-6">
@@ -382,9 +382,9 @@ export function CinematicHero({
             <div className="card-right-text gsap-reveal order-1 lg:order-3 flex justify-center lg:justify-end z-20 w-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/dfp-emblem.png"
+                src="/dfp-logo-full.png"
                 alt={brandName}
-                style={{ width: 'clamp(140px, 18vw, 240px)', height: 'auto', objectFit: 'contain', filter: 'brightness(0)', opacity: 0.75 }}
+                style={{ width: 'clamp(120px, 16vw, 200px)', height: 'auto', objectFit: 'contain', filter: 'brightness(0)', opacity: 0.75 }}
               />
             </div>
 
