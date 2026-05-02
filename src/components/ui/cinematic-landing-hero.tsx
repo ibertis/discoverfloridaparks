@@ -366,6 +366,9 @@ export function CinematicHero({
             </div>
           </a>
         </div>
+        <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--color-muted-foreground)', marginTop: 40, opacity: 0.6 }}>
+          Coming Soon
+        </p>
       </div>
 
       {/* The deep card */}
