@@ -147,9 +147,9 @@ export default async function HomePage() {
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#413734" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <polyline points="18 15 12 9 6 15" />
             </svg>
-            <span style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.4rem', color: '#413734', writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '-0.04em' }}>
+            <Link href="/app" style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.4rem', color: '#413734', writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '-0.04em', textDecoration: 'none' }}>
               plan my trip
-            </span>
+            </Link>
           </div>
 
         </div>
