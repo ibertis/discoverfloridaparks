@@ -46,18 +46,18 @@ const INJECTED_STYLES = `
   }
 
   .text-card-silver-matte {
-      background: linear-gradient(180deg, #FFFFFF 0%, #A1A1AA 100%);
+      background: linear-gradient(180deg, #1a0800 0%, #4d1800 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       transform: translateZ(0);
       filter:
-          drop-shadow(0px 12px 24px rgba(0,0,0,0.8))
-          drop-shadow(0px 4px 8px rgba(0,0,0,0.6));
+          drop-shadow(0px 4px 12px rgba(0,0,0,0.15))
+          drop-shadow(0px 1px 3px rgba(0,0,0,0.1));
   }
 
   .premium-depth-card {
-      background: linear-gradient(145deg, #162C6D 0%, #0A101D 100%);
+      background: linear-gradient(145deg, #ff7044 0%, #ffb98a 100%);
       box-shadow:
           0 40px 100px -20px rgba(0, 0, 0, 0.9),
           0 20px 40px -20px rgba(0, 0, 0, 0.8),
@@ -149,6 +149,12 @@ const INJECTED_STYLES = `
       box-shadow: 0 0 0 1px rgba(255,255,255,0.05), inset 0 3px 8px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(0,0,0,0.5);
   }
 
+  @keyframes dfp-bounce {
+      0%, 100% { transform: translateY(0); opacity: 0.4; }
+      50%       { transform: translateY(8px); opacity: 0.8; }
+  }
+  .scroll-hint { animation: dfp-bounce 1.8s ease-in-out infinite; }
+
   .progress-ring {
       transform: rotate(-90deg);
       transform-origin: center;
@@ -162,6 +168,7 @@ export interface CinematicHeroProps extends React.HTMLAttributes<HTMLDivElement>
   brandName?: string;
   tagline1?: string;
   tagline2?: string;
+  tagline3?: string;
   cardHeading?: string;
   cardDescription?: React.ReactNode;
   metricValue?: number;
@@ -173,11 +180,12 @@ export interface CinematicHeroProps extends React.HTMLAttributes<HTMLDivElement>
 export function CinematicHero({
   brandName = "DFP",
   tagline1 = "Your Florida,",
-  tagline2 = "in your pocket.",
+  tagline2 = "explored...",
+  tagline3 = "in your pocket.",
   cardHeading = "Every park. Every deal. Right here.",
   cardDescription = (
     <>
-      The <span className="text-white font-semibold">DFP app</span> puts Florida&apos;s
+      The <span className="text-[#1a0800] font-black">DFP app</span> puts Florida&apos;s
       parks, beaches, and outdoor escapes at your fingertips — with real-time park info,
       exclusive deals, and curated experiences available only to app users.
     </>
@@ -236,6 +244,7 @@ export function CinematicHero({
     const ctx = gsap.context(() => {
       gsap.set(".text-track", { autoAlpha: 0, y: 60, scale: 0.85, filter: "blur(20px)", rotationX: -20 });
       gsap.set(".text-days", { autoAlpha: 1, clipPath: "inset(0 100% 0 0)" });
+      gsap.set(".text-line3", { autoAlpha: 0, y: 40, filter: "blur(12px)" });
       gsap.set(".main-card", { y: window.innerHeight + 200, autoAlpha: 1 });
       gsap.set([".card-left-text", ".card-right-text", ".mockup-scroll-wrapper", ".floating-badge", ".phone-widget"], { autoAlpha: 0 });
       gsap.set(".cta-wrapper", { autoAlpha: 0, scale: 0.8, filter: "blur(30px)" });
@@ -243,7 +252,8 @@ export function CinematicHero({
       const introTl = gsap.timeline({ delay: 0.3 });
       introTl
         .to(".text-track", { duration: 1.8, autoAlpha: 1, y: 0, scale: 1, filter: "blur(0px)", rotationX: 0, ease: "expo.out" })
-        .to(".text-days", { duration: 1.4, clipPath: "inset(0 0% 0 0)", ease: "power4.inOut" }, "-=1.0");
+        .to(".text-days", { duration: 1.4, clipPath: "inset(0 0% 0 0)", ease: "power4.inOut" }, "-=1.0")
+        .to(".text-line3", { duration: 1.2, autoAlpha: 1, y: 0, filter: "blur(0px)", ease: "expo.out" }, "-=0.6");
 
       const scrollTl = gsap.timeline({
         scrollTrigger: {
@@ -311,6 +321,21 @@ export function CinematicHero({
         <h1 className="text-days gsap-reveal text-silver-matte text-5xl md:text-7xl lg:text-[6rem] font-extrabold tracking-tighter">
           {tagline2}
         </h1>
+        {tagline3 && (
+          <h1 className="text-line3 gsap-reveal text-3d-matte text-3xl md:text-5xl lg:text-[3.8rem] font-bold tracking-tight mt-1">
+            {tagline3}
+          </h1>
+        )}
+
+        {/* Scroll hint */}
+        <div className="scroll-hint mt-16 flex flex-col items-center gap-2 pointer-events-none select-none">
+          <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--color-foreground)', opacity: 0.45 }}>
+            Scroll to explore
+          </span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ opacity: 0.45 }}>
+            <path d="M8 3v10M8 13l-4-4M8 13l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
       </div>
 
       {/* CTA section (revealed at end of scroll) */}
@@ -466,10 +491,10 @@ export function CinematicHero({
 
             {/* Card copy — bottom on mobile, left on desktop */}
             <div className="card-left-text gsap-reveal order-3 lg:order-1 flex flex-col justify-center text-center lg:text-left z-20 w-full lg:max-w-none px-4 lg:px-0">
-              <h3 className="text-white text-2xl md:text-3xl lg:text-4xl font-bold mb-0 lg:mb-5 tracking-tight">
+              <h3 className="text-[#1a0800] text-2xl md:text-3xl lg:text-4xl font-bold mb-0 lg:mb-5 tracking-tight">
                 {cardHeading}
               </h3>
-              <p className="hidden md:block text-blue-100/70 text-sm md:text-base lg:text-lg font-normal leading-relaxed mx-auto lg:mx-0 max-w-sm lg:max-w-none">
+              <p className="hidden md:block text-[#1a0800]/75 text-sm md:text-base lg:text-lg font-normal leading-relaxed mx-auto lg:mx-0 max-w-sm lg:max-w-none">
                 {cardDescription}
               </p>
             </div>
