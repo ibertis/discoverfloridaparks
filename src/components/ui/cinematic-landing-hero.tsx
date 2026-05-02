@@ -384,7 +384,7 @@ export function CinematicHero({
               <img
                 src="/dfp-logo-full.png"
                 alt={brandName}
-                style={{ width: 'clamp(120px, 16vw, 200px)', height: 'auto', objectFit: 'contain', filter: 'brightness(0)', opacity: 0.75 }}
+                style={{ width: 'clamp(180px, 22vw, 300px)', height: 'auto', objectFit: 'contain', filter: 'brightness(0)', opacity: 0.75 }}
               />
             </div>
 
