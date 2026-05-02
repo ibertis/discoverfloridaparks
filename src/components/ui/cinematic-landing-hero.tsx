@@ -482,6 +482,18 @@ export function CinematicHero({
                   </div>
                 </div>
 
+                <div className="floating-badge absolute flex top-24 lg:top-32 right-[-15px] lg:right-[-80px] floating-ui-badge rounded-xl lg:rounded-2xl p-3 lg:p-4 items-center gap-3 lg:gap-4 z-30">
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gradient-to-b from-sky-500/20 to-sky-900/10 flex items-center justify-center border border-sky-400/30 shadow-inner">
+                    <svg className="w-4 h-4 text-sky-400 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white text-xs lg:text-sm font-bold tracking-tight">My Itinerary</p>
+                    <p className="text-sky-200/50 text-[10px] lg:text-xs font-medium">3 stops planned</p>
+                  </div>
+                </div>
+
                 <div className="floating-badge absolute flex bottom-12 lg:bottom-20 right-[-15px] lg:right-[-80px] floating-ui-badge rounded-xl lg:rounded-2xl p-3 lg:p-4 items-center gap-3 lg:gap-4 z-30">
                   <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gradient-to-b from-emerald-500/20 to-emerald-900/10 flex items-center justify-center border border-emerald-400/30 shadow-inner">
                     <span className="text-base lg:text-lg drop-shadow-lg" aria-hidden="true">🎯</span>
