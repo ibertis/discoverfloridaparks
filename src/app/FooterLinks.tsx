@@ -25,7 +25,7 @@ const OTHER_COLUMNS = [
     links: [
       { label: 'News',              href: '#' },
       { label: 'Our Channel',       href: '#' },
-      { label: 'The Ultimate App',  href: '#' },
+      { label: 'The Ultimate App',  href: '/app' },
       { label: 'Our Blog',          href: '/blog' },
     ],
   },

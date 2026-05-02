@@ -28,6 +28,12 @@
 }
 @import "tailwindcss";
 
+@theme {
+  --color-background:       #ffffff;
+  --color-foreground:       #362f35;
+  --color-muted-foreground: #726d6b;
+}
+
 :root {
   --accent:       #ff7044;
   --accent-dark:  #e85a2e;
