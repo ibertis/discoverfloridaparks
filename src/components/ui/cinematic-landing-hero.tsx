@@ -185,7 +185,7 @@ export function CinematicHero({
   cardHeading = "Every park. Every deal. Right here.",
   cardDescription = (
     <>
-      The <span className="text-[#1a0800] font-black">DFP app</span> puts Florida&apos;s
+      The <span className="text-[#1a0800] font-black">DFP app</span>{' '}puts Florida&apos;s
       parks, beaches, and outdoor escapes at your fingertips — with real-time park info,
       exclusive deals, and curated experiences available only to app users.
     </>
@@ -243,7 +243,7 @@ export function CinematicHero({
 
     const ctx = gsap.context(() => {
       gsap.set(".text-track", { autoAlpha: 0, y: 60, scale: 0.85, filter: "blur(20px)", rotationX: -20 });
-      gsap.set(".text-days", { autoAlpha: 1, clipPath: "inset(0 100% 0 0)" });
+      gsap.set(".text-days", { autoAlpha: 0, y: 50, filter: "blur(15px)" });
       gsap.set(".text-line3", { autoAlpha: 0, y: 40, filter: "blur(12px)" });
       gsap.set(".main-card", { y: window.innerHeight + 200, autoAlpha: 1 });
       gsap.set([".card-left-text", ".card-right-text", ".mockup-scroll-wrapper", ".floating-badge", ".phone-widget"], { autoAlpha: 0 });
@@ -252,7 +252,7 @@ export function CinematicHero({
       const introTl = gsap.timeline({ delay: 0.3 });
       introTl
         .to(".text-track", { duration: 1.8, autoAlpha: 1, y: 0, scale: 1, filter: "blur(0px)", rotationX: 0, ease: "expo.out" })
-        .to(".text-days", { duration: 1.4, clipPath: "inset(0 0% 0 0)", ease: "power4.inOut" }, "-=1.0")
+        .to(".text-days", { duration: 1.4, autoAlpha: 1, y: 0, filter: "blur(0px)", ease: "expo.out" }, "-=1.0")
         .to(".text-line3", { duration: 1.2, autoAlpha: 1, y: 0, filter: "blur(0px)", ease: "expo.out" }, "-=0.6");
 
       const scrollTl = gsap.timeline({
@@ -380,9 +380,12 @@ export function CinematicHero({
 
             {/* Brand name — top on mobile, right on desktop */}
             <div className="card-right-text gsap-reveal order-1 lg:order-3 flex justify-center lg:justify-end z-20 w-full">
-              <h2 className="text-6xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-card-silver-matte lg:mt-0">
-                {brandName}
-              </h2>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/dfp-emblem.png"
+                alt={brandName}
+                style={{ width: 'clamp(140px, 18vw, 240px)', height: 'auto', objectFit: 'contain', filter: 'brightness(0)', opacity: 0.75 }}
+              />
             </div>
 
             {/* iPhone mockup — center */}
