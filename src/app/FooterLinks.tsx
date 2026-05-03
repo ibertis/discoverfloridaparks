@@ -199,7 +199,7 @@ export default function FooterLinks() {
                       onChange={e => setConsent(e.target.checked)}
                       style={{ marginTop: 2, accentColor: '#ff7044', flexShrink: 0 }}
                     />
-                    By using this form you agree with the storage and handling of your data by this website.
+                    I&apos;m happy for my details to be saved so the team can get back to me.
                   </label>
                   {errors.consent && <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#ff7044', margin: '4px 0 0 28px' }}>{errors.consent}</p>}
                 </div>
