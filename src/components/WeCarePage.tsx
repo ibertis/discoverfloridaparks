@@ -152,13 +152,15 @@ export default function WeCarePage({
                 aria-label={`Visit ${p.name}`}
               >
                 {p.logo && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={p.logo}
-                    alt={p.name}
-                    className="partner-logo-img"
-                    onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-                  />
+                  <div className="partner-logo-wrap">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={p.logo}
+                      alt={p.name}
+                      className="partner-logo-img"
+                      onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  </div>
                 )}
                 <div style={{ textAlign: 'center' }}>
                   <p style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: '#362f35', margin: '0 0 5px', letterSpacing: '-0.01em' }}>

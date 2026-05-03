@@ -287,18 +287,26 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
 }
 
+.partner-logo-wrap {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .partner-logo-img {
-  max-height: 52px;
+  max-height: 90px;
+  max-width: 240px;
   width: auto;
+  height: auto;
   object-fit: contain;
-  filter: grayscale(1);
-  opacity: 0.6;
-  transition: filter 0.35s ease, opacity 0.35s ease;
+  display: block;
+  filter: grayscale(1) brightness(0.24) sepia(0.1);
+  transition: filter 0.35s ease;
 }
 
 .partner-logo-card:hover .partner-logo-img {
-  filter: grayscale(0);
-  opacity: 1;
+  filter: none;
 }
 
 @media (max-width: 768px) {
