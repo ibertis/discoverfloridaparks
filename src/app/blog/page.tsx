@@ -95,7 +95,6 @@ export default async function BlogPage() {
                   {post.categories && post.categories.length > 0 && (
                     <Link
                       href={`/blog/category/${post.categories[0].toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
-                      onClick={e => e.stopPropagation()}
                       style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8, textDecoration: 'none', display: 'inline-block' }}
                       className="hover:underline"
                     >
