@@ -33,7 +33,8 @@ import FeaturedExperiences from './FeaturedExperiences';
 import ParkCard from '@/components/ParkCard';
 
 const REGIONS: { name: string; icon: Icon; description: string }[] = [
-  { name: 'South Florida',                 icon: WavesIcon,    description: 'Everglades, Keys & Miami' },
+  { name: 'Southeast Florida',             icon: WavesIcon,    description: 'Everglades, Keys & Miami' },
+  { name: 'Southwest Florida',             icon: TreePalmIcon, description: 'Gulf beaches & Naples' },
   { name: 'Central Florida',               icon: TicketIcon,   description: 'Orlando & inland lakes' },
   { name: 'East Coast',                    icon: RocketIcon,   description: 'Space Coast & springs' },
   { name: 'North Florida',                 icon: PlantIcon,    description: 'Historic parks & springs' },
