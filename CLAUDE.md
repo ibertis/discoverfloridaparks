@@ -113,8 +113,8 @@ src/
 │   ├── layout.tsx                         # Root layout
 │   ├── page.tsx                           # Homepage
 │   ├── not-found.tsx                      # 404 page
-│   ├── sitemap.ts                         # Auto-generated sitemap (parks + blog)
-│   ├── robots.ts                          # robots.txt
+│   ├── sitemap.ts                         # Auto-generated sitemap (parks + blog + /news)
+│   ├── robots.ts                          # robots.txt — allows all SEO crawlers; blocks AI training bots (GPTBot, ClaudeBot, CCBot, Google-Extended, etc.) and aggressive commercial scrapers (AhrefsBot, SemrushBot, Bytespider, etc.)
 │   ├── SiteHeader.tsx                     # Global nav header
 │   ├── SiteFooter.tsx                     # Global footer
 │   ├── FooterLinks.tsx                    # 'use client' — contact form + footer columns
@@ -185,13 +185,16 @@ src/
 │   │   └── page.tsx                       # Curated external resource links (4 categories)
 │   ├── travel-trends/
 │   │   └── page.tsx                       # 'use client' — lead magnet page; name+email form → PDF via Resend
+│   ├── news/
+│   │   └── page.tsx                       # Auto-aggregated RSS news — revalidate 7200; two sections (In the News + From Our Partners)
 │   └── studio/[[...tool]]/page.tsx        # Sanity Studio embedded at /studio
 ├── components/
 │   ├── ParkCard.tsx                       # Reusable park card (used on homepage + directory)
 │   └── WeCarePage.tsx                     # Shared template for conservation/preservation/our-efforts pages
 ├── lib/
 │   ├── supabase.ts                        # Public Supabase client (anon key)
-│   └── supabase-server.ts                 # Server-only client + getAdminUser() + getUserRole()
+│   ├── supabase-server.ts                 # Server-only client + getAdminUser() + getUserRole()
+│   └── news-feeds.ts                      # RSS aggregation — fetchAllFeeds(), relativeDate(), dedup(); 5 partner feeds + 4 Google News queries
 ├── middleware.ts                           # Protects /admin routes — checks app_metadata.role
 └── sanity/
     ├── env.ts                             # Sanity env var validation
@@ -269,13 +272,16 @@ Used for all functional UI icons (navigation arrows, map pin, star, search, X, e
 - White nav: logo + 5 park type links + orange pill "View Map" CTA
 - `HeroSlider` — 3 slides, 88vh
 - Featured parks grid (`is_featured = true`)
-- Browse by Region + Browse by Type
+- Browse by Region (6 regions: Southeast FL, Southwest FL, Central FL, East Coast, North FL, NW FL/Panhandle) + Browse by Type
 - `FeaturedExperiences` — homepage experiences module with "All Experiences →" and "Upcoming Trips →" links
 - Map CTA section + Footer
 
 ### `/parks` — Directory
 - Server component — Supabase query from URL params (`type`, `region`, `amenities`, `q`)
-- `FilterBar` client component — sidebar filters
+- `generateMetadata` is dynamic — title and description update based on selected `type` param (e.g. "Florida State Parks | Discover Florida Parks")
+- H1 updates to "Explore Our [Type]" when a type is selected; falls back to "Explore Our Parks"
+- `FilterBar` client component — **horizontal inline dropdown bar** (not a sidebar); 3 dropdown pills (Park Type, Region, Amenities) + search field; mobile uses bottom-sheet drawer unchanged
+- Park cards grid: 4 columns desktop, 3 columns tablet, 1 column mobile
 
 ### `/parks/[slug]` — Park Detail
 - SSG with `generateStaticParams()` + `generateMetadata()`
@@ -319,6 +325,13 @@ Used for all functional UI icons (navigation arrows, map pin, star, search, X, e
 - 4 categories: Plan Your Visit, Maps & Trails, Weather & Safety, Conservation & Learning
 - Alternating white / off-white section backgrounds
 - Card grid — 4-col desktop → 3-col tablet → 2-col → 1-col
+
+### `/news` — Florida Parks & Conservation News
+- Server component with `revalidate = 7200` (auto-refreshes every 2 hours)
+- Two columns: "In the News" (4 Google News RSS queries) + "From Our Partners" (5 partner org feeds)
+- Feed sources defined in `src/lib/news-feeds.ts` — `Promise.allSettled` so one failed feed never breaks the page
+- Colored initial-letter badge per source (no favicon images)
+- Dedup: exact URL match first, then fuzzy title overlap (>70% word overlap = same story)
 
 ### `/travel-trends` — 2026 Travel Trends (Lead Magnet)
 - 'use client' — name + email form
