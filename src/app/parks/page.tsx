@@ -109,24 +109,22 @@ export default async function ParksPage({ searchParams }: { searchParams: Promis
       </div>
 
       {/* ── Content ──────────────────────────────────────────── */}
-      <div className="parks-page-layout" style={{ maxWidth: 1278, margin: '0 auto', padding: '48px 24px' }}>
+      <div style={{ maxWidth: 1278, margin: '0 auto', padding: '36px 24px 64px' }}>
 
-        {/* Sidebar */}
-        <aside className="park-sidebar">
-          <FilterBar
-            types={PARK_TYPES}
-            regions={REGIONS}
-            amenities={AMENITY_OPTIONS}
-            currentType={type}
-            currentRegion={region}
-            currentAmenities={amenityList}
-            currentQ={q}
-            parkCount={filtered.length}
-          />
-        </aside>
+        {/* Filter bar */}
+        <FilterBar
+          types={PARK_TYPES}
+          regions={REGIONS}
+          amenities={AMENITY_OPTIONS}
+          currentType={type}
+          currentRegion={region}
+          currentAmenities={amenityList}
+          currentQ={q}
+          parkCount={filtered.length}
+        />
 
         {/* Grid */}
-        <main style={{ flex: 1 }}>
+        <main>
           {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '80px 0' }}>
               <p style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '2rem', color: '#362f35', margin: '0 0 12px', letterSpacing: '-0.04em' }}>

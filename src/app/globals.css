@@ -96,20 +96,17 @@ a { color: inherit; text-decoration: none; }
 }
 .park-cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 24px;
 }
-.parks-page-layout {
+.filter-bar-desktop {
   display: flex;
-  align-items: flex-start;
-  gap: 48px;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 28px;
+  flex-wrap: wrap;
 }
-.park-sidebar {
-  width: 240px;
-  flex-shrink: 0;
-}
-.filter-mobile-btn   { display: none; }
-.filter-sidebar-content { display: block; }
+.filter-mobile-btn { display: none; }
 .park-detail-layout {
   display: grid;
   grid-template-columns: 1fr 300px;
@@ -133,7 +130,7 @@ a { color: inherit; text-decoration: none; }
 
 @media (max-width: 1024px) {
   .grid-types         { grid-template-columns: repeat(3, 1fr); }
-  .park-cards-grid    { grid-template-columns: repeat(2, 1fr); }
+  .park-cards-grid    { grid-template-columns: repeat(3, 1fr); }
   .park-detail-layout { grid-template-columns: 1fr; }
   .park-stats-grid    { grid-template-columns: repeat(2, 1fr); }
 }
@@ -143,10 +140,8 @@ a { color: inherit; text-decoration: none; }
   .grid-regions       { grid-template-columns: 1fr; }
   .grid-types         { grid-template-columns: repeat(3, 1fr); }
   .park-cards-grid    { grid-template-columns: 1fr; }
-  .parks-page-layout      { flex-direction: column; gap: 16px; }
-  .park-sidebar           { width: 100%; }
-  .filter-sidebar-content { display: none; }
-  .filter-mobile-btn      { display: flex; }
+  .filter-bar-desktop { display: none; }
+  .filter-mobile-btn  { display: flex; }
   .site-footer-inner  { flex-direction: column; text-align: center; gap: 20px; }
   .hero-content-pad   { padding: 0 24px; }
   .site-header-inner  { height: 72px; padding: 0 16px; }
