@@ -11,6 +11,13 @@ export interface WeCarePillar {
   body: string;
 }
 
+export interface WeCarePartner {
+  name: string;
+  tagline: string;
+  href: string;
+  logo?: string; // optional — added when logo files are supplied
+}
+
 export interface WeCarePageProps {
   eyebrow: string;
   headline: string;
@@ -18,6 +25,7 @@ export interface WeCarePageProps {
   heroBg: string;
   pillars: [WeCarePillar, WeCarePillar, WeCarePillar];
   partnerIntro: string;
+  partners: WeCarePartner[];
   pageSlug: string;
 }
 
@@ -30,53 +38,12 @@ const inputStyle: React.CSSProperties = {
 };
 
 export default function WeCarePage({
-  eyebrow, headline, subhead, heroBg, pillars, partnerIntro, pageSlug,
+  eyebrow, headline, subhead, heroBg, pillars, partnerIntro, partners, pageSlug,
 }: WeCarePageProps) {
-  // Nominate form
-  const [orgName, setOrgName]       = useState('');
-  const [orgUrl, setOrgUrl]         = useState('');
-  const [orgReason, setOrgReason]   = useState('');
-  const [orgEmail, setOrgEmail]     = useState('');
-  const [nomErrors, setNomErrors]   = useState<Record<string, string>>({});
-  const [nomStatus, setNomStatus]   = useState<FormStatus>('idle');
-
   // Notify form
   const [notifyEmail, setNotifyEmail]   = useState('');
   const [notifyError, setNotifyError]   = useState('');
   const [notifyStatus, setNotifyStatus] = useState<FormStatus>('idle');
-
-  function validateNominate() {
-    const e: Record<string, string> = {};
-    if (!orgName.trim())  e.orgName  = 'Organization name is required.';
-    if (!orgReason.trim()) e.orgReason = 'Please tell us why they matter.';
-    if (!orgEmail.trim()) e.orgEmail = 'Your email is required.';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(orgEmail)) e.orgEmail = 'Enter a valid email.';
-    return e;
-  }
-
-  async function handleNominate(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const errs = validateNominate();
-    if (Object.keys(errs).length) { setNomErrors(errs); return; }
-    setNomErrors({});
-    setNomStatus('submitting');
-    try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: `Org Nomination: ${orgName}`,
-          email: orgEmail,
-          message: `Organization: ${orgName}\nWebsite: ${orgUrl || 'Not provided'}\n\nWhy they matter:\n${orgReason}\n\nNominated via /${pageSlug}`,
-        }),
-      });
-      if (!res.ok) throw new Error();
-      setNomStatus('success');
-      setOrgName(''); setOrgUrl(''); setOrgReason(''); setOrgEmail('');
-    } catch {
-      setNomStatus('error');
-    }
-  }
 
   async function handleNotify(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -165,7 +132,7 @@ export default function WeCarePage({
       <section style={{ background: '#f9f7f5', borderTop: '1px solid #eeeeee', borderBottom: '1px solid #eeeeee' }} className="page-section-pad">
         <div style={{ maxWidth: 1278, margin: '0 auto' }}>
           <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.76rem', fontWeight: 700, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 10px' }}>
-            Coming soon
+            Proud to spotlight
           </p>
           <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2rem, 4vw, 3.2rem)', color: '#362f35', letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 14px' }}>
             Partner Organizations
@@ -174,16 +141,37 @@ export default function WeCarePage({
             {partnerIntro}
           </p>
 
-          <div className="we-care-pillars">
-            {[1, 2, 3].map(i => (
-              <div key={i} style={{ border: '2px dashed #dfdfdf', borderRadius: 16, padding: '36px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, textAlign: 'center', minHeight: 180 }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dfdfdf" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-                <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', fontWeight: 600, color: '#c4bfbb', margin: 0, letterSpacing: '0.04em' }}>
-                  Organization coming soon
-                </p>
-              </div>
+          <div className="we-care-partners-grid">
+            {partners.map(p => (
+              <a
+                key={p.name}
+                href={p.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="partner-logo-card"
+                aria-label={`Visit ${p.name}`}
+              >
+                {p.logo && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={p.logo}
+                    alt={p.name}
+                    className="partner-logo-img"
+                    onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                  />
+                )}
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: '#362f35', margin: '0 0 5px', letterSpacing: '-0.01em' }}>
+                    {p.name}
+                  </p>
+                  <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 400, fontSize: '0.78rem', color: '#726d6b', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    {p.tagline}
+                  </p>
+                  <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.72rem', color: '#ff7044', letterSpacing: '0.02em' }}>
+                    Visit →
+                  </span>
+                </div>
+              </a>
             ))}
           </div>
         </div>
@@ -202,64 +190,7 @@ export default function WeCarePage({
 
           <div className="we-care-get-involved">
 
-            {/* Left — Nominate */}
-            <div>
-              <h3 style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#362f35', margin: '0 0 6px' }}>
-                Nominate an Organization
-              </h3>
-              <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 400, fontSize: '0.88rem', color: '#726d6b', lineHeight: 1.6, margin: '0 0 24px' }}>
-                Know a non-profit or conservation group doing great work in Florida? Tell us about them.
-              </p>
-
-              {nomStatus === 'success' ? (
-                <div style={{ background: '#f5f3f0', borderRadius: 16, padding: '28px', textAlign: 'center' }}>
-                  <p style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.5rem', color: '#362f35', margin: '0 0 8px', letterSpacing: '-0.03em' }}>
-                    Nomination received!
-                  </p>
-                  <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 400, fontSize: '0.88rem', color: '#726d6b', margin: '0 0 16px', lineHeight: 1.5 }}>
-                    Thank you — we&apos;ll review it and be in touch.
-                  </p>
-                  <button onClick={() => setNomStatus('idle')} style={{ background: 'none', border: 'none', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: '#ff7044', cursor: 'pointer' }}>
-                    Nominate another →
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleNominate} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div>
-                    <label htmlFor="nom-org" style={{ display: 'none' }}>Organization name</label>
-                    <input id="nom-org" type="text" placeholder="Organization name" value={orgName} onChange={e => setOrgName(e.target.value)}
-                      style={{ ...inputStyle, borderBottom: nomErrors.orgName ? '2px solid #ff7044' : 'none' }} />
-                    {nomErrors.orgName && <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#ff7044', margin: '4px 0 0 18px' }}>{nomErrors.orgName}</p>}
-                  </div>
-                  <div>
-                    <label htmlFor="nom-url" style={{ display: 'none' }}>Website (optional)</label>
-                    <input id="nom-url" type="url" placeholder="Website (optional)" value={orgUrl} onChange={e => setOrgUrl(e.target.value)} style={inputStyle} />
-                  </div>
-                  <div>
-                    <label htmlFor="nom-reason" style={{ display: 'none' }}>Why do they deserve recognition?</label>
-                    <textarea id="nom-reason" placeholder="Why do they deserve recognition?" rows={4} value={orgReason} onChange={e => setOrgReason(e.target.value)}
-                      style={{ ...inputStyle, borderRadius: '1.4em', resize: 'vertical', borderBottom: nomErrors.orgReason ? '2px solid #ff7044' : 'none' }} />
-                    {nomErrors.orgReason && <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#ff7044', margin: '4px 0 0 18px' }}>{nomErrors.orgReason}</p>}
-                  </div>
-                  <div>
-                    <label htmlFor="nom-email" style={{ display: 'none' }}>Your email</label>
-                    <input id="nom-email" type="email" placeholder="Your email" value={orgEmail} onChange={e => setOrgEmail(e.target.value)}
-                      style={{ ...inputStyle, borderBottom: nomErrors.orgEmail ? '2px solid #ff7044' : 'none' }} />
-                    {nomErrors.orgEmail && <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#ff7044', margin: '4px 0 0 18px' }}>{nomErrors.orgEmail}</p>}
-                  </div>
-                  {nomStatus === 'error' && <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#ff7044', margin: 0 }}>Something went wrong — please try again.</p>}
-                  <div>
-                    <button type="submit" disabled={nomStatus === 'submitting'}
-                      style={{ background: '#ff7044', color: '#fff', border: 'none', borderRadius: '2.3em', padding: '13px 36px', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.9rem', cursor: nomStatus === 'submitting' ? 'not-allowed' : 'pointer', opacity: nomStatus === 'submitting' ? 0.7 : 1 }}
-                      className="hover:opacity-85 transition-opacity">
-                      {nomStatus === 'submitting' ? 'Sending…' : 'Submit Nomination'}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-
-            {/* Right — Notify */}
+            {/* Left — Notify */}
             <div>
               <h3 style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#362f35', margin: '0 0 6px' }}>
                 Stay in the Loop

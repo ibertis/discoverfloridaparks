@@ -26,7 +26,24 @@ export default function OurEffortsPage() {
           body: 'Through our guides and resources, we help visitors understand the ecological and cultural significance of the places they explore.',
         },
       ]}
-      partnerIntro="We're aligning with organizations that share our commitment to Florida's future. Want to nominate a group or stay in the loop?"
+      partnerIntro="These organizations share our belief that protecting Florida starts with policy, advocacy, and empowering the people who call it home."
+      partners={[
+        {
+          name: 'Biscayne Bay Waterkeeper',
+          tagline: "Protecting South Florida's watershed through science and citizen action.",
+          href: 'https://www.biscaynebaywaterkeeper.org',
+        },
+        {
+          name: '1000 Friends of Florida',
+          tagline: 'Fighting sprawl and advocating for smart growth statewide.',
+          href: 'https://www.1000friendsofflorida.org',
+        },
+        {
+          name: 'Florida Conservation Group',
+          tagline: "Science-based conservation for Florida's vast southern ranchlands.",
+          href: 'https://floridaconservationgroup.org',
+        },
+      ]}
       pageSlug="our-efforts"
     />
   );

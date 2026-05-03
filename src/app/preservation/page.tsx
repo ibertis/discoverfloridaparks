@@ -26,7 +26,29 @@ export default function PreservationPage() {
           body: 'Lighthouses, forts, and structures that anchor Florida\'s past to its present — and are worth protecting.',
         },
       ]}
-      partnerIntro="We're curating a list of preservation organizations working to safeguard Florida's irreplaceable places. Know one that should be here?"
+      partnerIntro="These organizations are permanently protecting Florida's most irreplaceable lands, rivers, and wild places for generations to come."
+      partners={[
+        {
+          name: 'The Nature Conservancy — Florida',
+          tagline: 'Over 1.3 million acres of vital Florida land conserved.',
+          href: 'https://www.nature.org/en-us/about-us/where-we-work/united-states/florida/',
+        },
+        {
+          name: 'Conservation Florida',
+          tagline: 'A homegrown land trust protecting the Florida Wildlife Corridor.',
+          href: 'https://www.conservationflorida.org',
+        },
+        {
+          name: 'Florida Wildlife Federation',
+          tagline: "Watchdog for Florida's lands, wildlife, and conservation law.",
+          href: 'https://fwfonline.org',
+        },
+        {
+          name: 'Apalachicola Riverkeeper',
+          tagline: "Fighting for one of Florida's most ecologically significant rivers.",
+          href: 'https://www.apalachicolariverkeeper.org',
+        },
+      ]}
       pageSlug="preservation"
     />
   );

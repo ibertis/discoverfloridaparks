@@ -26,7 +26,39 @@ export default function ConservationPage() {
           body: 'Healthy ecosystems sustain the parks we love. We advocate for science-led conservation efforts across the state.',
         },
       ]}
-      partnerIntro="We're building a directory of conservation organizations working to protect Florida's living ecosystems. Know a group that deserves recognition?"
+      partnerIntro="These organizations are on the front lines of protecting Florida's living ecosystems — from the Everglades to the coral reef to the springs."
+      partners={[
+        {
+          name: 'The Everglades Foundation',
+          tagline: 'Restoring the Everglades through science, advocacy, and policy.',
+          href: 'https://www.evergladesfoundation.org',
+        },
+        {
+          name: 'Audubon Florida',
+          tagline: 'Protecting birds, wetlands, and the ecosystems that sustain them.',
+          href: 'https://fl.audubon.org',
+        },
+        {
+          name: 'Florida Wildlife Corridor Foundation',
+          tagline: 'Connecting 18 million acres from the Everglades to Georgia.',
+          href: 'https://floridawildlifecorridor.org',
+        },
+        {
+          name: 'Coral Restoration Foundation',
+          tagline: "Restoring Florida's critically endangered reef system.",
+          href: 'https://www.coralrestoration.org',
+        },
+        {
+          name: 'Mote Marine Laboratory',
+          tagline: 'Marine research and coral restoration since 1955.',
+          href: 'https://mote.org',
+        },
+        {
+          name: 'Florida Springs Council',
+          tagline: "Advocating for Florida's threatened spring systems.",
+          href: 'https://www.floridaspring.org',
+        },
+      ]}
       pageSlug="conservation"
     />
   );
