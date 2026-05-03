@@ -17,6 +17,7 @@ interface Experience {
   business_name?: string | null;
   contact_email?: string | null;
   is_active?: boolean | null;
+  is_featured?: boolean | null;
   sort_order?: number | null;
   expires_at?: string | null;
 }
@@ -40,6 +41,7 @@ export default function ExperienceEditForm({ experience }: Props) {
     business_name: null,
     contact_email: null,
     is_active: true,
+    is_featured: false,
     sort_order: 0,
     expires_at: null,
     ...experience,
@@ -278,7 +280,7 @@ export default function ExperienceEditForm({ experience }: Props) {
           />
         </div>
         <div className="flex flex-col justify-end pb-1">
-          <label className="flex items-center gap-2.5 cursor-pointer">
+          <label className="flex items-center gap-2.5 cursor-pointer mb-3">
             <input
               type="checkbox"
               checked={form.is_active ?? true}
@@ -287,7 +289,16 @@ export default function ExperienceEditForm({ experience }: Props) {
             />
             <span className="text-sm font-medium text-[#362f35]">Active</span>
           </label>
-          <p className="text-xs text-[#a6967c] mt-1">Visible on homepage when active</p>
+          <label className="flex items-center gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.is_featured ?? false}
+              onChange={e => set('is_featured', e.target.checked)}
+              className="w-4 h-4 accent-[#ff7044]"
+            />
+            <span className="text-sm font-medium text-[#362f35]">Featured</span>
+          </label>
+          <p className="text-xs text-[#a6967c] mt-1">Shows in Upcoming Trips</p>
         </div>
       </div>
 

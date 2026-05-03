@@ -31,17 +31,26 @@ export default function OurEffortsPage() {
         {
           name: 'Biscayne Bay Waterkeeper',
           tagline: "Protecting South Florida's watershed through science and citizen action.",
-          href: 'https://www.biscaynebaywaterkeeper.org',
+          href: 'https://www.miamiwaterkeeper.org',
+          logo: '/logos/partners/biscayne-bay-waterkeeper.png',
         },
         {
           name: '1000 Friends of Florida',
           tagline: 'Fighting sprawl and advocating for smart growth statewide.',
-          href: 'https://www.1000friendsofflorida.org',
+          href: 'https://1000fof.org',
+          logo: '/logos/partners/1000-friends-of-florida.png',
         },
         {
           name: 'Florida Conservation Group',
           tagline: "Science-based conservation for Florida's vast southern ranchlands.",
-          href: 'https://floridaconservationgroup.org',
+          href: 'https://floridaconserve.org',
+          logo: '/logos/partners/florida-conservation-group.png',
+        },
+        {
+          name: 'Waterkeepers Florida',
+          tagline: "A coalition of Waterkeeper organizations protecting Florida's waterways.",
+          href: 'https://www.waterkeepersflorida.org/',
+          logo: '/logos/partners/waterkeepers-florida.png',
         },
       ]}
       pageSlug="our-efforts"

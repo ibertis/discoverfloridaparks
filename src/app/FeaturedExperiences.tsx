@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import NewsletterForm from './NewsletterForm';
 
@@ -28,9 +29,17 @@ export default async function FeaturedExperiences() {
           <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 10px' }}>
             Explore &amp; Experience
           </p>
-          <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2.4rem, 3.5vw, 3.6rem)', lineHeight: 0.95, color: '#362f35', margin: '0 0 40px', letterSpacing: '-0.04em' }}>
+          <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2.4rem, 3.5vw, 3.6rem)', lineHeight: 0.95, color: '#362f35', margin: '0 0 16px', letterSpacing: '-0.04em' }}>
             Plan your next<br />Adventure
           </h2>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 40, flexWrap: 'wrap' }}>
+            <Link href="/experiences" style={{ display: 'inline-block', background: '#ff7044', color: '#fff', borderRadius: '2.3em', padding: '9px 22px', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.82rem', textDecoration: 'none' }} className="hover:opacity-85 transition-opacity">
+              All Experiences →
+            </Link>
+            <Link href="/experiences/featured" style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.82rem', color: '#a6967c', textDecoration: 'none' }} className="hover:text-[#ff7044] transition-colors">
+              Upcoming Trips →
+            </Link>
+          </div>
 
           {listings && listings.length > 0 ? (
             listings.map((item, i) => (

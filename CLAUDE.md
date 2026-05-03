@@ -15,7 +15,7 @@
 - **CMS:** Sanity (blog posts only) — Studio at `/studio`
 - **Hosting:** Vercel — auto-deploys from `main` branch
 - **Map:** Mapbox GL JS via `NEXT_PUBLIC_MAPBOX_TOKEN`
-- **Email:** Resend — contact form via `/api/contact` Next.js API route
+- **Email:** Resend — contact form via `/api/contact`, lead magnet via `/api/download-signup`
 - **Icons:** `@phosphor-icons/react` (decorative fill icons) + `lucide-react` (functional UI icons)
 - **Fonts:** Google Fonts — Shrikhand, Glegoo, Archivo
 - **Weather:** Open-Meteo API (no key required) — used on park detail pages
@@ -37,7 +37,7 @@ NEXT_PUBLIC_SANITY_PROJECT_ID=your-project-id
 NEXT_PUBLIC_SANITY_DATASET=production
 NEXT_PUBLIC_SANITY_API_VERSION=2026-04-21
 
-# Resend (contact form) — server-side only, NOT NEXT_PUBLIC_
+# Resend (contact form + download signups) — server-side only, NOT NEXT_PUBLIC_
 RESEND_API_KEY=re_your_api_key_here
 ```
 
@@ -47,7 +47,9 @@ RESEND_API_KEY=re_your_api_key_here
 
 ---
 
-## Birdily Design System
+## Design System
+
+**Reference file:** `dfp-design-system.html` in the project root — open in a browser for a live visual reference of all components, typography, colors, spacing, and button styles. This is the canonical source for the Birdily design system as applied to this project. Consult it when building new UI.
 
 The site replicates the Birdily WordPress theme's exact look and feel. **Always match these values exactly.**
 
@@ -56,13 +58,15 @@ The site replicates the Birdily WordPress theme's exact look and feel. **Always 
 |---|---|---|
 | accent | `#ff7044` | CTAs, badges, links, icons, active states |
 | accent-dark | `#e85a2e` | Hover on orange elements |
+| espresso | `#362f35` | H1–H4 headings, dark surface backgrounds |
 | dark | `#413734` | Body text, card text |
-| heading-dark | `#362f35` | H1–H4 headings |
 | tan | `#a6967c` | Labels, secondary text, muted |
 | medium | `#726d6b` | Fine print, footer text |
 | border | `#eeeeee` | Dividers, card borders |
 | border-dark | `#dfdfdf` | Stronger borders |
 | bg | `#ffffff` | Page background (always white) |
+| bg-off-white | `#f9f7f5` | Alternating section backgrounds |
+| footer-bg | `#edeae5` | Footer background |
 
 ### Typography
 | Element | Font | Size | Weight | Line Height | Letter Spacing |
@@ -116,12 +120,13 @@ src/
 │   ├── FooterLinks.tsx                    # 'use client' — contact form + footer columns
 │   ├── HeroSlider.tsx                     # 'use client' — 3-slide hero
 │   ├── HomeMapSection.tsx                 # Homepage map preview section
-│   ├── FeaturedExperiences.tsx            # Featured experiences carousel
+│   ├── FeaturedExperiences.tsx            # Homepage experiences module (links to /experiences)
 │   ├── NewsletterForm.tsx                 # Newsletter signup form
 │   ├── ScrollToTop.tsx                    # 'use client' — scroll-to-top button
 │   ├── VideoModal.tsx                     # 'use client' — video lightbox
 │   ├── api/
 │   │   ├── contact/route.ts               # POST — Resend contact form email
+│   │   ├── download-signup/route.ts       # POST — lead magnet signup; emails PDF link via Resend + notifies owner
 │   │   └── admin/invite/route.ts          # POST — invite new admin/editor user
 │   ├── admin/
 │   │   ├── layout.tsx                     # Admin shell layout
@@ -140,7 +145,7 @@ src/
 │   │   │   ├── new/page.tsx               # New experience form
 │   │   │   └── [id]/
 │   │   │       ├── page.tsx               # Edit experience wrapper
-│   │   │       └── ExperienceEditForm.tsx # 'use client' — experience edit form
+│   │   │       └── ExperienceEditForm.tsx # 'use client' — experience edit form (is_active + is_featured toggles)
 │   │   ├── users/
 │   │   │   ├── page.tsx                   # Users list (admin only)
 │   │   │   └── UsersClient.tsx            # 'use client' — invite + manage users
@@ -157,23 +162,40 @@ src/
 │   │       ├── ParkMap.tsx                # 'use client' — single park Mapbox map
 │   │       ├── PhotoGallery.tsx           # 'use client' — lightbox gallery
 │   │       └── WeatherStatCard.tsx        # 'use client' — live weather via Open-Meteo
+│   ├── experiences/
+│   │   ├── page.tsx                       # All active experiences (Our Deals)
+│   │   └── featured/
+│   │       └── page.tsx                   # is_featured=true experiences (Upcoming Trips); sorted by expires_at
 │   ├── map/
 │   │   ├── page.tsx                       # Full map page — all parks
 │   │   ├── ParkMap.tsx                    # 'use client' — Mapbox map + type filter chips
 │   │   └── MapLoader.tsx                  # Loading skeleton for map
 │   ├── blog/
-│   │   ├── page.tsx                       # Blog index — fetches from Sanity
-│   │   └── [slug]/page.tsx               # Blog post — fetches from Sanity
+│   │   ├── page.tsx                       # Blog index — fetches from Sanity; category badges are clickable
+│   │   ├── [slug]/page.tsx                # Blog post — fetches from Sanity
+│   │   └── category/
+│   │       └── [slug]/page.tsx            # Blog category page — filters posts by category slug
+│   ├── conservation/
+│   │   └── page.tsx                       # We Care — Conservation (WeCarePage)
+│   ├── preservation/
+│   │   └── page.tsx                       # We Care — Preservation (WeCarePage)
+│   ├── our-efforts/
+│   │   └── page.tsx                       # We Care — Our Efforts (WeCarePage)
+│   ├── useful-links/
+│   │   └── page.tsx                       # Curated external resource links (4 categories)
+│   ├── travel-trends/
+│   │   └── page.tsx                       # 'use client' — lead magnet page; name+email form → PDF via Resend
 │   └── studio/[[...tool]]/page.tsx        # Sanity Studio embedded at /studio
 ├── components/
-│   └── ParkCard.tsx                       # Reusable park card (used on homepage + directory)
+│   ├── ParkCard.tsx                       # Reusable park card (used on homepage + directory)
+│   └── WeCarePage.tsx                     # Shared template for conservation/preservation/our-efforts pages
 ├── lib/
 │   ├── supabase.ts                        # Public Supabase client (anon key)
 │   └── supabase-server.ts                 # Server-only client + getAdminUser() + getUserRole()
 ├── middleware.ts                           # Protects /admin routes — checks app_metadata.role
 └── sanity/
     ├── env.ts                             # Sanity env var validation
-    ├── queries.ts                         # GROQ queries (postSlugsQuery, etc.)
+    ├── queries.ts                         # GROQ queries (postsListQuery, postsByCategoryQuery, allCategoriesQuery, etc.)
     ├── structure.ts                       # Sanity Studio structure
     ├── lib/
     │   ├── client.ts                      # Sanity client
@@ -181,19 +203,27 @@ src/
     │   └── live.ts                        # Live content client
     └── schemaTypes/
         ├── index.ts
-        └── post.ts                        # Blog post schema
+        └── post.ts                        # Blog post schema (title, slug, categories[], excerpt, mainImage, body, seoTitle, seoDescription)
 
 supabase/
-└── rls.sql                                # All RLS policies — re-run to reset
+├── schema_experiences.sql                 # experiences table structure + migrations ONLY — no RLS
+├── rls.sql                                # ALL RLS policies + storage bucket policies — single source of truth
 scripts/
 └── enrich-one-park.ts                     # CLI: enrich a park with Google Places + AI content
+
+public/
+├── downloads/                             # Gated PDF assets (e.g. 2026-florida-travel-trends.pdf)
+└── logos/
+    └── partners/                          # Partner org logos (PNG) — color versions used by default
 ```
 
 ---
 
 ## Supabase Schema
 
-**RLS is enabled on all tables.** All policies are documented in `supabase/rls.sql` — re-run that file any time policies need to be reset.
+**RLS is enabled on all tables.** `rls.sql` is the **single source of truth** for all RLS and storage policies — never define policies in schema files. Re-run `rls.sql` any time you need to audit or reset security.
+
+**Schema files** (`schema_*.sql`) contain table structure only — `CREATE TABLE IF NOT EXISTS` and `ALTER TABLE` migrations. No RLS.
 
 | Table | Description |
 |---|---|
@@ -203,11 +233,15 @@ scripts/
 | `park_fun_facts` | Repeater — fact text, sort_order |
 | `park_seasonal_events` | Repeater — event_name, month, description, sort_order |
 | `park_nearby` | Junction — park_id ↔ nearby_park_id. Public read-only. |
-| `experiences` | Featured experiences/attractions linked to parks |
+| `experiences` | Featured experiences/attractions — see fields below |
 
 Key `parks` fields: `slug` (unique), `name`, `short_description`, `full_description`, `park_types` (text[]), `park_regions` (text[]), `county`, `park_status`, `featured_image_url`, `gallery_urls` (text[]), `address`, `city`, `zip_code`, `latitude`, `longitude`, `park_size_acres`, `year_established`, `managing_agency`, `best_season`, `typical_visit_duration`, `crowd_level`, `google_rating`, `website`, `phone`, `email`, `entrance_fee`, `operating_hours`, `google_maps_link`, `reservation_url`, `camping_url`, `reservation_required`, `visitor_tips`, `instagram_hashtag`, `terrain`, `wildlife_summary`, `safety_notes`, `parking_info`, `nearby_cities`, `distance_from_miami`, `distance_from_orlando`, `distance_from_tampa`, `seo_title`, `seo_description`, `is_featured`
 
-**Important:** `park_types` and `park_regions` are `text[]` arrays. Use `.contains('park_types', [value])` for filtering, not `.eq()`. A park can belong to multiple types and regions.
+Key `experiences` fields: `name`, `description`, `duration`, `image_url`, `href`, `cta_label` (default `'Get Details'`), `placement_type` (`editorial` | `sponsored`), `business_name`, `contact_email`, `is_active` (default true), `is_featured` (default false — controls Upcoming Trips page), `sort_order`, `expires_at`
+
+**Important:** `park_types` and `park_regions` are `text[]` arrays. Use `.contains('park_types', [value])` for filtering, not `.eq()`.
+
+**Visitor tips format** — stored as a single `•`-delimited string. Split with `.split('•').map(t => t.trim()).filter(Boolean)` at render time.
 
 ---
 
@@ -220,99 +254,158 @@ Used for decorative/category icons (regions, park types). **All icons were renam
 // CORRECT (v2.1+)
 import { WavesIcon, TreeIcon, MountainsIcon } from '@phosphor-icons/react/dist/ssr';
 <WavesIcon weight="fill" size={36} color="#ff7044" />
-
-// WRONG — deprecated, causes TypeScript warnings
-import { Waves, Tree } from '@phosphor-icons/react/dist/ssr';
 ```
 
 Import from `/dist/ssr` for server components, `/dist/csr` for client components.
 
 ### Lucide React
-Used for all functional UI icons (navigation arrows, map pin, star, search, X, etc.). Lucide does **not** include social brand icons (Facebook, Instagram, YouTube) — use inline SVG for those.
-
----
-
-## Key Gotchas
-
-1. **Tailwind v4 CSS import order:** `@import url(...)` for Google Fonts **must come before** `@import "tailwindcss"` in `globals.css` — reversed order causes a PostCSS fatal error.
-
-2. **`Map` from lucide-react conflicts** with JavaScript's built-in `Map` constructor. Always alias it: `import { Map as MapIcon } from 'lucide-react'`.
-
-3. **Phosphor `Icon` type import:** `import type { Icon } from '@phosphor-icons/react/dist/lib/types'`
-
-4. **`park_types` and `park_regions` are arrays** — use `.contains('park_types', [value])` for filtering. Never use `.eq()` on these fields.
-
-5. **Visitor tips format** — stored as a single `•`-delimited string (e.g. `"Tip one • Tip two"`). Split with `.split('•').map(t => t.trim()).filter(Boolean)` at render time. Do not change the storage format.
-
-6. **WeatherStatCard** — uses Open-Meteo API, no key needed. Fetches `is_day` for day/night theming. Night variants apply dark navy gradients for clear/partly cloudy conditions only.
-
-7. **No `export-parks.php` or migration scripts** — these have been cleaned up. All parks are live in Supabase.
+Used for all functional UI icons (navigation arrows, map pin, star, search, X, etc.). Does **not** include social brand icons — use inline SVG for those. Always alias: `import { Map as MapIcon } from 'lucide-react'`.
 
 ---
 
 ## Pages
 
-### `/` — Homepage (`src/app/page.tsx`)
-- White nav: logo (240×62) + 5 park type links + orange pill "View Map" CTA
-- Header height: 108px
-- `HeroSlider` — 3 slides, `88vh` height, left/right arrows, dot indicators
-- Featured parks grid (3-col, `is_featured = true`)
-- Browse by Region (5 regions, Phosphor fill icons, white cards)
-- Browse by Type (6 types, Phosphor fill icons, white cards)
-- Map CTA section (dark `#362f35` bg, orange button)
-- Footer: logo left + copyright center + social circles + scroll-to-top
+### `/` — Homepage
+- White nav: logo + 5 park type links + orange pill "View Map" CTA
+- `HeroSlider` — 3 slides, 88vh
+- Featured parks grid (`is_featured = true`)
+- Browse by Region + Browse by Type
+- `FeaturedExperiences` — homepage experiences module with "All Experiences →" and "Upcoming Trips →" links
+- Map CTA section + Footer
 
-### `/parks` — Directory (`src/app/parks/page.tsx`)
-- Server component — Supabase query built from URL params (`type`, `region`, `amenities`, `q`)
-- Amenity filtering done client-side (join filter in Supabase is verbose)
-- `FilterBar` client component — sidebar with type list, region list, amenity checkboxes, search input
+### `/parks` — Directory
+- Server component — Supabase query from URL params (`type`, `region`, `amenities`, `q`)
+- `FilterBar` client component — sidebar filters
 
-### `/parks/[slug]` — Park Detail (`src/app/parks/[slug]/page.tsx`)
-- SSG: `generateStaticParams()` → all park slugs
-- `generateMetadata()` → seo_title / seo_description per park
-- Full join: `parks(*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*))`
-- `WeatherStatCard` — live weather from Open-Meteo (lat/lng), day/night detection via `is_day` field
-- `PhotoGallery` — lightbox over `gallery_urls[]`
-- `ParkMap` — single Mapbox marker
-- Visitor tips: stored as `•`-delimited text, split at render time into individual bullet rows
-- Nearby parks: excludes `Seasonal Attractions` via `.not('park_types', 'cs', '{"Seasonal Attractions"}')`
+### `/parks/[slug]` — Park Detail
+- SSG with `generateStaticParams()` + `generateMetadata()`
+- Full join with all child tables
+- `WeatherStatCard`, `PhotoGallery`, `ParkMap`
 
-### `/map` — Interactive Map (`src/app/map/page.tsx`)
-- Mapbox GL JS — all parks as markers, click → popup with link
+### `/experiences` — All Experiences (Our Deals)
+- All `is_active = true`, non-expired experiences
+- Card grid — shows Featured + Sponsored badges
+- Links to `/experiences/featured`
+
+### `/experiences/featured` — Upcoming Trips
+- `is_featured = true` experiences only
+- Sorted by `expires_at` ascending (soonest first)
+- Shows expiry date badge on cards when set
+- Dark espresso banner
+
+### `/map` — Interactive Map
+- Mapbox GL JS — all parks as markers
 - Filter chips by park type
-- Park count in `generateMetadata()` — dynamic, not hardcoded
-- Excludes parks with `latitude = 0` or `longitude = 0`
 
-### `/blog` — Blog (`src/app/blog/`)
-- Powered by Sanity CMS — posts authored in `/studio`
-- Blog index + individual post pages fetch via GROQ queries in `src/sanity/queries.ts`
+### `/blog` — Blog Index
+- Fetches from Sanity CMS
+- Category badges are clickable → `/blog/category/[slug]`
 
-### `/admin` — Admin Panel (`src/app/admin/`)
+### `/blog/[slug]` — Blog Post
+- Fetches from Sanity by slug
+
+### `/blog/category/[slug]` — Blog Category
+- `generateStaticParams()` from all distinct Sanity categories
+- Filters posts by category; empty state with "Browse All Posts" CTA
+- Category slug is slugified category name: "Family Trips" → `family-trips`
+
+### `/conservation`, `/preservation`, `/our-efforts` — We Care Pages
+- All use `WeCarePage` component
+- Each has a `partners[]` array with `name`, `tagline`, `href`, `logo?` fields
+- Partner logos: PNG files in `public/logos/partners/` — dark by default via CSS filter, full color on hover
+- Logo max-height: 84px (wrap: 96px)
+
+### `/useful-links` — Useful Links
+- 4 categories: Plan Your Visit, Maps & Trails, Weather & Safety, Conservation & Learning
+- Alternating white / off-white section backgrounds
+- Card grid — 4-col desktop → 3-col tablet → 2-col → 1-col
+
+### `/travel-trends` — 2026 Travel Trends (Lead Magnet)
+- 'use client' — name + email form
+- On submit: POST to `/api/download-signup` → Resend emails PDF link to subscriber + notifies owner
+- Immediate download button shown in success state
+- PDF file location: `public/downloads/2026-florida-travel-trends.pdf` (must be placed manually)
+- "What's Inside" section with 6 chapter previews
+
+### `/admin` — Admin Panel
 - Protected by `middleware.ts` — requires `app_metadata.role` of `admin` or `editor`
-- Dashboard: park count, missing photo/description counts, recently updated parks
-- Parks: full CRUD — list with search/filter, edit form with all fields, photo upload, gallery
-- Experiences: full CRUD — similar pattern to parks
-- Users: admin-only — invite new users, manage roles
-- All write operations go through API routes in `src/app/admin/api/` which re-check auth server-side
+- Parks + Experiences: full CRUD with photo upload
+- Experiences admin: `is_active` (visible on homepage) + `is_featured` (visible on Upcoming Trips page)
+- Users: admin-only — invite + manage roles
 
 ---
 
-## Pending / Roadmap
+## Blog Category Routing
 
-- [ ] Monetization: featured placements, affiliate links, user accounts, trip planning
-- [ ] Connect Resend contact form (RESEND_API_KEY needed in Vercel env vars + domain verified in Resend)
+Category slugs are derived from category names: lowercase, spaces → hyphens, special chars stripped.
+
+```ts
+// name → slug
+cat.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+
+// slug → name (for GROQ query)
+slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+```
+
+Footer links use pre-slugified paths: `family-trips`, `travel-tips`, `our-picks`.
+
+---
+
+## Partner Logo Convention (`WeCarePage`)
+
+- Store logos in `public/logos/partners/` as PNG files
+- Filename convention: `org-name.png` (color) + `org-name-drk.png` (dark variant, stored for reference)
+- CSS handles the dark → color transition on hover via `filter: grayscale(1) brightness(0.24) sepia(0.1)` default, `filter: none` on hover
+- Reference the color logo in the `logo` field — the CSS filter handles the dark default state automatically
+
+---
+
+## Lead Magnet Infrastructure
+
+- **Signup route:** `src/app/api/download-signup/route.ts`
+- **PDF location:** `public/downloads/` — files served statically
+- **PDF URL pattern:** `https://discoverfloridaparks.com/downloads/[filename].pdf`
+- Sends branded Resend email to subscriber + owner notification to `hello@discoverfloridaparks.com`
+- To add future lead magnets: create a new page + reuse the same API route pattern
+
+---
+
+## Supabase SQL File Convention
+
+| File | Purpose |
+|---|---|
+| `supabase/rls.sql` | **Single source of truth** — all RLS policies + all storage bucket policies. Re-run to audit or reset. |
+| `supabase/schema_experiences.sql` | Table structure + `ALTER TABLE` migrations for experiences. No RLS. |
+
+**Rule:** When adding a new table — define columns in a `schema_*.sql` file, add RLS block to `rls.sql` in the same task. Never split policies across both files.
+
+---
+
+## Key Gotchas
+
+1. **Tailwind v4 CSS import order:** `@import url(...)` for Google Fonts **must come before** `@import "tailwindcss"` in `globals.css`.
+
+2. **`Map` from lucide-react conflicts** with JavaScript's built-in `Map`. Always alias: `import { Map as MapIcon } from 'lucide-react'`.
+
+3. **Phosphor `Icon` suffix:** All Phosphor icon names require the `Icon` suffix in v2.1+.
+
+4. **`park_types` and `park_regions` are arrays** — use `.contains('park_types', [value])` not `.eq()`.
+
+5. **Visitor tips format** — `•`-delimited string. Split at render time, never change storage format.
+
+6. **JSX whitespace around expressions** — `No {category} posts` loses the space. Use template literals: `` {`No ${category} posts`} ``.
+
+7. **RLS role checks** — always use `app_metadata`, never `user_metadata`. `user_metadata` is writable by the client.
 
 ---
 
 ## Security
 
-Security is a first-class priority on this project. Follow these rules without exception.
-
 ### RLS Policy Rules
-- **Every new table must have RLS enabled immediately** — never leave a table in the public schema without RLS, even temporarily
-- **Add the RLS block to `supabase/rls.sql` in the same task** as creating the table — document it before moving on
-- **Use `app_metadata` for role checks** in all policies — not `user_metadata` (user_metadata can be written by the client; app_metadata is server-only)
-- Policy pattern for all write-protected tables:
+- **Every new table must have RLS enabled immediately**
+- **All policies go in `rls.sql` only** — never in schema files
+- **Use `app_metadata` for role checks** — not `user_metadata`
+- Standard policy pattern for write-protected tables:
   ```sql
   ALTER TABLE new_table ENABLE ROW LEVEL SECURITY;
   CREATE POLICY "new_table_public_read"   ON new_table FOR SELECT USING (true);
@@ -322,17 +415,16 @@ Security is a first-class priority on this project. Follow these rules without e
   ```
 
 ### Storage Bucket Rules
-- Every new storage bucket must have SELECT, INSERT, and DELETE policies
-- Document all buckets in `supabase/rls.sql`
-- Restrict INSERT/DELETE to `admin`/`editor` roles via `app_metadata`
+- Every new bucket needs SELECT, INSERT, and DELETE policies in `rls.sql`
+- Restrict INSERT/DELETE to `admin`/`editor` via `app_metadata`
 
 ### Admin API Routes
-- Every admin API route must call `getAdminUser()` and return 401 if no user before doing any database work
-- Never expose service-role keys to the browser — only use them server-side
+- Every admin API route must call `getAdminUser()` and return 401 before any DB work
+- Never expose service-role keys to the browser
 
 ### Ongoing Audits
-- Check Supabase **Security Advisor** (Dashboard → Advisors → Security) periodically — at minimum when adding new tables or features
-- Run **Rerun linter** after any schema changes to confirm no new issues
+- Check Supabase **Security Advisor** periodically — at minimum when adding new tables
+- Run **Rerun linter** after schema changes
 
 ---
 
@@ -347,13 +439,16 @@ Security is a first-class priority on this project. Follow these rules without e
 - Use 1278px max-width for all page content
 - Import Phosphor icons from `/dist/ssr` in server components
 - Use the `Icon` suffix for all Phosphor icon names
+- Consult `dfp-design-system.html` when building new UI components
+- Add new RLS policies to `rls.sql` only — never in schema files
 
 ### Don't
-- Don't use a colored or dark background for page sections (exception: hero, map CTA, footer)
+- Don't use a colored or dark background for page sections (exception: hero, map CTA, dark banner, footer)
 - Don't use dynamic Tailwind class construction (`bg-${color}-500`) — use full class names or inline styles
 - Don't import `Map` from lucide-react without aliasing as `MapIcon`
 - Don't use deprecated Phosphor icon names (without `Icon` suffix)
-- Don't add RLS-bypassing anon writes to production without proper policies
-- Don't create a new Supabase table without immediately adding its RLS block to `supabase/rls.sql`
-- Don't use `user_metadata` for role checks in RLS policies — always use `app_metadata`
+- Don't add RLS-bypassing anon writes without proper policies
+- Don't create a new table without immediately adding its RLS block to `rls.sql`
+- Don't use `user_metadata` for role checks — always use `app_metadata`
 - Don't store sensitive credentials or API keys in `user_metadata`
+- Don't define RLS policies in schema files — `rls.sql` only

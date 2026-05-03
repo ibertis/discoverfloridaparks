@@ -32,21 +32,25 @@ export default function PreservationPage() {
           name: 'The Nature Conservancy — Florida',
           tagline: 'Over 1.3 million acres of vital Florida land conserved.',
           href: 'https://www.nature.org/en-us/about-us/where-we-work/united-states/florida/',
+          logo: '/logos/partners/nature-conservancy-florida.png',
         },
         {
           name: 'Conservation Florida',
           tagline: 'A homegrown land trust protecting the Florida Wildlife Corridor.',
           href: 'https://www.conservationflorida.org',
+          logo: '/logos/partners/conservation-florida.png',
         },
         {
           name: 'Florida Wildlife Federation',
           tagline: "Watchdog for Florida's lands, wildlife, and conservation law.",
           href: 'https://fwfonline.org',
+          logo: '/logos/partners/florida-wildlife-federation.png',
         },
         {
           name: 'Apalachicola Riverkeeper',
           tagline: "Fighting for one of Florida's most ecologically significant rivers.",
           href: 'https://www.apalachicolariverkeeper.org',
+          logo: '/logos/partners/apalachicola-riverkeeper.png',
         },
       ]}
       pageSlug="preservation"

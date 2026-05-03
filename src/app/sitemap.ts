@@ -43,6 +43,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      url: 'https://discoverfloridaparks.com/news',
+      lastModified: new Date(),
+      changeFrequency: 'hourly',
+      priority: 0.8,
+    },
+    {
       url: 'https://discoverfloridaparks.com/map',
       lastModified: new Date(),
       changeFrequency: 'monthly',

@@ -15,16 +15,16 @@ const OTHER_COLUMNS = [
     heading: 'Travel',
     links: [
       { label: 'Destinations',   href: '/parks' },
-      { label: 'Travel Trends',  href: '#' },
-      { label: 'Our Deals',      href: '#' },
-      { label: 'Upcoming Trips', href: '#' },
+      { label: 'Travel Trends',  href: '/travel-trends' },
+      { label: 'Our Deals',      href: '/experiences' },
+      { label: 'Upcoming Trips', href: '/experiences/featured' },
     ],
   },
   {
     heading: 'Resources',
     links: [
-      { label: 'News',              href: '#' },
-      { label: 'Our Channel',       href: '#' },
+      { label: 'News',              href: '/news' },
+      { label: 'Our Channel',       href: 'https://www.youtube.com/@flparks101' },
       { label: 'The Ultimate App',  href: '/app' },
       { label: 'Our Blog',          href: '/blog' },
     ],
@@ -32,10 +32,10 @@ const OTHER_COLUMNS = [
   {
     heading: 'Tips',
     links: [
-      { label: 'Trip Planner',  href: '#' },
-      { label: 'Travel Tips',   href: '#' },
-      { label: 'Family Trips',  href: '#' },
-      { label: 'Our Picks',     href: '#' },
+      { label: 'Trip Planner',  href: '/app' },
+      { label: 'Travel Tips',   href: '/blog/category/travel-tips' },
+      { label: 'Family Trips',  href: '/blog/category/family-trips' },
+      { label: 'Our Picks',     href: '/blog/category/our-picks' },
     ],
   },
   {
@@ -52,7 +52,7 @@ const OTHER_COLUMNS = [
     links: [
       { label: 'Conservation',  href: '/conservation' },
       { label: 'Preservation',  href: '/preservation' },
-      { label: 'Useful Links',  href: '#' },
+      { label: 'Useful Links',  href: '/useful-links' },
       { label: 'Our Efforts',   href: '/our-efforts' },
     ],
   },
@@ -243,6 +243,8 @@ export default function FooterLinks() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
+                      target={link.href.startsWith('http') ? '_blank' : undefined}
+                      rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                       style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.85rem', color: '#726d6b', textDecoration: 'none' }}
                       className="hover:text-[#ff7044] transition-colors"
                     >

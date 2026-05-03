@@ -33,3 +33,21 @@ export const postBySlugQuery = groq`
 export const postSlugsQuery = groq`
   *[_type == "post" && defined(slug.current)] { "slug": slug.current }
 `;
+
+export const postsByCategoryQuery = groq`
+  *[_type == "post" && defined(publishedAt) && publishedAt <= now() && $category in categories]
+  | order(publishedAt desc) {
+    _id,
+    title,
+    slug,
+    excerpt,
+    mainImage,
+    publishedAt,
+    categories,
+    author
+  }
+`;
+
+export const allCategoriesQuery = groq`
+  array::unique(*[_type == "post" && defined(publishedAt)].categories[])
+`;

@@ -2,23 +2,13 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import SiteHeader from '../SiteHeader';
-import SiteFooter from '../SiteFooter';
-import FooterLinks from '../FooterLinks';
+import { notFound } from 'next/navigation';
+import SiteHeader from '@/app/SiteHeader';
+import SiteFooter from '@/app/SiteFooter';
+import FooterLinks from '@/app/FooterLinks';
 import { client as sanityClient } from '@/sanity/lib/client';
-import { postsListQuery } from '@/sanity/queries';
+import { postsByCategoryQuery, allCategoriesQuery } from '@/sanity/queries';
 import { urlFor } from '@/sanity/imageUrl';
-
-export const metadata: Metadata = {
-  title: 'Florida Parks Blog',
-  description: 'Stories, guides, and inspiration for exploring Florida\'s best parks, beaches, and outdoor adventures.',
-  alternates: { canonical: 'https://discoverfloridaparks.com/blog' },
-  openGraph: {
-    title: 'Florida Parks Blog',
-    description: 'Stories, guides, and inspiration for exploring Florida\'s best parks, beaches, and outdoor adventures.',
-    url: 'https://discoverfloridaparks.com/blog',
-  },
-};
 
 interface Post {
   _id: string;
@@ -31,8 +21,32 @@ interface Post {
   author?: string;
 }
 
-export default async function BlogPage() {
-  const posts: Post[] = await sanityClient.fetch(postsListQuery);
+function slugToCategory(slug: string): string {
+  return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+export async function generateStaticParams() {
+  const categories: string[] = await sanityClient.fetch(allCategoriesQuery);
+  return categories.map(cat => ({
+    slug: cat.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+  }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const category = slugToCategory(slug);
+  return {
+    title: `${category} | Florida Parks Blog`,
+    description: `Browse all ${category} posts on the Discover Florida Parks blog.`,
+  };
+}
+
+export default async function BlogCategoryPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const category = slugToCategory(slug);
+  const posts: Post[] = await sanityClient.fetch(postsByCategoryQuery, { category });
+
+  if (posts === null) notFound();
 
   return (
     <div style={{ background: '#fff', color: '#413734', minHeight: '100vh' }}>
@@ -41,14 +55,21 @@ export default async function BlogPage() {
       {/* Banner */}
       <div style={{ background: '#f9f7f5', borderBottom: '1px solid #eeeeee', padding: '56px 24px' }}>
         <div style={{ maxWidth: 1278, margin: '0 auto' }}>
-          <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.85rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
-            From the Blog
+          <Link
+            href="/blog"
+            style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.8rem', fontWeight: 600, color: '#a6967c', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4, marginBottom: 16 }}
+            className="hover:text-[#ff7044] transition-colors"
+          >
+            ← All Posts
+          </Link>
+          <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.85rem', fontWeight: 600, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
+            Category
           </p>
           <h1 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2.5rem, 5vw, 4.14rem)', lineHeight: 0.98, color: '#362f35', margin: '0 0 12px', letterSpacing: '-0.04em' }}>
-            Florida Park Stories
+            {category}
           </h1>
           <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.95rem', color: '#726d6b', margin: 0 }}>
-            Guides, trip reports, and inspiration for your next adventure
+            {posts.length === 0 ? 'No posts yet — check back soon.' : `${posts.length} post${posts.length === 1 ? '' : 's'}`}
           </p>
         </div>
       </div>
@@ -60,9 +81,15 @@ export default async function BlogPage() {
             <p style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '2rem', color: '#362f35', margin: '0 0 12px', letterSpacing: '-0.04em' }}>
               Coming Soon
             </p>
-            <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.9rem', color: '#a6967c', margin: 0 }}>
-              Our first posts are on the way.
+            <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.9rem', color: '#a6967c', margin: '0 0 32px' }}>
+              {`No ${category} posts yet — we're working on it.`}
             </p>
+            <Link
+              href="/blog"
+              style={{ background: '#ff7044', color: '#fff', borderRadius: '2.3em', padding: '14px 32px', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.9rem', textDecoration: 'none' }}
+            >
+              Browse All Posts
+            </Link>
           </div>
         ) : (
           <div className="park-cards-grid">
@@ -90,17 +117,11 @@ export default async function BlogPage() {
                     </div>
                   </div>
                 )}
-
                 <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
                   {post.categories && post.categories.length > 0 && (
-                    <Link
-                      href={`/blog/category/${post.categories[0].toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
-                      onClick={e => e.stopPropagation()}
-                      style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8, textDecoration: 'none', display: 'inline-block' }}
-                      className="hover:underline"
-                    >
+                    <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
                       {post.categories[0]}
-                    </Link>
+                    </span>
                   )}
                   <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.55rem', lineHeight: 1.05, color: '#362f35', margin: '0 0 10px', letterSpacing: '-0.03em' }}>
                     {post.title}
