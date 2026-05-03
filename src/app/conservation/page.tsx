@@ -32,13 +32,13 @@ export default function ConservationPage() {
           name: 'The Everglades Foundation',
           tagline: 'Restoring the Everglades through science, advocacy, and policy.',
           href: 'https://www.evergladesfoundation.org',
-          logo: '/logos/partners/everglades-foundation.webp',
+          logo: '/logos/partners/everglades-foundation.png',
         },
         {
           name: 'Audubon Florida',
           tagline: 'Protecting birds, wetlands, and the ecosystems that sustain them.',
           href: 'https://fl.audubon.org',
-          logo: '/logos/partners/audubon-florida.webp',
+          logo: '/logos/partners/audubon-florida.png',
         },
         {
           name: 'Florida Wildlife Corridor Foundation',
@@ -50,7 +50,7 @@ export default function ConservationPage() {
           name: 'Coral Restoration Foundation',
           tagline: "Restoring Florida's critically endangered reef system.",
           href: 'https://www.coralrestoration.org',
-          logo: '/logos/partners/coral-restoration-foundation.webp',
+          logo: '/logos/partners/coral-restoration-foundation.png',
         },
         {
           name: 'Mote Marine Laboratory',
@@ -62,7 +62,7 @@ export default function ConservationPage() {
           name: 'Florida Springs Council',
           tagline: "Advocating for Florida's threatened spring systems.",
           href: 'https://www.floridaspringscouncil.org',
-          logo: '/logos/partners/florida-springs-council.jpg',
+          logo: '/logos/partners/florida-springs-council.png',
         },
       ]}
       pageSlug="conservation"
