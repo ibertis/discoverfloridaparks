@@ -8,23 +8,32 @@ import ParkCard from '@/components/ParkCard';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Explore Florida Parks',
-  description: 'Browse all 49 Florida parks, nature preserves, and outdoor attractions. Filter by type, region, and amenities.',
-  openGraph: {
-    title: 'Explore Florida Parks',
-    description: 'Browse all 49 Florida parks, nature preserves, and outdoor attractions. Filter by type, region, and amenities.',
-    url: 'https://discoverfloridaparks.com/parks',
-    images: [{ url: 'https://discoverfloridaparks.com/hero-2.jpg', width: 1280, height: 853, alt: 'Florida Parks Directory' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Explore Florida Parks',
-    description: 'Browse all 49 Florida parks, nature preserves, and outdoor attractions.',
-    images: ['https://discoverfloridaparks.com/hero-2.jpg'],
-  },
-  alternates: { canonical: 'https://discoverfloridaparks.com/parks' },
-};
+export async function generateMetadata(
+  { searchParams }: { searchParams: Promise<SearchParams> }
+): Promise<Metadata> {
+  const { type } = await searchParams;
+  const title = type ? `Florida ${type} | Discover Florida Parks` : 'Explore Florida Parks';
+  const description = type
+    ? `Browse Florida ${type} across the state. Filter by region and amenities to find your perfect outdoor destination.`
+    : 'Browse all Florida parks, nature preserves, and outdoor attractions. Filter by type, region, and amenities.';
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: 'https://discoverfloridaparks.com/parks',
+      images: [{ url: 'https://discoverfloridaparks.com/hero-2.jpg', width: 1280, height: 853, alt: 'Florida Parks Directory' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['https://discoverfloridaparks.com/hero-2.jpg'],
+    },
+    alternates: { canonical: 'https://discoverfloridaparks.com/parks' },
+  };
+}
 
 const PARK_TYPES = [
   'National Parks', 'State Parks', 'National Wildlife Refuge',
@@ -99,7 +108,7 @@ export default async function ParksPage({ searchParams }: { searchParams: Promis
             Find Your Next Adventure
           </p>
           <h1 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2.5rem, 5vw, 4.14rem)', lineHeight: 0.98, color: '#362f35', margin: '0 0 12px', letterSpacing: '-0.04em' }}>
-            Explore Our Parks
+            {type ? `Explore Our ${type}` : 'Explore Our Parks'}
           </h1>
           <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.95rem', color: '#726d6b', margin: 0 }}>
             {filtered.length} park{filtered.length !== 1 ? 's' : ''}{' '}
