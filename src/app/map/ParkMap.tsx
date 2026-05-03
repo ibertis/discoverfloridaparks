@@ -3,6 +3,7 @@
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useRef, useState } from 'react';
+import { Search, ChevronDown, X } from 'lucide-react';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
@@ -16,17 +17,35 @@ interface Park {
   google_rating?: number;
   featured_image_url?: string;
   short_description?: string;
+  park_amenities?: any[] | null;
 }
 
 const TYPE_FILTERS = [
-  'All',
   'National Parks',
   'State Parks',
+  'State Forest',
   'National Wildlife Refuge',
   'Theme Parks',
   'Water Parks',
   'County Parks',
   'Community Parks',
+  'Seasonal Attractions',
+  'National Estuarine Research Reserve',
+];
+
+const AMENITY_OPTIONS = [
+  { key: 'dog_friendly',       label: 'Dog Friendly'      },
+  { key: 'camping_available',  label: 'Camping'           },
+  { key: 'swimming_allowed',   label: 'Swimming'          },
+  { key: 'fishing_allowed',    label: 'Fishing'           },
+  { key: 'hiking_available',   label: 'Hiking'            },
+  { key: 'biking_available',   label: 'Biking'            },
+  { key: 'horseback_riding',   label: 'Horseback Riding'  },
+  { key: 'hunting_allowed',    label: 'Hunting'           },
+  { key: 'paddling_available', label: 'Paddling'          },
+  { key: 'wildlife_viewing',   label: 'Wildlife Viewing'  },
+  { key: 'boat_launch',        label: 'Boat Launch'       },
+  { key: 'picnic_areas',       label: 'Picnic Areas'      },
 ];
 
 const PIN_SVG = `
@@ -37,11 +56,29 @@ const PIN_SVG = `
 `;
 
 export default function ParkMap({ parks }: { parks: Park[] }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const activeTypeRef = useRef('All');
-  const [activeType, setActiveType] = useState('All');
+  const containerRef   = useRef<HTMLDivElement>(null);
+  const mapRef         = useRef<mapboxgl.Map | null>(null);
+  const markersRef     = useRef<mapboxgl.Marker[]>([]);
+  const activeTypeRef  = useRef('All');
+  const searchRef      = useRef('');
+  const amenitiesRef   = useRef<string[]>([]);
+  const barRef         = useRef<HTMLDivElement>(null);
+
+  const [activeType,    setActiveType]    = useState('All');
+  const [search,        setSearch]        = useState('');
+  const [amenities,     setAmenities]     = useState<string[]>([]);
+  const [openPanel,     setOpenPanel]     = useState<'type' | 'amenities' | null>(null);
+  const [visibleCount,  setVisibleCount]  = useState(parks.length);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (barRef.current && !barRef.current.contains(e.target as Node)) {
+        setOpenPanel(null);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   useEffect(() => {
     if (mapRef.current || !containerRef.current) return;
@@ -57,7 +94,7 @@ export default function ParkMap({ parks }: { parks: Park[] }) {
     mapRef.current = map;
 
     map.on('load', () => {
-      renderMarkers(map, parks, activeTypeRef.current);
+      renderMarkers(map, parks, activeTypeRef.current, searchRef.current, amenitiesRef.current);
     });
 
     return () => {
@@ -68,15 +105,37 @@ export default function ParkMap({ parks }: { parks: Park[] }) {
 
   useEffect(() => {
     activeTypeRef.current = activeType;
+    searchRef.current = search;
+    amenitiesRef.current = amenities;
     if (!mapRef.current?.loaded()) return;
-    renderMarkers(mapRef.current, parks, activeType);
-  }, [activeType, parks]);
+    renderMarkers(mapRef.current, parks, activeType, search, amenities);
+  }, [activeType, search, amenities, parks]);
 
-  function renderMarkers(map: mapboxgl.Map, allParks: Park[], type: string) {
+  function renderMarkers(
+    map: mapboxgl.Map,
+    allParks: Park[],
+    type: string,
+    query: string,
+    selectedAmenities: string[],
+  ) {
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
 
-    const filtered = type === 'All' ? allParks : allParks.filter(p => p.park_types?.includes(type));
+    let filtered = type === 'All' ? allParks : allParks.filter(p => p.park_types?.includes(type));
+
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      filtered = filtered.filter(p => p.name.toLowerCase().includes(q));
+    }
+
+    if (selectedAmenities.length > 0) {
+      filtered = filtered.filter(p => {
+        const a = (p.park_amenities?.[0] ?? {}) as Record<string, boolean>;
+        return selectedAmenities.every(k => a[k] === true);
+      });
+    }
+
+    setVisibleCount(filtered.length);
 
     filtered.forEach(park => {
       if (!park.latitude || !park.longitude) return;
@@ -119,40 +178,196 @@ export default function ParkMap({ parks }: { parks: Park[] }) {
     });
   }
 
+  function toggleAmenity(key: string) {
+    setAmenities(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    );
+  }
+
+  const hasFilters = activeType !== 'All' || search.trim() !== '' || amenities.length > 0;
+
+  const dropdownStyle: React.CSSProperties = {
+    position: 'absolute', top: 'calc(100% + 8px)', left: 0,
+    background: '#fff', border: '1.5px solid #eeeeee',
+    borderRadius: 16, boxShadow: '0 8px 32px rgba(54,47,53,0.12)',
+    zIndex: 50, minWidth: 230, maxHeight: 320, overflowY: 'auto',
+    padding: '8px 0',
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
-      {/* Filter chips */}
-      <div style={{
-        background: '#fff', borderBottom: '1px solid #eeeeee',
-        padding: '10px 24px', display: 'flex', gap: 8, flexWrap: 'wrap',
-        alignItems: 'center',
-      }}>
-        <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600, color: '#a6967c', marginRight: 4 }}>
-          Filter:
-        </span>
-        {TYPE_FILTERS.map(type => (
-          <button
-            key={type}
-            onClick={() => setActiveType(type)}
-            style={{
-              padding: '5px 14px', borderRadius: '2.3em', border: '1.5px solid',
-              borderColor: activeType === type ? '#ff7044' : '#dfdfdf',
-              background: activeType === type ? '#ff7044' : '#fff',
-              color: activeType === type ? '#fff' : '#726d6b',
-              fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', fontWeight: 700,
-              cursor: 'pointer', transition: 'all 0.15s',
-            }}
-          >
-            {type}
-          </button>
-        ))}
-        <span style={{ marginLeft: 'auto', fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', fontWeight: 600, color: '#a6967c', whiteSpace: 'nowrap' }}>
-          {parks.length} parks
-        </span>
+      {/* Filter bar */}
+      <div
+        ref={barRef}
+        style={{
+          background: '#fff', borderBottom: '1px solid #eeeeee',
+          padding: '10px 20px', position: 'relative',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, maxWidth: 1278, margin: '0 auto' }}>
+
+          {/* Search */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: '#fff', borderRadius: '2.3em', padding: '7px 16px',
+            border: `1.5px solid ${search ? '#ff7044' : '#dfdfdf'}`,
+            boxShadow: '0 2px 10px rgba(54,47,53,0.07)',
+            flex: 1, minWidth: 140, maxWidth: 320,
+          }}>
+            <Search size={14} color="#ff7044" style={{ flexShrink: 0 }} />
+            <input
+              type="text"
+              placeholder="Search parks…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{
+                border: 'none', outline: 'none', background: 'transparent',
+                fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem',
+                color: '#362f35', width: '100%',
+              }}
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}
+              >
+                <X size={13} color="#a6967c" />
+              </button>
+            )}
+          </div>
+
+          {/* Park Type dropdown */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setOpenPanel(p => p === 'type' ? null : 'type')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '7px 14px', borderRadius: '2.3em',
+                border: `1.5px solid ${activeType !== 'All' ? '#ff7044' : '#dfdfdf'}`,
+                background: activeType !== 'All' ? 'rgba(255,112,68,0.07)' : '#fff',
+                color: activeType !== 'All' ? '#ff7044' : '#726d6b',
+                fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700,
+                cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              {activeType === 'All' ? 'Park Type' : activeType}
+              <ChevronDown
+                size={13}
+                style={{ transition: 'transform 0.15s', transform: openPanel === 'type' ? 'rotate(180deg)' : 'none' }}
+              />
+            </button>
+
+            {openPanel === 'type' && (
+              <div style={dropdownStyle}>
+                {['All', ...TYPE_FILTERS].map(type => (
+                  <button
+                    key={type}
+                    onClick={() => { setActiveType(type); setOpenPanel(null); }}
+                    style={{
+                      display: 'block', width: '100%', textAlign: 'left',
+                      padding: '9px 18px',
+                      background: activeType === type ? 'rgba(255,112,68,0.07)' : 'transparent',
+                      color: activeType === type ? '#ff7044' : '#362f35',
+                      fontFamily: 'Archivo, sans-serif', fontSize: '0.85rem',
+                      fontWeight: activeType === type ? 700 : 500,
+                      border: 'none', cursor: 'pointer',
+                    }}
+                  >
+                    {type === 'All' ? 'All Types' : type}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Amenities dropdown */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setOpenPanel(p => p === 'amenities' ? null : 'amenities')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '7px 14px', borderRadius: '2.3em',
+                border: `1.5px solid ${amenities.length > 0 ? '#ff7044' : '#dfdfdf'}`,
+                background: amenities.length > 0 ? 'rgba(255,112,68,0.07)' : '#fff',
+                color: amenities.length > 0 ? '#ff7044' : '#726d6b',
+                fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700,
+                cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              Amenities
+              {amenities.length > 0 && (
+                <span style={{
+                  background: '#ff7044', color: '#fff', borderRadius: '50%',
+                  width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.65rem', fontWeight: 700, flexShrink: 0,
+                }}>
+                  {amenities.length}
+                </span>
+              )}
+              <ChevronDown
+                size={13}
+                style={{ transition: 'transform 0.15s', transform: openPanel === 'amenities' ? 'rotate(180deg)' : 'none' }}
+              />
+            </button>
+
+            {openPanel === 'amenities' && (
+              <div style={dropdownStyle}>
+                {AMENITY_OPTIONS.map(({ key, label }) => (
+                  <label
+                    key={key}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '9px 18px', cursor: 'pointer',
+                      background: amenities.includes(key) ? 'rgba(255,112,68,0.07)' : 'transparent',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={amenities.includes(key)}
+                      onChange={() => toggleAmenity(key)}
+                      style={{ accentColor: '#ff7044', flexShrink: 0 }}
+                    />
+                    <span style={{
+                      fontFamily: 'Archivo, sans-serif', fontSize: '0.85rem',
+                      color: amenities.includes(key) ? '#ff7044' : '#362f35',
+                      fontWeight: amenities.includes(key) ? 700 : 500,
+                    }}>
+                      {label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Clear */}
+          {hasFilters && (
+            <button
+              onClick={() => { setActiveType('All'); setSearch(''); setAmenities([]); setOpenPanel(null); }}
+              style={{
+                padding: '7px 14px', borderRadius: '2.3em',
+                border: '1.5px solid #dfdfdf', background: '#fff',
+                color: '#726d6b', fontFamily: 'Archivo, sans-serif',
+                fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              Clear
+            </button>
+          )}
+
+          {/* Count */}
+          <span style={{
+            marginLeft: 'auto', fontFamily: 'Archivo, sans-serif',
+            fontSize: '0.78rem', fontWeight: 600, color: '#a6967c', whiteSpace: 'nowrap',
+          }}>
+            {visibleCount} park{visibleCount !== 1 ? 's' : ''}
+          </span>
+
+        </div>
       </div>
 
-      {/* Map container */}
+      {/* Map */}
       <div ref={containerRef} style={{ flex: 1, minHeight: 0 }} />
     </div>
   );
