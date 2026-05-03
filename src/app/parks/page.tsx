@@ -12,10 +12,22 @@ export async function generateMetadata(
   { searchParams }: { searchParams: Promise<SearchParams> }
 ): Promise<Metadata> {
   const { type } = await searchParams;
-  const title = type ? `Florida ${type} | Discover Florida Parks` : 'Explore Florida Parks';
-  const description = type
-    ? `Browse Florida ${type} across the state. Filter by region and amenities to find your perfect outdoor destination.`
-    : 'Browse all Florida parks, nature preserves, and outdoor attractions. Filter by type, region, and amenities.';
+
+  let title: string;
+  let description: string;
+
+  if (type) {
+    title = `Florida ${type} | Discover Florida Parks`;
+    description = `Browse Florida ${type} across the state. Filter by region and amenities to find your perfect outdoor destination.`;
+  } else {
+    const { count } = await supabase
+      .from('parks')
+      .select('*', { count: 'exact', head: true });
+    const n = count ?? 263;
+    title = `Florida Parks Directory — ${n} State Parks, National Parks & More | Discover Florida Parks`;
+    description = `Browse all ${n} Florida parks — state parks, national parks, wildlife refuges, and more. Filter by type, region, and amenities to plan your next adventure.`;
+  }
+
   return {
     title,
     description,
