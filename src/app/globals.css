@@ -375,7 +375,15 @@ a { color: inherit; text-decoration: none; }
 
 /* Hero two-col layout collapses on tablet */
 @media (max-width: 900px) {
-  .trends-hero-grid { grid-template-columns: 1fr !important; }
+  .trends-hero-grid        { grid-template-columns: 1fr !important; gap: 40px !important; }
+  .trends-hero-section     { padding: 56px 24px 48px !important; }
+  .trends-form-card        { padding: 28px 24px !important; }
+}
+
+@media (max-width: 640px) {
+  .trends-hero-section     { padding: 44px 20px 36px !important; }
+  .trends-hero-grid        { gap: 32px !important; }
+  .trends-form-card        { padding: 24px 20px !important; border-radius: 16px !important; }
 }
 
 /* Hero section: taller min-height on mobile to prevent button/indicator overlap */

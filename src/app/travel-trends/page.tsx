@@ -90,8 +90,8 @@ export default function TravelTrendsPage() {
       <SiteHeader />
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section style={{ background: '#362f35', padding: '80px 24px 72px' }}>
-        <div style={{ maxWidth: 1278, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 420px', gap: 64, alignItems: 'center' }}>
+      <section className="trends-hero-section" style={{ background: '#362f35', padding: '80px 24px 72px' }}>
+        <div className="trends-hero-grid" style={{ maxWidth: 1278, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 420px', gap: 64, alignItems: 'center' }}>
 
           {/* Left — copy */}
           <div>
@@ -116,7 +116,7 @@ export default function TravelTrendsPage() {
           </div>
 
           {/* Right — form card */}
-          <div style={{ background: '#ffffff', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.28)' }}>
+          <div className="trends-form-card" style={{ background: '#ffffff', borderRadius: 20, padding: '36px 32px', boxShadow: '0 24px 64px rgba(0,0,0,0.28)' }}>
             {status === 'success' ? (
               <div style={{ textAlign: 'center' }}>
                 <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#fff5f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: 24 }}>
