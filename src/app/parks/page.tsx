@@ -25,7 +25,7 @@ export async function generateMetadata(
       .select('*', { count: 'exact', head: true });
     const n = count ?? 263;
     title = `Florida Parks Directory — ${n} State Parks, National Parks & More | Discover Florida Parks`;
-    description = `Browse all ${n} Florida parks — state parks, national parks, wildlife refuges, and more. Filter by type, region, and amenities to plan your next adventure.`;
+    description = `Browse hundreds of Florida parks — state parks, national parks, wildlife refuges, and more. Filter by type, region, and amenities to plan your next adventure.`;
   }
 
   return {
