@@ -163,10 +163,10 @@ export default function WeCarePage({
                   </div>
                 )}
                 <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: '#362f35', margin: '0 0 5px', letterSpacing: '-0.01em' }}>
+                  <p className="partner-name" style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.85rem', color: '#362f35', margin: '0 0 5px', letterSpacing: '-0.01em' }}>
                     {p.name}
                   </p>
-                  <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 400, fontSize: '0.78rem', color: '#726d6b', margin: '0 0 12px', lineHeight: 1.5 }}>
+                  <p className="partner-tag" style={{ fontFamily: 'Glegoo, serif', fontWeight: 400, fontSize: '0.78rem', color: '#726d6b', margin: '0 0 12px', lineHeight: 1.5 }}>
                     {p.tagline}
                   </p>
                   <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.72rem', color: '#ff7044', letterSpacing: '0.02em' }}>

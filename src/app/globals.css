@@ -306,11 +306,21 @@ a { color: inherit; text-decoration: none; }
 
 
 @media (max-width: 768px) {
-  .we-care-partners-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .we-care-partners-grid          { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .partner-logo-card              { padding: 22px 16px 18px; gap: 10px; }
+  .partner-logo-wrap              { height: 72px; }
+  .partner-logo-img               { max-height: 60px; max-width: 140px; }
+  .partner-logo-card .partner-name  { font-size: 0.78rem !important; }
+  .partner-logo-card .partner-tag   { font-size: 0.72rem !important; }
 }
 
 @media (max-width: 480px) {
-  .we-care-partners-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .we-care-partners-grid          { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .partner-logo-card              { padding: 18px 12px 14px; gap: 8px; border-radius: 12px; }
+  .partner-logo-wrap              { height: 56px; }
+  .partner-logo-img               { max-height: 48px; max-width: 110px; }
+  .partner-logo-card .partner-name  { font-size: 0.74rem !important; }
+  .partner-logo-card .partner-tag   { font-size: 0.68rem !important; }
 }
 
 /* Useful Links page */
