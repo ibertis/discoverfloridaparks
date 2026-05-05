@@ -13,6 +13,8 @@ import { client as sanityClient } from '@/sanity/lib/client';
 import { postBySlugQuery, postSlugsQuery } from '@/sanity/queries';
 import { urlFor } from '@/sanity/imageUrl';
 
+export const revalidate = 300; // re-fetch from Sanity every 5 minutes
+
 interface Post {
   _id: string;
   title: string;

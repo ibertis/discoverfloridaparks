@@ -9,6 +9,8 @@ import { client as sanityClient } from '@/sanity/lib/client';
 import { postsListQuery } from '@/sanity/queries';
 import { urlFor } from '@/sanity/imageUrl';
 
+export const revalidate = 300; // re-fetch from Sanity every 5 minutes
+
 export const metadata: Metadata = {
   title: 'Florida Parks Blog',
   description: 'Stories, guides, and inspiration for exploring Florida\'s best parks, beaches, and outdoor adventures.',
