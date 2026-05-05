@@ -69,29 +69,30 @@ export default async function BlogPage() {
         ) : (
           <div className="park-cards-grid">
             {posts.map(post => (
-              <Link
+              <div
                 key={post._id}
-                href={`/blog/${post.slug.current}`}
-                style={{ display: 'flex', flexDirection: 'column', background: '#fff', border: '1px solid #eeeeee', borderRadius: 16, overflow: 'hidden', textDecoration: 'none', transition: 'box-shadow 0.2s' }}
+                style={{ display: 'flex', flexDirection: 'column', background: '#fff', border: '1px solid #eeeeee', borderRadius: 16, overflow: 'hidden', transition: 'box-shadow 0.2s' }}
                 className="hover:shadow-md"
               >
-                {post.mainImage?.asset ? (
-                  <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#f9f7f5', flexShrink: 0 }}>
-                    <Image
-                      src={urlFor(post.mainImage).width(800).height(450).url()}
-                      alt={post.mainImage.alt ?? post.title}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                  </div>
-                ) : (
-                  <div style={{ width: '100%', paddingTop: '56.25%', background: '#f9f7f5', flexShrink: 0, position: 'relative' }}>
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ fontFamily: 'Shrikhand, cursive', fontSize: '2rem', color: '#dfdfdf' }}>DFP</span>
+                <Link href={`/blog/${post.slug.current}`} style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
+                  {post.mainImage?.asset ? (
+                    <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#f9f7f5' }}>
+                      <Image
+                        src={urlFor(post.mainImage).width(800).height(450).url()}
+                        alt={post.mainImage.alt ?? post.title}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div style={{ width: '100%', paddingTop: '56.25%', background: '#f9f7f5', position: 'relative' }}>
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontFamily: 'Shrikhand, cursive', fontSize: '2rem', color: '#dfdfdf' }}>DFP</span>
+                      </div>
+                    </div>
+                  )}
+                </Link>
 
                 <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
                   {post.categories && post.categories.length > 0 && (
@@ -103,9 +104,11 @@ export default async function BlogPage() {
                       {post.categories[0]}
                     </Link>
                   )}
-                  <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.55rem', lineHeight: 1.05, color: '#362f35', margin: '0 0 10px', letterSpacing: '-0.03em' }}>
-                    {post.title}
-                  </h2>
+                  <Link href={`/blog/${post.slug.current}`} style={{ textDecoration: 'none' }}>
+                    <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.55rem', lineHeight: 1.05, color: '#362f35', margin: '0 0 10px', letterSpacing: '-0.03em' }}>
+                      {post.title}
+                    </h2>
+                  </Link>
                   {post.excerpt && (
                     <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.82rem', color: '#726d6b', lineHeight: 1.65, margin: '0 0 16px', flex: 1 }}>
                       {post.excerpt}
@@ -117,12 +120,12 @@ export default async function BlogPage() {
                         {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                       </span>
                     )}
-                    <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700, color: '#ff7044', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Link href={`/blog/${post.slug.current}`} style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700, color: '#ff7044', display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
                       Read more <ArrowRight size={13} />
-                    </span>
+                    </Link>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
