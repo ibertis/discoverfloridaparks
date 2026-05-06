@@ -39,6 +39,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             '@type': 'WebSite',
             name: 'Discover Florida Parks',
             url: 'https://discoverfloridaparks.com',
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: {
+                '@type': 'EntryPoint',
+                urlTemplate: 'https://discoverfloridaparks.com/parks?q={search_term_string}',
+              },
+              'query-input': 'required name=search_term_string',
+            },
           }) }}
         />
         <script
