@@ -36,6 +36,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'Discover Florida Parks',
+            url: 'https://discoverfloridaparks.com',
+          }) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
             '@type': 'Organization',
             name: 'Discover Florida Parks',
             url: 'https://discoverfloridaparks.com',
