@@ -44,7 +44,7 @@ export default function SiteFooter() {
         </div>
 
       </div>
-      <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.7rem', color: '#a6967c', textAlign: 'center', margin: '16px auto 0', maxWidth: 1278, paddingTop: 16, borderTop: '1px solid #ddd8d0', lineHeight: 1.6 }}>
+      <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.68rem', color: '#a6967c', textAlign: 'center', margin: '16px auto 0', maxWidth: '50%', paddingTop: 16, borderTop: '1px solid #ddd8d0', lineHeight: 1.6 }}>
         Discover Florida Parks is a participant in the Amazon Services LLC Associates Program, an affiliate advertising program designed to provide a means for sites to earn advertising fees by advertising and linking to Amazon.com.
       </p>
     </footer>
