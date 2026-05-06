@@ -1,13 +1,8 @@
 import Link from 'next/link';
 import SiteHeader from './SiteHeader';
 import SiteFooter from './SiteFooter';
-import { createSupabaseServerClient } from '@/lib/supabase-server';
 
-export default async function NotFound() {
-  const supabase = await createSupabaseServerClient();
-  const { count } = await supabase.from('parks').select('*', { count: 'exact', head: true });
-  const parkCount = count ?? 263;
-
+export default function NotFound() {
   return (
     <div style={{ background: '#fff', color: '#413734', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <SiteHeader />
@@ -21,7 +16,7 @@ export default async function NotFound() {
           </h1>
           <div style={{ width: 48, height: 3, background: '#ff7044', margin: '0 auto 28px', borderRadius: 2 }} />
           <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.95rem', color: '#726d6b', lineHeight: 1.6, maxWidth: 340, margin: '0 auto 36px' }}>
-            This page doesn&apos;t exist, but Florida has {parkCount.toLocaleString()} amazing parks waiting for you.
+            This page doesn&apos;t exist, but Florida has hundreds of amazing parks waiting for you.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/parks"
