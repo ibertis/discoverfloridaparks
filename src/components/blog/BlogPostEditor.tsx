@@ -9,8 +9,9 @@ import dynamic from 'next/dynamic';
 const TipTapEditor = dynamic(() => import('./TipTapEditor'), { ssr: false });
 
 const CATEGORIES = [
-  'Park Guides', 'Gear & Packing', 'Family Travel',
-  'Conservation', 'Wildlife', 'Florida Travel', 'News & Updates',
+  'Our Picks', 'Park Guides', 'Hiking & Trails', 'Camping',
+  'Beaches & Water', 'Family Travel', 'Gear & Packing',
+  'Wildlife', 'Conservation', 'Seasonal Guides', 'Florida Travel', 'News & Updates',
 ];
 
 function generateSlug(title: string): string {

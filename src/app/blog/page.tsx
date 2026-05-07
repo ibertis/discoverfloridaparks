@@ -35,7 +35,7 @@ export default async function BlogPage() {
             Florida Park Stories
           </h1>
           <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.95rem', color: '#726d6b', margin: 0 }}>
-            Guides, trip reports, and inspiration for your next adventure
+            Guides, park reviews, and inspiration for your next adventure
           </p>
         </div>
       </div>
