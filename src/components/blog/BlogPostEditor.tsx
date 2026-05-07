@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, ChangeEvent } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -76,10 +76,31 @@ export default function BlogPostEditor({ postId }: { postId?: string }) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [error, setError] = useState('');
   const [seoOpen, setSeoOpen] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const slugEdited = useRef(!!postId);
   const formRef = useRef(form);
   const currentPostId = useRef(postId);
   formRef.current = form;
+
+  async function handleImageUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/admin/api/upload-blog-image', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? 'Upload failed');
+      setForm(f => ({ ...f, featured_image_url: json.url }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setImageUploading(false);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+    }
+  }
 
   useEffect(() => {
     if (!postId) return;
@@ -373,20 +394,37 @@ export default function BlogPostEditor({ postId }: { postId?: string }) {
 
           {/* Featured Image */}
           <SidebarCard>
-            <label style={labelStyle}>Featured Image URL</label>
-            <input
-              value={form.featured_image_url}
-              onChange={e => setForm(f => ({ ...f, featured_image_url: e.target.value }))}
-              style={inputStyle}
-              placeholder="https://…"
-            />
+            <label style={labelStyle}>Featured Image</label>
             {form.featured_image_url && (
-              <img
-                src={form.featured_image_url}
-                alt=""
-                style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: 8, marginTop: 10 }}
-              />
+              <div style={{ position: 'relative', marginBottom: 10 }}>
+                <img
+                  src={form.featured_image_url}
+                  alt=""
+                  style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: 8, display: 'block' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, featured_image_url: '' }))}
+                  style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(0,0,0,0.55)', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', color: '#fff', fontSize: '0.75rem', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  title="Remove image"
+                >✕</button>
+              </div>
             )}
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              style={{ display: 'none' }}
+            />
+            <button
+              type="button"
+              onClick={() => imageInputRef.current?.click()}
+              disabled={imageUploading}
+              style={{ ...inputStyle, background: '#f9f7f5', cursor: 'pointer', textAlign: 'center', color: imageUploading ? '#a6967c' : '#413734', padding: '9px 12px' }}
+            >
+              {imageUploading ? 'Uploading…' : form.featured_image_url ? 'Replace image' : 'Upload image'}
+            </button>
           </SidebarCard>
 
           {/* SEO */}
