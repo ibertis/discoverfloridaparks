@@ -1,5 +1,24 @@
-import type { StructureResolver } from 'sanity/structure';
+import type { StructureResolver, DefaultDocumentNodeResolver } from 'sanity/structure';
 import { Iframe } from 'sanity-plugin-iframe-pane';
+
+export const defaultDocumentNode: DefaultDocumentNodeResolver = (S, { schemaType }) => {
+  if (schemaType === 'post') {
+    return S.document().views([
+      S.view.form(),
+      S.view
+        .component(Iframe)
+        .options({
+          url: (doc: { slug?: { current?: string } }) =>
+            doc?.slug?.current
+              ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/draft?secret=${process.env.NEXT_PUBLIC_SANITY_PREVIEW_SECRET}&slug=/blog/${doc.slug.current}`
+              : null,
+          reload: { button: true },
+        })
+        .title('Preview'),
+    ]);
+  }
+  return S.document().views([S.view.form()]);
+};
 
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -8,28 +27,7 @@ export const structure: StructureResolver = (S) =>
       S.listItem()
         .title('Blog Posts')
         .schemaType('post')
-        .child(
-          S.documentTypeList('post')
-            .title('Blog Posts')
-            .child((documentId) =>
-              S.document()
-                .documentId(documentId)
-                .schemaType('post')
-                .views([
-                  S.view.form(),
-                  S.view
-                    .component(Iframe)
-                    .options({
-                      url: (doc: { slug?: { current?: string } }) =>
-                        doc?.slug?.current
-                          ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/draft?secret=${process.env.NEXT_PUBLIC_SANITY_PREVIEW_SECRET}&slug=/blog/${doc.slug.current}`
-                          : null,
-                      reload: { button: true },
-                    })
-                    .title('Preview'),
-                ])
-            )
-        ),
+        .child(S.documentTypeList('post').title('Blog Posts')),
       ...S.documentTypeListItems().filter(
         (item) => item.getId() !== 'post'
       ),
