@@ -106,6 +106,26 @@ const portableTextComponents: PortableTextComponents = {
     number: ({ children }) => <li style={{ marginBottom: '0.4em' }}>{children}</li>,
   },
   types: {
+    table: ({ value }) => {
+      if (!value?.rows?.length) return null;
+      return (
+        <div style={{ overflowX: 'auto', margin: '2em 0' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Glegoo, serif', fontSize: '0.9rem', color: '#726d6b' }}>
+            <tbody>
+              {value.rows.map((row: { _key: string; cells: string[] }) => (
+                <tr key={row._key}>
+                  {row.cells.map((cell: string, i: number) => (
+                    <td key={i} style={{ border: '1px solid #eeeeee', padding: '10px 14px', lineHeight: 1.55 }}>
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    },
     image: ({ value }) => {
       if (!value?.asset) return null;
       return (

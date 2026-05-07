@@ -64,6 +64,7 @@ export const postType = defineType({
             defineField({ name: 'caption', type: 'string', title: 'Caption' }),
           ],
         },
+        { type: 'table' },
       ],
     }),
     defineField({
