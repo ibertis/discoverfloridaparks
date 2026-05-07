@@ -13,7 +13,7 @@ export interface BlogPost {
   body: string | null;
   featured_image_url: string | null;
   author: string;
-  category: string | null;
+  categories: string[] | null;
   tags: string[] | null;
   seo_title: string | null;
   seo_description: string | null;
@@ -23,7 +23,7 @@ export interface BlogPost {
   updated_at: string;
 }
 
-const LIST_FIELDS = 'id, title, slug, excerpt, featured_image_url, author, category, published_at';
+const LIST_FIELDS = 'id, title, slug, excerpt, featured_image_url, author, categories, published_at';
 
 export async function getPublishedPosts(): Promise<BlogPost[]> {
   const { data } = await supabase
@@ -49,7 +49,7 @@ export async function getPostsByCategory(category: string): Promise<BlogPost[]> 
     .from('blog_posts')
     .select('*')
     .eq('published', true)
-    .ilike('category', category)
+    .contains('categories', [category])
     .order('published_at', { ascending: false });
   return (data ?? []) as BlogPost[];
 }
@@ -76,8 +76,9 @@ export async function getPublishedSlugs(): Promise<string[]> {
 export async function getDistinctCategories(): Promise<string[]> {
   const { data } = await supabase
     .from('blog_posts')
-    .select('category')
+    .select('categories')
     .eq('published', true)
-    .not('category', 'is', null);
-  return [...new Set((data ?? []).map(p => p.category).filter(Boolean))] as string[];
+    .not('categories', 'is', null);
+  const all = (data ?? []).flatMap(p => (p.categories as string[]) ?? []);
+  return [...new Set(all)];
 }

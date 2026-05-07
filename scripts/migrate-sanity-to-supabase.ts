@@ -91,7 +91,7 @@ async function migrate() {
         body,
         featured_image_url,
         author: post.author ?? 'Discover Florida Parks',
-        category: post.category ?? null,
+        categories: post.category ? [post.category] : null,
         seo_title: post.seo_title ?? null,
         seo_description: post.seo_description ?? null,
         published: true,

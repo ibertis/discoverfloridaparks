@@ -12,7 +12,7 @@ export default async function AdminBlogPage() {
   const supabase = await createSupabaseServerClient();
   const { data: posts } = await supabase
     .from('blog_posts')
-    .select('id, title, slug, published, published_at, category, created_at')
+    .select('id, title, slug, published, published_at, categories, created_at')
     .order('created_at', { ascending: false });
 
   return (
@@ -70,7 +70,7 @@ export default async function AdminBlogPage() {
                       {post.published ? 'Published' : 'Draft'}
                     </span>
                   </td>
-                  <td style={{ padding: '14px 16px', color: '#726d6b' }}>{post.category ?? '—'}</td>
+                  <td style={{ padding: '14px 16px', color: '#726d6b' }}>{(post.categories as string[] | null)?.join(', ') || '—'}</td>
                   <td style={{ padding: '14px 16px', color: '#a6967c', whiteSpace: 'nowrap' }}>
                     {post.published_at
                       ? new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })

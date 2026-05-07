@@ -25,7 +25,7 @@ interface FormState {
   body: string;
   featured_image_url: string;
   author: string;
-  category: string;
+  categories: string[];
   tags: string;
   seo_title: string;
   seo_description: string;
@@ -36,7 +36,7 @@ interface FormState {
 const DEFAULTS: FormState = {
   id: '', title: '', slug: '', excerpt: '', body: '',
   featured_image_url: '', author: 'Discover Florida Parks',
-  category: '', tags: '', seo_title: '', seo_description: '',
+  categories: [], tags: '', seo_title: '', seo_description: '',
   published: false, published_at: null,
 };
 
@@ -98,7 +98,7 @@ export default function BlogPostEditor({ postId }: { postId?: string }) {
             body: data.body ?? '',
             featured_image_url: data.featured_image_url ?? '',
             author: data.author ?? 'Discover Florida Parks',
-            category: data.category ?? '',
+            categories: data.categories ?? [],
             tags: (data.tags ?? []).join(', '),
             seo_title: data.seo_title ?? '',
             seo_description: data.seo_description ?? '',
@@ -126,7 +126,7 @@ export default function BlogPostEditor({ postId }: { postId?: string }) {
       body: f.body || null,
       featured_image_url: f.featured_image_url || null,
       author: f.author || 'Discover Florida Parks',
-      category: f.category || null,
+      categories: f.categories.length > 0 ? f.categories : null,
       tags: f.tags ? f.tags.split(',').map(t => t.trim()).filter(Boolean) : null,
       seo_title: f.seo_title || null,
       seo_description: f.seo_description || null,
@@ -312,19 +312,40 @@ export default function BlogPostEditor({ postId }: { postId?: string }) {
             />
           </SidebarCard>
 
-          {/* Category */}
+          {/* Categories */}
           <SidebarCard>
-            <label style={labelStyle}>Category</label>
-            <input
-              value={form.category}
-              onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-              style={inputStyle}
-              placeholder="Select or type…"
-              list="blog-categories"
-            />
-            <datalist id="blog-categories">
-              {CATEGORIES.map(c => <option key={c} value={c} />)}
-            </datalist>
+            <label style={labelStyle}>Categories</label>
+            {form.categories.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                {form.categories.map(cat => (
+                  <span
+                    key={cat}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#fff0ec', color: '#ff7044', borderRadius: '2.3em', padding: '4px 12px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}
+                  >
+                    {cat}
+                    <button
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, categories: f.categories.filter(c => c !== cat) }))}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ff7044', padding: 0, lineHeight: 1, fontSize: '0.9rem' }}
+                      aria-label={`Remove ${cat}`}
+                    >×</button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {CATEGORIES.filter(c => !form.categories.includes(c)).map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, categories: [...f.categories, cat] }))}
+                  style={{ background: '#f5f2ef', color: '#726d6b', border: 'none', borderRadius: '2.3em', padding: '4px 12px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}
+                  className="hover:bg-[#ffe8e0] hover:text-[#ff7044] transition-colors"
+                >
+                  + {cat}
+                </button>
+              ))}
+            </div>
           </SidebarCard>
 
           {/* Excerpt */}

@@ -78,14 +78,19 @@ export default async function BlogPage() {
                 </Link>
 
                 <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  {post.category && (
-                    <Link
-                      href={`/blog/category/${post.category.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
-                      style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8, textDecoration: 'none', display: 'inline-block' }}
-                      className="hover:underline"
-                    >
-                      {post.category}
-                    </Link>
+                  {(post.categories ?? []).length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                      {(post.categories ?? []).map(cat => (
+                        <Link
+                          key={cat}
+                          href={`/blog/category/${cat.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
+                          style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', textDecoration: 'none' }}
+                          className="hover:underline"
+                        >
+                          {cat}
+                        </Link>
+                      ))}
+                    </div>
                   )}
                   <Link href={`/blog/${post.slug}`} style={{ textDecoration: 'none' }}>
                     <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.55rem', lineHeight: 1.05, color: '#362f35', margin: '0 0 10px', letterSpacing: '-0.03em' }}>

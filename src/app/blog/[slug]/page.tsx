@@ -82,17 +82,18 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <ArrowLeft size={13} /> Back to Blog
         </Link>
 
-        {(post.category || post.published_at || post.author) && (
+        {((post.categories ?? []).length > 0 || post.published_at || post.author) && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 20px', alignItems: 'center', marginBottom: 20 }}>
-            {post.category && (
+            {(post.categories ?? []).map(cat => (
               <Link
-                href={`/blog/category/${post.category.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
+                key={cat}
+                href={`/blog/category/${cat.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
                 style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', textDecoration: 'none' }}
                 className="hover:underline"
               >
-                {post.category}
+                {cat}
               </Link>
-            )}
+            ))}
             {post.published_at && (
               <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c' }}>
                 {new Date(post.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
