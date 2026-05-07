@@ -9,11 +9,11 @@ import SiteHeader from '../../SiteHeader';
 import SiteFooter from '../../SiteFooter';
 import FooterLinks from '../../FooterLinks';
 import NewsletterForm from '../../NewsletterForm';
-import { client as sanityClient } from '@/sanity/lib/client';
+import { draftMode } from 'next/headers';
+import { client as sanityClient, getPreviewClient } from '@/sanity/lib/client';
 import { postBySlugQuery, postSlugsQuery } from '@/sanity/queries';
 import { urlFor } from '@/sanity/imageUrl';
-
-export const revalidate = 300; // re-fetch from Sanity every 5 minutes
+import PreviewBanner from '@/components/PreviewBanner';
 
 interface Post {
   _id: string;
@@ -152,7 +152,15 @@ const portableTextComponents: PortableTextComponents = {
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post: Post | null = await sanityClient.fetch(postBySlugQuery, { slug });
+  const { isEnabled } = await draftMode();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const post: Post | null = isEnabled
+    ? (await getPreviewClient(process.env.SANITY_API_READ_TOKEN!).fetch(
+        postBySlugQuery, { slug }, { perspective: 'previewDrafts' } as Record<string, unknown>
+      ) as Post | null)
+    : await sanityClient.fetch(postBySlugQuery, { slug });
+
   if (!post) notFound();
 
   const ogImage = post.mainImage?.asset
@@ -176,6 +184,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <div style={{ background: '#fff', color: '#413734', minHeight: '100vh' }}>
+      {isEnabled && <PreviewBanner />}
       <SiteHeader />
 
       <script
