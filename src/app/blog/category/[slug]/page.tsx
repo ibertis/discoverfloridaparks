@@ -95,9 +95,9 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ s
                   </div>
                 )}
                 <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  {post.category && (
+                  {(post.categories ?? [])[0] && (
                     <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
-                      {post.category}
+                      {(post.categories ?? [])[0]}
                     </span>
                   )}
                   <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.55rem', lineHeight: 1.05, color: '#362f35', margin: '0 0 10px', letterSpacing: '-0.03em' }}>

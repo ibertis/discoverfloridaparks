@@ -157,9 +157,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     </div>
                   )}
                   <div style={{ padding: '14px 16px' }}>
-                    {p.category && (
+                    {(p.categories ?? [])[0] && (
                       <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.68rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>
-                        {p.category}
+                        {(p.categories ?? [])[0]}
                       </span>
                     )}
                     <p style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.1rem', lineHeight: 1.1, color: '#362f35', margin: 0, letterSpacing: '-0.02em' }}>
