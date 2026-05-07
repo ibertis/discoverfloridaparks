@@ -83,6 +83,18 @@ export default function BlogPostEditor({ postId }: { postId?: string }) {
   const currentPostId = useRef(postId);
   formRef.current = form;
 
+  async function handleImageRemove() {
+    const url = formRef.current.featured_image_url;
+    if (!url) return;
+    setForm(f => ({ ...f, featured_image_url: '' }));
+    // Best-effort delete — don't block the UI if it fails
+    fetch('/admin/api/upload-blog-image', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    }).catch(() => {});
+  }
+
   async function handleImageUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -404,7 +416,7 @@ export default function BlogPostEditor({ postId }: { postId?: string }) {
                 />
                 <button
                   type="button"
-                  onClick={() => setForm(f => ({ ...f, featured_image_url: '' }))}
+                  onClick={handleImageRemove}
                   style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(0,0,0,0.55)', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', color: '#fff', fontSize: '0.75rem', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   title="Remove image"
                 >✕</button>

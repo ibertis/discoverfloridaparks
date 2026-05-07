@@ -31,3 +31,27 @@ export async function POST(req: NextRequest) {
   const { data } = serviceClient.storage.from('blog-images').getPublicUrl(fileName);
   return NextResponse.json({ url: data.publicUrl });
 }
+
+export async function DELETE(req: NextRequest) {
+  const user = await getAdminUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { url } = await req.json() as { url?: string };
+  if (!url) return NextResponse.json({ error: 'Missing url' }, { status: 400 });
+
+  // Extract filename from public URL: .../blog-images/FILENAME.ext
+  const marker = '/blog-images/';
+  const idx = url.indexOf(marker);
+  if (idx === -1) return NextResponse.json({ error: 'Not a blog-images URL' }, { status: 400 });
+  const fileName = url.slice(idx + marker.length);
+
+  const serviceClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { error } = await serviceClient.storage.from('blog-images').remove([fileName]);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ ok: true });
+}
