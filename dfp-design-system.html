@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover Florida Parks — Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Glegoo:wght@400;700&family=Shrikhand&display=swap" rel="stylesheet">
+  <style>
+
+/* ============================================================
+   CSS CUSTOM PROPERTIES — DFP DESIGN TOKENS
+   ============================================================ */
+:root {
+  /* ── Primitives ── */
+  --prim-white:       #ffffff;
+  --prim-coral:       #ff7044;
+  --prim-coral-dark:  #e85a2e;
+  --prim-charcoal:    #413734;
+  --prim-espresso:    #362f35;
+  --prim-tan:         #a6967c;
+  --prim-medium:      #726d6b;
+  --prim-border:      #eeeeee;
+  --prim-border-dark: #dfdfdf;
+  --prim-bg-warm:     #f9f7f5;
+  --prim-bg-light:    #f5f3f0;
+  --prim-bg-cream:    #f5f1ec;
+  --prim-bg-footer:   #edeae5;
+  --prim-bg-sand:     #f0ece6;
+  --prim-gold:        #e8a020;
+
+  /* ── Semantic Tokens ── */
+  --color-bg:             var(--prim-white);
+  --color-surface:        var(--prim-bg-light);
+  --color-accent:         var(--prim-coral);
+  --color-accent-hover:   var(--prim-coral-dark);
+  --color-text-primary:   var(--prim-charcoal);
+  --color-text-heading:   var(--prim-espresso);
+  --color-text-secondary: var(--prim-medium);
+  --color-text-muted:     var(--prim-tan);
+  --color-border:         var(--prim-border);
+  --color-border-strong:  var(--prim-border-dark);
+  --color-footer-bg:      var(--prim-bg-footer);
+  --color-dark-surface:   var(--prim-espresso);
+  --color-overlay:        rgba(30,25,20,0.52);
+
+  /* ── Status Colors ── */
+  --status-easy-bg:        #dcfce7;
+  --status-easy-text:      #166534;
+  --status-moderate-bg:    #fef9c3;
+  --status-moderate-text:  #854d0e;
+  --status-hard-bg:        #ffedd5;
+  --status-hard-text:      #9a3412;
+  --status-strenuous-bg:   #fee2e2;
+  --status-strenuous-text: #991b1b;
+
+  /* ── Typography ── */
+  --ff-display: 'Shrikhand', cursive;
+  --ff-body:    'Glegoo', serif;
+  --ff-ui:      'Archivo', sans-serif;
+
+  --fs-hero:  clamp(3rem, 6.5vw, 5.35rem);
+  --fs-h2:    4.14rem;
+  --fs-h3:    2.14rem;
+  --fs-lg:    1.3rem;
+  --fs-base:  1rem;
+  --fs-body:  0.95rem;
+  --fs-sm:    0.88rem;
+  --fs-xs:    0.82rem;
+  --fs-label: 0.72rem;
+
+  --lh-tight:  1em;
+  --lh-snug:   1.15em;
+  --lh-normal: 1.55em;
+  --lh-relaxed:1.75em;
+
+  --ls-tight:  -0.04em;
+  --ls-normal: -0.02em;
+  --ls-wide:   0.10em;
+
+  /* ── Spacing (8px base) ── */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-14: 56px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+
+  /* ── Border Radius ── */
+  --r-pill:   2.3em;
+  --r-card:   16px;
+  --r-img:    12px;
+  --r-subtle: 8px;
+  --r-circle: 50%;
+
+  /* ── Shadows ── */
+  --sh-1: 0 1px 4px rgba(0,0,0,.08);
+  --sh-2: 0 4px 16px rgba(0,0,0,.10);
+  --sh-3: 0 32px 80px rgba(0,0,0,.60);
+
+  /* ── Transitions ── */
+  --ease-fast:   all 150ms ease;
+  --ease-base:   all 200ms ease;
+  --ease-slow:   all 300ms ease;
+  --ease-hero:   background-image 500ms ease;
+
+  /* ── Layout ── */
+  --container-max: 1278px;
+  --nav-h:         108px;
+  --sidebar-w:     220px;
+}
+
+/* ============================================================
+   RESET + BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: var(--ff-ui);
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; height: auto; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+ul { list-style: none; }
+
+/* ============================================================
+   STYLE GUIDE META-UI
+   ============================================================ */
+.sg-body { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sg-sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--prim-tan);
+  overflow-y: auto; z-index: 200;
+  display: flex; flex-direction: column;
+  padding-bottom: var(--sp-12);
+}
+.sg-sidebar::-webkit-scrollbar { width: 4px; }
+.sg-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.25); border-radius: 2px; }
+
+.sg-sidebar-brand {
+  padding: var(--sp-5) var(--sp-6) var(--sp-4);
+  border-bottom: 1px solid rgba(255,255,255,.15);
+  margin-bottom: var(--sp-2);
+  flex-shrink: 0;
+}
+.sg-sidebar-brand-name {
+  font-family: var(--ff-display);
+  color: var(--prim-coral);
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.sg-sidebar-brand-sub {
+  margin-top: var(--sp-2);
+  font-family: var(--ff-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.45);
+}
+
+.sg-sidebar-group { padding: var(--sp-2) 0; }
+.sg-sidebar-group-label {
+  padding: var(--sp-2) var(--sp-6) var(--sp-1);
+  font-family: var(--ff-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.32);
+}
+.sg-sidebar-nav a {
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding: 7px var(--sp-6);
+  font-family: var(--ff-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,.65);
+  border-left: 2px solid transparent;
+  transition: var(--ease-fast);
+}
+.sg-sidebar-nav a .sg-nav-num {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,.28);
+  width: 18px;
+  flex-shrink: 0;
+}
+.sg-sidebar-nav a:hover {
+  color: var(--prim-white);
+  background: rgba(255,255,255,.10);
+}
+
+/* ── Main ── */
+.sg-main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  padding: var(--sp-12) 56px var(--sp-20);
+  max-width: 1100px;
+}
+
+/* ── Section Template ── */
+.sg-section { margin-bottom: 96px; scroll-margin-top: 32px; }
+.sg-section-header {
+  margin-bottom: var(--sp-8);
+  padding-bottom: var(--sp-4);
+  border-bottom: 2px solid var(--color-border);
+}
+.sg-eyebrow {
+  font-family: var(--ff-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--sp-1);
+}
+.sg-section-title {
+  font-family: var(--ff-display);
+  font-size: 2.2rem;
+  color: var(--color-text-heading);
+  line-height: 1.1em;
+  letter-spacing: var(--ls-tight);
+}
+.sg-section-desc {
+  margin-top: var(--sp-2);
+  font-family: var(--ff-ui);
+  font-size: 13px;
+  color: var(--prim-medium);
+  line-height: 1.6;
+}
+
+/* ── Spec table ── */
+.sg-spec { margin-bottom: var(--sp-8); }
+.sg-spec-row {
+  display: flex; align-items: baseline;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+  gap: var(--sp-4);
+}
+.sg-spec-row:first-child { border-top: 1px solid var(--color-border); }
+.sg-spec-label {
+  width: 180px; flex-shrink: 0;
+  font-family: var(--ff-ui);
+  font-weight: 600;
+  color: var(--prim-medium);
+}
+.sg-spec-val {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--color-text-primary);
+  flex: 1;
+}
+.sg-spec-note {
+  font-size: 11px;
+  color: var(--prim-tan);
+}
+
+/* ── Preview box ── */
+.sg-preview {
+  background: var(--prim-bg-light);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-subtle);
+  padding: var(--sp-8);
+}
+.sg-preview--warm   { background: var(--prim-bg-warm); }
+.sg-preview--dark   { background: var(--prim-espresso); }
+.sg-preview--white  { background: var(--prim-white); border: 1px solid var(--color-border); }
+.sg-preview-label {
+  font-family: var(--ff-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--prim-tan);
+  margin-bottom: var(--sp-4);
+}
+.sg-row { display: flex; flex-wrap: wrap; gap: var(--sp-4); align-items: flex-start; }
+.sg-col { display: flex; flex-direction: column; gap: var(--sp-4); }
+.sg-divider { height: 1px; background: var(--color-border); margin: var(--sp-6) 0; }
+.sg-note {
+  font-family: var(--ff-ui);
+  font-size: 11px;
+  color: var(--prim-medium);
+  background: var(--prim-bg-warm);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  border-radius: 4px;
+  padding: var(--sp-3) var(--sp-4);
+  margin-top: var(--sp-4);
+}
+
+/* ============================================================
+   COLOR SWATCHES
+   ============================================================ */
+.swatch-grid { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.swatch { display: flex; flex-direction: column; width: 90px; }
+.swatch-color {
+  height: 72px;
+  border-radius: 6px 6px 0 0;
+}
+.swatch-color--bordered { box-shadow: inset 0 0 0 1px var(--color-border); }
+.swatch-info {
+  background: var(--prim-white);
+  border: 1px solid var(--color-border);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  padding: var(--sp-2);
+}
+.swatch-name { font-family: var(--ff-ui); font-size: 10px; font-weight: 600; color: var(--prim-charcoal); line-height: 1.3; }
+.swatch-hex  { font-family: 'Courier New', monospace; font-size: 10px; color: var(--prim-tan); margin-top: 2px; }
+
+/* ============================================================
+   TYPOGRAPHY SPECIMENS
+   ============================================================ */
+.type-specimen { margin-bottom: var(--sp-6); }
+.type-specimen + .type-specimen { padding-top: var(--sp-6); border-top: 1px solid var(--color-border); }
+.type-meta {
+  font-family: 'Courier New', monospace;
+  font-size: 10px; color: var(--prim-tan);
+  margin-bottom: var(--sp-2);
+}
+.type-scale-row { display: flex; flex-direction: column; gap: var(--sp-3); }
+.type-scale-item { display: flex; align-items: baseline; gap: var(--sp-6); border-bottom: 1px solid var(--color-border); padding-bottom: var(--sp-3); }
+.type-scale-item:last-child { border-bottom: none; }
+.type-scale-label {
+  font-family: 'Courier New', monospace;
+  font-size: 10px; color: var(--prim-tan);
+  width: 100px; flex-shrink: 0;
+}
+
+/* ============================================================
+   SPACING RULER
+   ============================================================ */
+.space-row {
+  display: flex; align-items: center; gap: var(--sp-4);
+  padding: 6px 0; border-bottom: 1px solid var(--color-border);
+}
+.space-token { font-family: 'Courier New', monospace; font-size: 11px; color: var(--prim-tan); width: 60px; flex-shrink: 0; }
+.space-val   { font-family: 'Courier New', monospace; font-size: 11px; color: var(--prim-charcoal); width: 44px; flex-shrink: 0; }
+.space-bar   { background: var(--color-accent); height: 10px; border-radius: 2px; opacity: 0.7; }
+
+/* ============================================================
+   RADIUS SPECIMENS
+   ============================================================ */
+.radius-grid { display: flex; flex-wrap: wrap; gap: var(--sp-5); }
+.radius-box {
+  display: flex; flex-direction: column; align-items: center; gap: var(--sp-2);
+}
+.radius-preview {
+  width: 72px; height: 72px;
+  background: var(--color-accent);
+  opacity: 0.18;
+  border: 2px solid var(--color-accent);
+}
+.radius-label { font-family: 'Courier New', monospace; font-size: 10px; color: var(--prim-tan); text-align: center; }
+.radius-name  { font-family: var(--ff-ui); font-size: 11px; font-weight: 600; color: var(--prim-charcoal); text-align: center; }
+
+/* ============================================================
+   SHADOW SPECIMENS
+   ============================================================ */
+.shadow-grid { display: flex; gap: var(--sp-8); flex-wrap: wrap; }
+.shadow-box  { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
+.shadow-card {
+  width: 160px; height: 100px;
+  background: var(--prim-white);
+  border-radius: var(--r-subtle);
+  display: flex; align-items: center; justify-content: center;
+}
+.shadow-label { font-family: 'Courier New', monospace; font-size: 10px; color: var(--prim-tan); text-align: center; }
+.shadow-name  { font-family: var(--ff-ui); font-size: 12px; font-weight: 600; color: var(--prim-charcoal); }
+
+/* ============================================================
+   COMPONENT SPECIMENS
+   ============================================================ */
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px;
+  font-family: var(--ff-ui);
+  font-weight: 700;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: var(--ease-base);
+  border: none;
+  text-decoration: none;
+}
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--prim-white);
+  padding: 14px 36px;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+.btn-primary:hover { opacity: 0.88; }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--prim-charcoal);
+  padding: 13px 34px;
+  font-size: 1rem;
+  border: 2px solid var(--prim-charcoal);
+}
+.btn-secondary:hover { background: var(--prim-charcoal); color: var(--prim-white); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-accent);
+  padding: 13px 34px;
+  font-size: 1rem;
+  border: 2px solid var(--color-accent);
+}
+.btn-ghost:hover { background: var(--color-accent); color: var(--prim-white); }
+
+.btn-sm {
+  background: var(--color-accent);
+  color: var(--prim-white);
+  padding: 9px 24px;
+  font-size: 0.82rem;
+  border-radius: var(--r-pill);
+  font-weight: 700;
+}
+.btn-sm:hover { opacity: 0.88; }
+
+.btn-dark {
+  background: var(--prim-espresso);
+  color: var(--prim-white);
+  padding: 14px 36px;
+  font-size: 1rem;
+}
+.btn-dark:hover { opacity: 0.88; }
+
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Filter button */
+.btn-filter {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--ff-ui);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--prim-medium);
+  background: var(--prim-white);
+  border: 1.5px solid var(--prim-border-dark);
+  border-radius: var(--r-subtle);
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: var(--ease-fast);
+}
+.btn-filter:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.btn-filter.is-active {
+  color: var(--color-accent);
+  background: #fff3f0;
+  border-color: var(--color-accent);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center;
+  font-family: var(--ff-ui);
+  font-weight: 700;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+.badge-type {
+  background: var(--color-accent);
+  color: var(--prim-white);
+  font-size: var(--fs-label);
+  padding: 4px 12px;
+}
+.badge-region {
+  background: var(--prim-bg-light);
+  color: var(--prim-medium);
+  font-size: var(--fs-label);
+  padding: 4px 12px;
+}
+.badge-easy        { background: var(--status-easy-bg);       color: var(--status-easy-text);       font-size: var(--fs-label); padding: 3px 10px; }
+.badge-moderate    { background: var(--status-moderate-bg);   color: var(--status-moderate-text);   font-size: var(--fs-label); padding: 3px 10px; }
+.badge-hard        { background: var(--status-hard-bg);       color: var(--status-hard-text);       font-size: var(--fs-label); padding: 3px 10px; }
+.badge-strenuous   { background: var(--status-strenuous-bg);  color: var(--status-strenuous-text);  font-size: var(--fs-label); padding: 3px 10px; }
+
+.badge-open        { background: #dcfce7; color: #166534; font-size: var(--fs-label); padding: 3px 10px; }
+.badge-closed      { background: #fee2e2; color: #991b1b; font-size: var(--fs-label); padding: 3px 10px; }
+.badge-seasonal    { background: #eff6ff; color: #2563eb; font-size: var(--fs-label); padding: 3px 10px; }
+.badge-renovation  { background: #fef9c3; color: #854d0e; font-size: var(--fs-label); padding: 3px 10px; }
+
+/* Park Card Specimen */
+.park-card {
+  display: flex; flex-direction: column;
+  border-radius: var(--r-card);
+  border: 1px solid var(--color-border);
+  background: var(--prim-white);
+  overflow: hidden;
+  width: 300px;
+  transition: box-shadow 0.2s;
+}
+.park-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.10); }
+.park-card-img {
+  height: 200px;
+  background: var(--prim-bg-sand);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--prim-tan);
+  font-size: 0.8rem;
+  font-family: var(--ff-ui);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  position: relative;
+}
+.park-card-img-badge {
+  position: absolute; top: 12px; left: 12px;
+}
+.park-card-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+.park-card-name {
+  font-family: var(--ff-body);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--prim-espresso);
+  line-height: 1.25;
+}
+.park-card-region {
+  font-family: var(--ff-ui);
+  font-size: 0.78rem;
+  color: var(--prim-tan);
+  display: flex; align-items: center; gap: 4px;
+}
+.park-card-rating {
+  display: flex; align-items: center; gap: 4px;
+  font-family: var(--ff-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--prim-charcoal);
+}
+.park-card-stars { color: var(--prim-gold); font-size: 0.85rem; }
+.park-card-desc {
+  font-family: var(--ff-body);
+  font-size: 0.82rem;
+  color: var(--prim-medium);
+  line-height: 1.55;
+  margin-top: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Form Inputs */
+.field-group { display: flex; flex-direction: column; gap: 6px; max-width: 360px; }
+.field-label {
+  font-family: var(--ff-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--prim-tan);
+  letter-spacing: 0.04em;
+}
+.field-input {
+  background: var(--prim-bg-light);
+  border: 1.5px solid var(--prim-bg-light);
+  border-radius: var(--r-pill);
+  padding: 14px 22px;
+  font-family: var(--ff-body);
+  font-size: 0.9rem;
+  color: var(--prim-espresso);
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+.field-input::placeholder { color: var(--prim-tan); opacity: 0.7; }
+.field-input:focus { border-color: var(--color-accent); }
+.field-input--error { border-color: var(--color-accent); border-bottom-width: 2px; }
+
+.field-input-std {
+  background: var(--prim-bg-light);
+  border: 1.5px solid var(--prim-border-dark);
+  border-radius: var(--r-pill);
+  padding: 12px 20px;
+  font-family: var(--ff-body);
+  font-size: 0.9rem;
+  color: var(--prim-espresso);
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+.field-input-std:focus { border-color: var(--color-accent); }
+
+/* Newsletter row */
+.newsletter-row {
+  display: flex; gap: 8px;
+  background: var(--prim-bg-light);
+  border-radius: var(--r-pill);
+  padding: 6px 6px 6px 20px;
+  max-width: 420px;
+}
+.newsletter-input {
+  flex: 1; background: none; border: none; outline: none;
+  font-family: var(--ff-body); font-size: 0.88rem; color: var(--prim-espresso);
+}
+.newsletter-input::placeholder { color: var(--prim-tan); }
+
+/* Amenity chip */
+.amenity-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--ff-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--prim-medium);
+  background: var(--prim-bg-light);
+  border: 1px solid var(--prim-border-dark);
+  border-radius: var(--r-pill);
+  padding: 5px 10px;
+}
+.amenity-chip svg { width: 13px; height: 13px; color: var(--color-accent); flex-shrink: 0; }
+
+/* Icon grid */
+.icon-grid { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.icon-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; width: 76px;
+  padding: var(--sp-3) var(--sp-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-subtle);
+  background: var(--prim-white);
+  text-align: center;
+}
+.icon-item svg { width: 22px; height: 22px; color: var(--color-accent); }
+.icon-name { font-family: 'Courier New', monospace; font-size: 8.5px; color: var(--prim-tan); line-height: 1.3; }
+
+/* Grid layout diagrams */
+.grid-diagram {
+  display: grid;
+  gap: 6px;
+  margin-bottom: var(--sp-3);
+}
+.grid-cell {
+  background: rgba(255,112,68,0.12);
+  border: 1.5px solid rgba(255,112,68,0.35);
+  border-radius: 4px;
+  height: 36px;
+}
+.grid-label {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--prim-medium);
+  margin-bottom: var(--sp-2);
+  font-weight: 600;
+}
+.grid-spec {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--prim-tan);
+}
+
+/* Motion table */
+.motion-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.motion-table th {
+  text-align: left; padding: 8px 12px;
+  font-family: var(--ff-ui); font-weight: 700; font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--prim-tan);
+  border-bottom: 2px solid var(--color-border);
+}
+.motion-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--ff-ui); color: var(--prim-charcoal);
+  vertical-align: top;
+}
+.motion-table td:first-child { font-weight: 600; }
+.motion-table td code {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--prim-medium);
+  background: var(--prim-bg-light);
+  padding: 1px 4px; border-radius: 3px;
+}
+.motion-swatch {
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.motion-bar {
+  height: 6px; background: var(--color-accent);
+  border-radius: 3px; opacity: 0.65;
+}
+
+  </style>
+</head>
+<body>
+<div class="sg-body">
+
+  <!-- ══════════════════════════════════════════════════════════
+       SIDEBAR
+       ══════════════════════════════════════════════════════════ -->
+  <aside class="sg-sidebar">
+    <div class="sg-sidebar-brand">
+      <img src="DiscoverFloridaParks_emblem.png" alt="Discover Florida Parks emblem" style="width:52px;height:52px;object-fit:contain;margin-bottom:8px;filter:brightness(0) invert(1);opacity:0.65;">
+      <div class="sg-sidebar-brand-sub">Design System · v1.0</div>
+    </div>
+
+    <div class="sg-sidebar-group">
+      <div class="sg-sidebar-group-label">Foundations</div>
+      <nav class="sg-sidebar-nav">
+        <a href="#sec-brand"><span class="sg-nav-num">00</span> Brand &amp; Logo</a>
+        <a href="#sec-colors"><span class="sg-nav-num">01</span> Colors</a>
+        <a href="#sec-typography"><span class="sg-nav-num">02</span> Typography</a>
+        <a href="#sec-spacing"><span class="sg-nav-num">03</span> Spacing</a>
+        <a href="#sec-radius"><span class="sg-nav-num">04</span> Border Radius</a>
+        <a href="#sec-shadows"><span class="sg-nav-num">05</span> Shadows</a>
+        <a href="#sec-motion"><span class="sg-nav-num">06</span> Motion</a>
+      </nav>
+    </div>
+
+    <div class="sg-sidebar-group">
+      <div class="sg-sidebar-group-label">Components</div>
+      <nav class="sg-sidebar-nav">
+        <a href="#sec-buttons"><span class="sg-nav-num">07</span> Buttons</a>
+        <a href="#sec-badges"><span class="sg-nav-num">08</span> Badges &amp; Pills</a>
+        <a href="#sec-cards"><span class="sg-nav-num">09</span> Cards</a>
+        <a href="#sec-forms"><span class="sg-nav-num">10</span> Form Inputs</a>
+        <a href="#sec-icons"><span class="sg-nav-num">11</span> Icons</a>
+        <a href="#sec-grids"><span class="sg-nav-num">12</span> Grid Layouts</a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MAIN CONTENT
+       ══════════════════════════════════════════════════════════ -->
+  <main class="sg-main">
+
+    <!-- ─── 00 BRAND & LOGO ─── -->
+    <section class="sg-section" id="sec-brand">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">00 — Foundations</div>
+        <h2 class="sg-section-title">Brand &amp; Logo</h2>
+        <p class="sg-section-desc">Two brand assets: the horizontal lockup (logo + wordmark) for headers and marketing, and the standalone emblem for favicons, app icons, and constrained spaces.</p>
+      </div>
+
+      <!-- Full logo — light background -->
+      <p class="sg-preview-label" style="margin-bottom:var(--sp-3);">Horizontal Lockup — Light Background</p>
+      <div class="sg-preview sg-preview--white" style="display:flex;align-items:center;justify-content:center;padding:var(--sp-12) var(--sp-8);margin-bottom:var(--sp-5);">
+        <img src="DFP Logo FINAL.png" alt="Discover Florida Parks logo" style="width:320px;height:auto;max-width:100%;">
+      </div>
+
+      <!-- Full logo — dark background -->
+      <p class="sg-preview-label" style="margin-bottom:var(--sp-3);">Horizontal Lockup — Dark Background</p>
+      <div class="sg-preview sg-preview--dark" style="display:flex;align-items:center;justify-content:center;padding:var(--sp-12) var(--sp-8);margin-bottom:var(--sp-8);">
+        <img src="DFP Logo FINAL.png" alt="Discover Florida Parks logo on dark" style="width:320px;height:auto;max-width:100%;filter:brightness(0) invert(1);">
+      </div>
+
+      <!-- Emblem -->
+      <p class="sg-preview-label" style="margin-bottom:var(--sp-3);">Emblem — Standalone Mark</p>
+      <div class="sg-row" style="gap:var(--sp-5);margin-bottom:var(--sp-8);">
+        <div class="sg-preview sg-preview--white" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:var(--sp-4);padding:var(--sp-8);">
+          <img src="DiscoverFloridaParks_emblem.png" alt="DFP emblem" style="width:80px;height:80px;object-fit:contain;">
+          <div style="font-family:'Courier New',monospace;font-size:10px;color:var(--prim-tan);text-align:center;">80 × 80px</div>
+        </div>
+        <div class="sg-preview sg-preview--white" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:var(--sp-4);padding:var(--sp-8);">
+          <img src="DiscoverFloridaParks_emblem.png" alt="DFP emblem" style="width:48px;height:48px;object-fit:contain;">
+          <div style="font-family:'Courier New',monospace;font-size:10px;color:var(--prim-tan);text-align:center;">48 × 48px<br>nav / sidebar</div>
+        </div>
+        <div class="sg-preview sg-preview--white" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:var(--sp-4);padding:var(--sp-8);">
+          <img src="DiscoverFloridaParks_emblem.png" alt="DFP emblem" style="width:32px;height:32px;object-fit:contain;">
+          <div style="font-family:'Courier New',monospace;font-size:10px;color:var(--prim-tan);text-align:center;">32 × 32px<br>favicon size</div>
+        </div>
+        <div class="sg-preview sg-preview--dark" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:var(--sp-4);padding:var(--sp-8);">
+          <img src="DiscoverFloridaParks_emblem.png" alt="DFP emblem on dark" style="width:48px;height:48px;object-fit:contain;filter:brightness(0) invert(1);">
+          <div style="font-family:'Courier New',monospace;font-size:10px;color:rgba(255,255,255,.4);text-align:center;">White / dark bg</div>
+        </div>
+      </div>
+
+      <!-- Specs table -->
+      <div class="sg-spec">
+        <div class="sg-spec-row"><span class="sg-spec-label">Logo file</span><span class="sg-spec-val">DFP Logo FINAL.png</span><span class="sg-spec-note">horizontal lockup · PNG · white bg</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Emblem file</span><span class="sg-spec-val">DiscoverFloridaParks_emblem.png</span><span class="sg-spec-note">palm circle mark · PNG · white bg</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Site header (desktop)</span><span class="sg-spec-val">260 × 66px</span><span class="sg-spec-note">full logo in SiteHeader component</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Site header (mobile)</span><span class="sg-spec-val">200 × 52px</span><span class="sg-spec-note">scaled via .header-logo media query</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Footer logo</span><span class="sg-spec-val">auto width · 46px height</span><span class="sg-spec-note">full logo</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Emblem min size</span><span class="sg-spec-val">24 × 24px</span><span class="sg-spec-note">below this, palm detail is lost</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Dark bg treatment</span><span class="sg-spec-val">filter: brightness(0) invert(1)</span><span class="sg-spec-note">CSS inversion to white; or use dedicated white-variant asset</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Clear space</span><span class="sg-spec-val">≥ 1× emblem diameter on all sides</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Primary wordmark color</span><span class="sg-spec-val">#ff7044 "Discover" · #413734 "FLORIDA PARKS"</span></div>
+      </div>
+
+      <div class="sg-note">
+        <strong>When to use the emblem vs. full logo:</strong> Use the full horizontal lockup in the site header, footer, email templates, and any context with ≥200px of horizontal space. Use the standalone emblem for favicons, app icons, social profile images, map markers, and tight navigation contexts.
+      </div>
+    </section>
+
+    <!-- ─── 01 COLORS ─── -->
+    <section class="sg-section" id="sec-colors">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">01 — Foundations</div>
+        <h2 class="sg-section-title">Colors</h2>
+        <p class="sg-section-desc">Warm earth tones anchored by a single coral accent. All values defined as CSS custom properties in <code style="font-size:11px;background:var(--prim-bg-light);padding:1px 4px;border-radius:3px;">globals.css</code>.</p>
+      </div>
+
+      <p class="sg-preview-label">Brand &amp; Semantic</p>
+      <div class="swatch-grid" style="margin-bottom:var(--sp-6);">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#ff7044;"></div>
+          <div class="swatch-info"><div class="swatch-name">--accent</div><div class="swatch-hex">#ff7044</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#e85a2e;"></div>
+          <div class="swatch-info"><div class="swatch-name">--accent-dark</div><div class="swatch-hex">#e85a2e</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#362f35;"></div>
+          <div class="swatch-info"><div class="swatch-name">--heading-dark</div><div class="swatch-hex">#362f35</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#413734;"></div>
+          <div class="swatch-info"><div class="swatch-name">--dark</div><div class="swatch-hex">#413734</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#726d6b;"></div>
+          <div class="swatch-info"><div class="swatch-name">--medium</div><div class="swatch-hex">#726d6b</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#a6967c;"></div>
+          <div class="swatch-info"><div class="swatch-name">--tan</div><div class="swatch-hex">#a6967c</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#e8a020;"></div>
+          <div class="swatch-info"><div class="swatch-name">--gold</div><div class="swatch-hex">#e8a020</div></div>
+        </div>
+      </div>
+
+      <p class="sg-preview-label">Backgrounds</p>
+      <div class="swatch-grid" style="margin-bottom:var(--sp-6);">
+        <div class="swatch">
+          <div class="swatch-color swatch-color--bordered" style="background:#ffffff;"></div>
+          <div class="swatch-info"><div class="swatch-name">--bg</div><div class="swatch-hex">#ffffff</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#f9f7f5;"></div>
+          <div class="swatch-info"><div class="swatch-name">bg-warm</div><div class="swatch-hex">#f9f7f5</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#f5f3f0;"></div>
+          <div class="swatch-info"><div class="swatch-name">bg-light</div><div class="swatch-hex">#f5f3f0</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#f5f1ec;"></div>
+          <div class="swatch-info"><div class="swatch-name">bg-cream</div><div class="swatch-hex">#f5f1ec</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#f0ece6;"></div>
+          <div class="swatch-info"><div class="swatch-name">bg-sand</div><div class="swatch-hex">#f0ece6</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#edeae5;"></div>
+          <div class="swatch-info"><div class="swatch-name">bg-footer</div><div class="swatch-hex">#edeae5</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#362f35;"></div>
+          <div class="swatch-info"><div class="swatch-name">dark-surface</div><div class="swatch-hex">#362f35</div></div>
+        </div>
+      </div>
+
+      <p class="sg-preview-label">Borders</p>
+      <div class="swatch-grid" style="margin-bottom:var(--sp-6);">
+        <div class="swatch">
+          <div class="swatch-color swatch-color--bordered" style="background:#eeeeee;"></div>
+          <div class="swatch-info"><div class="swatch-name">--border</div><div class="swatch-hex">#eeeeee</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color swatch-color--bordered" style="background:#dfdfdf;"></div>
+          <div class="swatch-info"><div class="swatch-name">--border-dark</div><div class="swatch-hex">#dfdfdf</div></div>
+        </div>
+      </div>
+
+      <p class="sg-preview-label">Status / Semantic</p>
+      <div class="swatch-grid">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#dcfce7;"></div>
+          <div class="swatch-info"><div class="swatch-name">easy-bg</div><div class="swatch-hex">#dcfce7</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#166534;"></div>
+          <div class="swatch-info"><div class="swatch-name">easy-text</div><div class="swatch-hex">#166534</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#fef9c3;"></div>
+          <div class="swatch-info"><div class="swatch-name">moderate-bg</div><div class="swatch-hex">#fef9c3</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#854d0e;"></div>
+          <div class="swatch-info"><div class="swatch-name">moderate-text</div><div class="swatch-hex">#854d0e</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#ffedd5;"></div>
+          <div class="swatch-info"><div class="swatch-name">hard-bg</div><div class="swatch-hex">#ffedd5</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#9a3412;"></div>
+          <div class="swatch-info"><div class="swatch-name">hard-text</div><div class="swatch-hex">#9a3412</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#fee2e2;"></div>
+          <div class="swatch-info"><div class="swatch-name">danger-bg</div><div class="swatch-hex">#fee2e2</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#991b1b;"></div>
+          <div class="swatch-info"><div class="swatch-name">danger-text</div><div class="swatch-hex">#991b1b</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#eff6ff;"></div>
+          <div class="swatch-info"><div class="swatch-name">info-bg</div><div class="swatch-hex">#eff6ff</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#2563eb;"></div>
+          <div class="swatch-info"><div class="swatch-name">info-text</div><div class="swatch-hex">#2563eb</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 02 TYPOGRAPHY ─── -->
+    <section class="sg-section" id="sec-typography">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">02 — Foundations</div>
+        <h2 class="sg-section-title">Typography</h2>
+        <p class="sg-section-desc">Three self-hosted font families with distinct roles. Each font is loaded as <code style="font-size:11px;background:var(--prim-bg-light);padding:1px 4px;border-radius:3px;">@font-face</code> from the <code style="font-size:11px;background:var(--prim-bg-light);padding:1px 4px;border-radius:3px;">public/fonts/</code> directory.</p>
+      </div>
+
+      <!-- Shrikhand -->
+      <div class="type-specimen">
+        <div class="type-meta">--ff-display · Shrikhand · weight 400 · tracking -0.04em · role: Display headings</div>
+        <div class="type-scale-row">
+          <div class="type-scale-item">
+            <span class="type-scale-label">--fs-hero</span>
+            <span style="font-family:'Shrikhand',cursive;font-size:clamp(2.4rem,5vw,4.2rem);color:var(--prim-espresso);letter-spacing:-0.04em;line-height:1;">Discover Florida</span>
+          </div>
+          <div class="type-scale-item">
+            <span class="type-scale-label">--fs-h2 · 4.14rem</span>
+            <span style="font-family:'Shrikhand',cursive;font-size:3.2rem;color:var(--prim-espresso);letter-spacing:-0.04em;line-height:1;">State Parks</span>
+          </div>
+          <div class="type-scale-item">
+            <span class="type-scale-label">--fs-h3 · 2.14rem</span>
+            <span style="font-family:'Shrikhand',cursive;font-size:2rem;color:var(--prim-espresso);letter-spacing:-0.04em;line-height:1.1;">Amenities &amp; Activities</span>
+          </div>
+          <div class="type-scale-item">
+            <span class="type-scale-label">Accent color</span>
+            <span style="font-family:'Shrikhand',cursive;font-size:1.6rem;color:var(--color-accent);letter-spacing:-0.04em;line-height:1.1;">DFP Admin</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Glegoo -->
+      <div class="type-specimen">
+        <div class="type-meta">--ff-body · Glegoo · weights 400 &amp; 700 · lh 1.55em · role: Body copy, card titles, descriptions</div>
+        <div class="type-scale-row">
+          <div class="type-scale-item">
+            <span class="type-scale-label">700 · 1.1rem</span>
+            <span style="font-family:'Glegoo',serif;font-size:1.1rem;font-weight:700;color:var(--prim-espresso);">Fakahatchee Strand Preserve State Park</span>
+          </div>
+          <div class="type-scale-item">
+            <span class="type-scale-label">700 · 1rem</span>
+            <span style="font-family:'Glegoo',serif;font-size:1rem;font-weight:700;color:var(--prim-espresso);">Fun Facts &amp; Visitor Tips</span>
+          </div>
+          <div class="type-scale-item">
+            <span class="type-scale-label">400 · 0.95rem</span>
+            <span style="font-family:'Glegoo',serif;font-size:0.95rem;font-weight:400;color:var(--prim-medium);line-height:1.6;">Home to the largest intact stand of native royal palms in the United States, this remarkable wetland preserves a ghost orchid habitat found nowhere else in Florida.</span>
+          </div>
+          <div class="type-scale-item">
+            <span class="type-scale-label">700 · 0.88rem</span>
+            <span style="font-family:'Glegoo',serif;font-size:0.88rem;font-weight:700;color:var(--prim-medium);">Visitor Tips · Fun Facts</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Archivo -->
+      <div class="type-specimen">
+        <div class="type-meta">--ff-ui · Archivo · variable 400–700 · role: Navigation, labels, buttons, UI chrome</div>
+        <div class="type-scale-row">
+          <div class="type-scale-item">
+            <span class="type-scale-label">700 · 1rem</span>
+            <span style="font-family:'Archivo',sans-serif;font-size:1rem;font-weight:700;color:var(--prim-espresso);">Plan Your Visit</span>
+          </div>
+          <div class="type-scale-item">
+            <span class="type-scale-label">600 · 0.88rem</span>
+            <span style="font-family:'Archivo',sans-serif;font-size:0.88rem;font-weight:600;color:var(--prim-charcoal);">Parks · Map · Experiences · Blog</span>
+          </div>
+          <div class="type-scale-item">
+            <span class="type-scale-label">600 · 0.82rem</span>
+            <span style="font-family:'Archivo',sans-serif;font-size:0.82rem;font-weight:600;color:var(--prim-medium);">Filter by Region &nbsp;·&nbsp; Sort by Rating</span>
+          </div>
+          <div class="type-scale-item">
+            <span class="type-scale-label">700 · 0.72rem · caps</span>
+            <span style="font-family:'Archivo',sans-serif;font-size:0.72rem;font-weight:700;color:var(--prim-tan);letter-spacing:0.12em;text-transform:uppercase;">North Florida · State Park · 4.8 ★</span>
+          </div>
+          <div class="type-scale-item">
+            <span class="type-scale-label">500 · 0.75rem</span>
+            <span style="font-family:'Archivo',sans-serif;font-size:0.75rem;font-weight:500;color:var(--prim-tan);">Last updated April 2025</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sg-note">
+        <strong>Font loading:</strong> All three fonts are self-hosted as <code>.woff2</code> in <code>public/fonts/</code> with <code>font-display: swap</code>. The design system doc loads them from Google Fonts CDN for portability.
+      </div>
+    </section>
+
+    <!-- ─── 03 SPACING ─── -->
+    <section class="sg-section" id="sec-spacing">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">03 — Foundations</div>
+        <h2 class="sg-section-title">Spacing</h2>
+        <p class="sg-section-desc">8px base grid. Section padding: 80px vertical desktop → 56px tablet → 36px mobile. Container max-width: 1278px.</p>
+      </div>
+
+      <div class="sg-preview sg-preview--white">
+        <div class="space-row"><span class="space-token">--sp-1</span><span class="space-val">4px</span><div class="space-bar" style="width:4px;"></div></div>
+        <div class="space-row"><span class="space-token">--sp-2</span><span class="space-val">8px</span><div class="space-bar" style="width:8px;"></div></div>
+        <div class="space-row"><span class="space-token">--sp-3</span><span class="space-val">12px</span><div class="space-bar" style="width:12px;"></div></div>
+        <div class="space-row"><span class="space-token">--sp-4</span><span class="space-val">16px</span><div class="space-bar" style="width:16px;"></div></div>
+        <div class="space-row"><span class="space-token">--sp-5</span><span class="space-val">20px</span><div class="space-bar" style="width:20px;"></div></div>
+        <div class="space-row"><span class="space-token">--sp-6</span><span class="space-val">24px</span><div class="space-bar" style="width:24px;"></div></div>
+        <div class="space-row"><span class="space-token">--sp-8</span><span class="space-val">32px</span><div class="space-bar" style="width:32px;"></div></div>
+        <div class="space-row"><span class="space-token">--sp-10</span><span class="space-val">40px</span><div class="space-bar" style="width:40px;"></div></div>
+        <div class="space-row"><span class="space-token">--sp-12</span><span class="space-val">48px</span><div class="space-bar" style="width:48px;"></div></div>
+        <div class="space-row"><span class="space-token">--sp-14</span><span class="space-val">56px</span><div class="space-bar" style="width:56px;"></div></div>
+        <div class="space-row"><span class="space-token">--sp-16</span><span class="space-val">64px</span><div class="space-bar" style="width:64px;"></div></div>
+        <div class="space-row"><span class="space-token">--sp-20</span><span class="space-val">80px</span><div class="space-bar" style="width:80px;"></div></div>
+      </div>
+
+      <div class="sg-divider"></div>
+      <div class="sg-spec">
+        <div class="sg-spec-row"><span class="sg-spec-label">Card padding</span><span class="sg-spec-val">18px 20px</span><span class="sg-spec-note">park-cards-grid items</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Section padding (desktop)</span><span class="sg-spec-val">80px 24px</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Section padding (tablet)</span><span class="sg-spec-val">56px 16px</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Section padding (mobile)</span><span class="sg-spec-val">36px 16px</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Hero padding (horizontal)</span><span class="sg-spec-val">80px</span><span class="sg-spec-note">24px on mobile</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Container max-width</span><span class="sg-spec-val">1278px</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Nav height (desktop)</span><span class="sg-spec-val">108px</span><span class="sg-spec-note">72px on mobile</span></div>
+      </div>
+    </section>
+
+    <!-- ─── 04 BORDER RADIUS ─── -->
+    <section class="sg-section" id="sec-radius">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">04 — Foundations</div>
+        <h2 class="sg-section-title">Border Radius</h2>
+        <p class="sg-section-desc">Pill-shaped CTAs are the dominant shape. Cards and images use progressively smaller radii.</p>
+      </div>
+
+      <div class="sg-preview sg-preview--white">
+        <div class="radius-grid">
+          <div class="radius-box">
+            <div class="radius-preview" style="border-radius:2.3em;"></div>
+            <div class="radius-name">Pill</div>
+            <div class="radius-label">2.3em<br>buttons · inputs · badges</div>
+          </div>
+          <div class="radius-box">
+            <div class="radius-preview" style="border-radius:16px;"></div>
+            <div class="radius-name">Card</div>
+            <div class="radius-label">16px<br>park cards · modals</div>
+          </div>
+          <div class="radius-box">
+            <div class="radius-preview" style="border-radius:12px;"></div>
+            <div class="radius-name">Image</div>
+            <div class="radius-label">12px<br>image containers</div>
+          </div>
+          <div class="radius-box">
+            <div class="radius-preview" style="border-radius:8px;"></div>
+            <div class="radius-name">Subtle</div>
+            <div class="radius-label">8px<br>filter buttons · toasts</div>
+          </div>
+          <div class="radius-box">
+            <div class="radius-preview" style="border-radius:50%;"></div>
+            <div class="radius-name">Circle</div>
+            <div class="radius-label">50%<br>avatars · icon buttons</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 05 SHADOWS ─── -->
+    <section class="sg-section" id="sec-shadows">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">05 — Foundations</div>
+        <h2 class="sg-section-title">Shadows</h2>
+        <p class="sg-section-desc">Three elevation levels. Cards use --sh-1 at rest and --sh-2 on hover. Modals and map overlays use --sh-3.</p>
+      </div>
+
+      <div class="sg-preview sg-preview--warm">
+        <div class="shadow-grid">
+          <div class="shadow-box">
+            <div class="shadow-card" style="box-shadow:var(--sh-1);"></div>
+            <div class="shadow-name">Subtle</div>
+            <div class="shadow-label">--sh-1<br>0 1px 4px rgba(0,0,0,.08)<br>card default</div>
+          </div>
+          <div class="shadow-box">
+            <div class="shadow-card" style="box-shadow:var(--sh-2);"></div>
+            <div class="shadow-name">Raised</div>
+            <div class="shadow-label">--sh-2<br>0 4px 16px rgba(0,0,0,.10)<br>card hover</div>
+          </div>
+          <div class="shadow-box">
+            <div class="shadow-card" style="box-shadow:0 16px 48px rgba(0,0,0,.28);"></div>
+            <div class="shadow-name">Modal</div>
+            <div class="shadow-label">--sh-3<br>0 32px 80px rgba(0,0,0,.60)<br>modals · map overlays</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 06 MOTION ─── -->
+    <section class="sg-section" id="sec-motion">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">06 — Foundations</div>
+        <h2 class="sg-section-title">Motion</h2>
+        <p class="sg-section-desc">All interactions use <code style="font-size:11px;background:var(--prim-bg-light);padding:1px 4px;border-radius:3px;">ease</code> curves. Hover/filter states are fast; hero and image transitions are slow.</p>
+      </div>
+
+      <table class="motion-table">
+        <thead>
+          <tr>
+            <th>Token</th>
+            <th>Duration</th>
+            <th>Property</th>
+            <th>Used on</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>--ease-fast</td>
+            <td><div class="motion-swatch"><div class="motion-bar" style="width:30px;"></div> 150ms</div></td>
+            <td><code>all</code></td>
+            <td>Filter buttons, nav links, color/border shifts</td>
+          </tr>
+          <tr>
+            <td>--ease-base</td>
+            <td><div class="motion-swatch"><div class="motion-bar" style="width:50px;"></div> 200ms</div></td>
+            <td><code>all</code></td>
+            <td>Cards (shadow), button opacity, form focus borders</td>
+          </tr>
+          <tr>
+            <td>--ease-slow</td>
+            <td><div class="motion-swatch"><div class="motion-bar" style="width:80px;"></div> 300ms</div></td>
+            <td><code>all</code></td>
+            <td>Scroll-to-top fade, hero content reveals</td>
+          </tr>
+          <tr>
+            <td>--ease-hero</td>
+            <td><div class="motion-swatch"><div class="motion-bar" style="width:130px;"></div> 500ms</div></td>
+            <td><code>background-image</code></td>
+            <td>Hero slider background crossfade; image scale on hover</td>
+          </tr>
+          <tr>
+            <td>hero interval</td>
+            <td>—</td>
+            <td>setInterval</td>
+            <td>Auto-advance hero slides every 5000ms</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ─── 07 BUTTONS ─── -->
+    <section class="sg-section" id="sec-buttons">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">07 — Components</div>
+        <h2 class="sg-section-title">Buttons</h2>
+        <p class="sg-section-desc">All buttons use <code style="font-size:11px;background:var(--prim-bg-light);padding:1px 4px;border-radius:3px;">border-radius: 2.3em</code> (pill shape), Archivo Bold, and a 200ms ease transition.</p>
+      </div>
+
+      <div class="sg-preview sg-preview--white" style="margin-bottom:var(--sp-6);">
+        <div class="sg-preview-label">Primary &amp; Variants</div>
+        <div class="sg-row">
+          <button class="btn btn-primary">Plan Your Visit</button>
+          <button class="btn btn-secondary">View All Parks</button>
+          <button class="btn btn-ghost">Explore Map</button>
+          <button class="btn btn-dark">Admin Login</button>
+        </div>
+      </div>
+
+      <div class="sg-preview sg-preview--white" style="margin-bottom:var(--sp-6);">
+        <div class="sg-preview-label">Sizes &amp; States</div>
+        <div class="sg-row" style="align-items:center;">
+          <button class="btn btn-primary">Default · 14px 36px</button>
+          <button class="btn btn-sm">Small · 9px 24px</button>
+          <button class="btn btn-primary" disabled>Disabled</button>
+        </div>
+      </div>
+
+      <div class="sg-preview sg-preview--warm">
+        <div class="sg-preview-label">Filter Button</div>
+        <div class="sg-row">
+          <button class="btn-filter">All Parks</button>
+          <button class="btn-filter is-active">State Parks</button>
+          <button class="btn-filter">National Parks</button>
+          <button class="btn-filter">Dog Friendly</button>
+        </div>
+      </div>
+
+      <div class="sg-divider"></div>
+      <div class="sg-spec">
+        <div class="sg-spec-row"><span class="sg-spec-label">Font family</span><span class="sg-spec-val">Archivo, sans-serif</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Font weight</span><span class="sg-spec-val">700</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Border radius</span><span class="sg-spec-val">2.3em (pill)</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Primary padding</span><span class="sg-spec-val">14px 36px</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Small padding</span><span class="sg-spec-val">9px 24px</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Primary hover</span><span class="sg-spec-val">opacity: 0.88</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Disabled opacity</span><span class="sg-spec-val">0.45</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Transition</span><span class="sg-spec-val">all 200ms ease</span></div>
+      </div>
+    </section>
+
+    <!-- ─── 08 BADGES ─── -->
+    <section class="sg-section" id="sec-badges">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">08 — Components</div>
+        <h2 class="sg-section-title">Badges &amp; Pills</h2>
+        <p class="sg-section-desc">Pill-shaped labels used for park type, park region, trail difficulty, park status, and amenity chips.</p>
+      </div>
+
+      <div class="sg-preview sg-preview--white" style="margin-bottom:var(--sp-5);">
+        <div class="sg-preview-label">Park Type &amp; Region</div>
+        <div class="sg-row">
+          <span class="badge badge-type">State Park</span>
+          <span class="badge badge-type">National Park</span>
+          <span class="badge badge-type">State Forest</span>
+          <span class="badge badge-region">North Florida</span>
+          <span class="badge badge-region">Central Florida</span>
+        </div>
+      </div>
+
+      <div class="sg-preview sg-preview--white" style="margin-bottom:var(--sp-5);">
+        <div class="sg-preview-label">Trail Difficulty</div>
+        <div class="sg-row">
+          <span class="badge badge-easy">Easy</span>
+          <span class="badge badge-moderate">Moderate</span>
+          <span class="badge badge-hard">Hard</span>
+          <span class="badge badge-strenuous">Strenuous</span>
+        </div>
+      </div>
+
+      <div class="sg-preview sg-preview--white" style="margin-bottom:var(--sp-5);">
+        <div class="sg-preview-label">Park Status</div>
+        <div class="sg-row">
+          <span class="badge badge-open">Open</span>
+          <span class="badge badge-closed">Closed</span>
+          <span class="badge badge-seasonal">Seasonal</span>
+          <span class="badge badge-renovation">Under Renovation</span>
+        </div>
+      </div>
+
+      <div class="sg-preview sg-preview--white">
+        <div class="sg-preview-label">Amenity Chips (icon + label)</div>
+        <div class="sg-row" style="flex-wrap:wrap;">
+          <span class="amenity-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>
+            Hiking
+          </span>
+          <span class="amenity-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><path d="M12 7v8M9 15l3 4 3-4M7 9l2 2M17 9l-2 2"/></svg>
+            Dog Friendly
+          </span>
+          <span class="amenity-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2l5 5H7l5-5zM7 17l5 5 5-5"/></svg>
+            Camping
+          </span>
+          <span class="amenity-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20l4-8 4 8M16 4v16M16 4l4 4M16 4l-4 4"/></svg>
+            Fishing
+          </span>
+          <span class="amenity-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            Paddling
+          </span>
+          <span class="amenity-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            Biking
+          </span>
+          <span class="amenity-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+            Wildlife Viewing
+          </span>
+          <span class="amenity-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            Swimming
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 09 CARDS ─── -->
+    <section class="sg-section" id="sec-cards">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">09 — Components</div>
+        <h2 class="sg-section-title">Cards</h2>
+        <p class="sg-section-desc">Park cards use a consistent structure: 200px image area → type badge → Glegoo bold title → region label → star rating → 2-line description. Shadow lifts on hover.</p>
+      </div>
+
+      <div class="sg-preview sg-preview--warm">
+        <div class="sg-row" style="gap:var(--sp-6);flex-wrap:wrap;">
+
+          <div class="park-card">
+            <div class="park-card-img">
+              <div class="park-card-img-badge"><span class="badge badge-type">State Park</span></div>
+              <span style="font-size:0.72rem;letter-spacing:0.06em;">Park Photo</span>
+            </div>
+            <div class="park-card-body">
+              <div class="park-card-name">Fakahatchee Strand Preserve State Park</div>
+              <div class="park-card-region">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Southwest Florida
+              </div>
+              <div class="park-card-rating">
+                <span class="park-card-stars">★★★★★</span> 4.8 <span style="color:var(--prim-tan);font-weight:400;">(1,204)</span>
+              </div>
+              <div class="park-card-desc">Home to the largest intact stand of native royal palms and the ghost orchid, a rare beauty found nowhere else.</div>
+            </div>
+          </div>
+
+          <div class="park-card">
+            <div class="park-card-img" style="background:#e8e4de;">
+              <div class="park-card-img-badge"><span class="badge badge-type">National Park</span></div>
+              <span style="font-size:0.72rem;letter-spacing:0.06em;">Park Photo</span>
+            </div>
+            <div class="park-card-body">
+              <div class="park-card-name">Everglades National Park</div>
+              <div class="park-card-region">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                South Florida
+              </div>
+              <div class="park-card-rating">
+                <span class="park-card-stars">★★★★★</span> 4.7 <span style="color:var(--prim-tan);font-weight:400;">(8,302)</span>
+              </div>
+              <div class="park-card-desc">The largest tropical wilderness in the United States — a mosaic of mangroves, sawgrass prairies, and abundant wildlife.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="sg-divider"></div>
+      <div class="sg-spec">
+        <div class="sg-spec-row"><span class="sg-spec-label">Image height</span><span class="sg-spec-val">200px</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Card border</span><span class="sg-spec-val">1px solid #eeeeee</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Card radius</span><span class="sg-spec-val">16px</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Card padding</span><span class="sg-spec-val">18px 20px</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Title font</span><span class="sg-spec-val">Glegoo 700, 1.05rem</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Description font</span><span class="sg-spec-val">Glegoo 400, 0.82rem, 2 lines clamped</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Hover</span><span class="sg-spec-val">box-shadow 0 4px 16px rgba(0,0,0,.10)</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Grid</span><span class="sg-spec-val">3 cols desktop → 2 cols tablet → 1 col mobile</span></div>
+      </div>
+    </section>
+
+    <!-- ─── 10 FORMS ─── -->
+    <section class="sg-section" id="sec-forms">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">10 — Components</div>
+        <h2 class="sg-section-title">Form Inputs</h2>
+        <p class="sg-section-desc">Inputs use <code style="font-size:11px;background:var(--prim-bg-light);padding:1px 4px;border-radius:3px;">border-radius: 2.3em</code> (pill) with a warm beige background. Glegoo is the input font; Archivo is the label font.</p>
+      </div>
+
+      <div class="sg-preview sg-preview--white" style="margin-bottom:var(--sp-6);">
+        <div class="sg-preview-label">Default / Focus / Error</div>
+        <div class="sg-col" style="max-width:400px;gap:var(--sp-5);">
+
+          <div class="field-group">
+            <label class="field-label">Your Name</label>
+            <input class="field-input" type="text" placeholder="Jane Smith" value="">
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Email Address (focus)</label>
+            <input class="field-input" type="email" placeholder="jane@example.com" style="border-color:var(--color-accent);">
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Message (error)</label>
+            <input class="field-input field-input--error" type="text" placeholder="Enter your message" value="Too short">
+            <span style="font-family:var(--ff-ui);font-size:0.75rem;color:var(--color-accent);margin-top:2px;">Please enter at least 20 characters.</span>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="sg-preview sg-preview--dark" style="margin-bottom:var(--sp-6);">
+        <div class="sg-preview-label" style="color:rgba(255,255,255,.4);">Newsletter Input (on dark bg)</div>
+        <div class="newsletter-row">
+          <input class="newsletter-input" type="email" placeholder="Your email address">
+          <button class="btn btn-primary" style="padding:10px 22px;font-size:0.85rem;">Subscribe</button>
+        </div>
+      </div>
+
+      <div class="sg-preview sg-preview--warm">
+        <div class="sg-preview-label">Search / Filter Input</div>
+        <div style="position:relative;max-width:360px;">
+          <svg style="position:absolute;left:16px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--prim-tan);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input class="field-input-std" type="text" placeholder="Search parks by name or city…" style="padding-left:44px;">
+        </div>
+      </div>
+
+      <div class="sg-divider"></div>
+      <div class="sg-spec">
+        <div class="sg-spec-row"><span class="sg-spec-label">Input font</span><span class="sg-spec-val">Glegoo, serif · 0.9rem</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Label font</span><span class="sg-spec-val">Archivo · 0.78rem · 600 · letter-spacing 0.04em</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Input background</span><span class="sg-spec-val">#f5f3f0 (bg-light)</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Border radius</span><span class="sg-spec-val">2.3em (pill)</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Padding</span><span class="sg-spec-val">14px 22px</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Focus border</span><span class="sg-spec-val">1.5px solid #ff7044</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Error state</span><span class="sg-spec-val">border-bottom: 2px solid #ff7044</span></div>
+        <div class="sg-spec-row"><span class="sg-spec-label">Text color</span><span class="sg-spec-val">#362f35 (heading-dark)</span></div>
+      </div>
+    </section>
+
+    <!-- ─── 11 ICONS ─── -->
+    <section class="sg-section" id="sec-icons">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">11 — Components</div>
+        <h2 class="sg-section-title">Icons</h2>
+        <p class="sg-section-desc">Two icon libraries in use. <strong>lucide-react</strong> is the primary library (client components). <strong>@phosphor-icons/react</strong> is used in server components (SSR-safe). Default size: 16–22px. Stroke: 2px. Color: inherits or uses <code style="font-size:11px;background:var(--prim-bg-light);padding:1px 4px;border-radius:3px;">var(--color-accent)</code>.</p>
+      </div>
+
+      <p class="sg-preview-label" style="margin-bottom:var(--sp-3);">lucide-react — Navigation &amp; UI</p>
+      <div class="icon-grid" style="margin-bottom:var(--sp-6);">
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="icon-name">MapPin</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span class="icon-name">Star</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          <span class="icon-name">ArrowRight</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          <span class="icon-name">ChevronLeft</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          <span class="icon-name">ChevronRight</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          <span class="icon-name">Map</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <span class="icon-name">X</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="icon-name">Search</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+          <span class="icon-name">SlidersH</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.88 11a19.79 19.79 0 01-3.07-8.67A2 2 0 013.8 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9a16 16 0 006 6l.92-.92a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+          <span class="icon-name">Phone</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+          <span class="icon-name">Globe</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span class="icon-name">Clock</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 010 7H6"/></svg>
+          <span class="icon-name">DollarSign</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          <span class="icon-name">Users</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          <span class="icon-name">Leaf</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="icon-name">TreePine</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><path d="M12 7l-5 9h10L12 7zM7 16l-4 5h18l-4-5"/></svg>
+          <span class="icon-name">Tent</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M2 12c0-5.52 4.48-10 10-10M2 12c0 5.52 4.48 10 10 10M22 12c0 5.52-4.48 10-10 10M22 12c0-5.52-4.48-10-10-10"/></svg>
+          <span class="icon-name">Waves</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="4" r="2"/><path d="M15 20h-6l1-7H9l2-5"/><path d="M20 8l-3 12"/><path d="M4 8l3 12"/></svg>
+          <span class="icon-name">Bike</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4a1 1 0 01.82.44l7 10A1 1 0 0119 16H5a1 1 0 01-.82-1.56l7-10A1 1 0 0112 4z"/></svg>
+          <span class="icon-name">Bird</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+          <span class="icon-name">Crosshair</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H2l7 9v5l6 3v-8l7-9H8z"/></svg>
+          <span class="icon-name">MountainSnow</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          <span class="icon-name">Sailboat</span>
+        </div>
+        <div class="icon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span class="icon-name">Calendar</span>
+        </div>
+      </div>
+
+      <div class="sg-note">
+        <strong>lucide-react</strong> — used in client components (<code>'use client'</code>). Verify icon names against installed version before use — names occasionally differ between releases.<br><br>
+        <strong>@phosphor-icons/react</strong> — used in server components for SSR safety. Icons in use: <code>Waves, Ticket, Rocket, Plant, Umbrella, Mountains, Tree, Bird, Star, TreePalm, Drop</code>.
+      </div>
+    </section>
+
+    <!-- ─── 12 GRIDS ─── -->
+    <section class="sg-section" id="sec-grids">
+      <div class="sg-section-header">
+        <div class="sg-eyebrow">12 — Components</div>
+        <h2 class="sg-section-title">Grid Layouts</h2>
+        <p class="sg-section-desc">Named CSS grid classes defined in <code style="font-size:11px;background:var(--prim-bg-light);padding:1px 4px;border-radius:3px;">globals.css</code>. All collapse to fewer columns at tablet/mobile breakpoints.</p>
+      </div>
+
+      <div class="sg-preview sg-preview--white">
+
+        <div style="margin-bottom:var(--sp-8);">
+          <div class="grid-label">.park-cards-grid — 3 cols · 24px gap → 2 cols (1024px) → 1 col (768px)</div>
+          <div class="grid-diagram" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+          </div>
+          <div class="grid-spec">auto-fill 3 columns · Park listing page · main park browse grid</div>
+        </div>
+
+        <div style="margin-bottom:var(--sp-8);">
+          <div class="grid-label">.grid-featured — 3 cols · 24px gap → 1 col (768px)</div>
+          <div class="grid-diagram" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+          </div>
+          <div class="grid-spec">Homepage featured parks section</div>
+        </div>
+
+        <div style="margin-bottom:var(--sp-8);">
+          <div class="grid-label">.grid-regions — 3 cols · 20px gap → 2 cols (1024px) → 1 col (640px)</div>
+          <div class="grid-diagram" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+          </div>
+          <div class="grid-spec">Homepage Browse by Region section</div>
+        </div>
+
+        <div style="margin-bottom:var(--sp-8);">
+          <div class="grid-label">.grid-types — 6 cols · 16px gap → 3 cols (1024px) → 2 cols (480px)</div>
+          <div class="grid-diagram" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;">
+            <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+            <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+          </div>
+          <div class="grid-spec">Homepage Browse by Type — icon category cards</div>
+        </div>
+
+        <div style="margin-bottom:var(--sp-8);">
+          <div class="grid-label">.park-stats-grid — auto-fit minmax(190px, 1fr) · 16px gap → 2 cols (768px)</div>
+          <div class="grid-diagram" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+            <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+          </div>
+          <div class="grid-spec">Park detail page stat cards (hours, admission, crowd, best season)</div>
+        </div>
+
+        <div style="margin-bottom:var(--sp-8);">
+          <div class="grid-label">.park-detail-layout — 1fr 300px · 48px gap → 1 col (1024px)</div>
+          <div class="grid-diagram" style="grid-template-columns:1fr 300px;gap:12px;">
+            <div class="grid-cell" style="height:60px;"></div>
+            <div class="grid-cell" style="height:60px;max-width:300px;width:100%;"></div>
+          </div>
+          <div class="grid-spec">Park detail page: main content + sidebar (map, nearby parks)</div>
+        </div>
+
+        <div>
+          <div class="grid-label">.footer-nav-grid — 3 cols · 64px 24px gap → 2 cols (1024px) → 1 col (640px)</div>
+          <div class="grid-diagram" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+          </div>
+          <div class="grid-spec">Footer navigation columns</div>
+        </div>
+
+      </div>
+
+      <div class="sg-note">
+        All breakpoints are defined with <code>@media (max-width: ...)</code>. Tablet: 1024px · Mobile: 768px · Small mobile: 640px · Extra small: 480px.
+      </div>
+    </section>
+
+  </main>
+</div>
+</body>
+</html>

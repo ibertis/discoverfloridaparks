@@ -1,32 +1,19 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { notFound } from 'next/navigation';
 import SiteHeader from '@/app/SiteHeader';
 import SiteFooter from '@/app/SiteFooter';
 import FooterLinks from '@/app/FooterLinks';
-import { client as sanityClient } from '@/sanity/lib/client';
-import { postsByCategoryQuery, allCategoriesQuery } from '@/sanity/queries';
-import { urlFor } from '@/sanity/imageUrl';
+import { getPostsByCategory, getDistinctCategories } from '@/lib/blog';
 
-interface Post {
-  _id: string;
-  title: string;
-  slug: { current: string };
-  excerpt?: string;
-  mainImage?: { asset: { _ref: string }; alt?: string };
-  publishedAt?: string;
-  categories?: string[];
-  author?: string;
-}
+export const revalidate = 60;
 
 function slugToCategory(slug: string): string {
   return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
 export async function generateStaticParams() {
-  const categories: string[] = await sanityClient.fetch(allCategoriesQuery);
+  const categories = await getDistinctCategories();
   return categories.map(cat => ({
     slug: cat.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
   }));
@@ -44,15 +31,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function BlogCategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const category = slugToCategory(slug);
-  const posts: Post[] = await sanityClient.fetch(postsByCategoryQuery, { category });
-
-  if (posts === null) notFound();
+  const posts = await getPostsByCategory(category);
 
   return (
     <div style={{ background: '#fff', color: '#413734', minHeight: '100vh' }}>
       <SiteHeader />
 
-      {/* Banner */}
       <div style={{ background: '#f9f7f5', borderBottom: '1px solid #eeeeee', padding: '56px 24px' }}>
         <div style={{ maxWidth: 1278, margin: '0 auto' }}>
           <Link
@@ -74,7 +58,6 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ s
         </div>
       </div>
 
-      {/* Posts grid */}
       <div style={{ maxWidth: 1278, margin: '0 auto', padding: '56px 24px 80px' }}>
         {posts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
@@ -95,20 +78,14 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ s
           <div className="park-cards-grid">
             {posts.map(post => (
               <Link
-                key={post._id}
-                href={`/blog/${post.slug.current}`}
+                key={post.id}
+                href={`/blog/${post.slug}`}
                 style={{ display: 'flex', flexDirection: 'column', background: '#fff', border: '1px solid #eeeeee', borderRadius: 16, overflow: 'hidden', textDecoration: 'none', transition: 'box-shadow 0.2s' }}
                 className="hover:shadow-md"
               >
-                {post.mainImage?.asset ? (
-                  <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#f9f7f5', flexShrink: 0 }}>
-                    <Image
-                      src={urlFor(post.mainImage).width(800).height(450).url()}
-                      alt={post.mainImage.alt ?? post.title}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
+                {post.featured_image_url ? (
+                  <div style={{ width: '100%', paddingTop: '56.25%', background: '#f9f7f5', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
+                    <img src={post.featured_image_url} alt={post.title} loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 ) : (
                   <div style={{ width: '100%', paddingTop: '56.25%', background: '#f9f7f5', flexShrink: 0, position: 'relative' }}>
@@ -118,9 +95,9 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ s
                   </div>
                 )}
                 <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  {post.categories && post.categories.length > 0 && (
+                  {post.category && (
                     <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
-                      {post.categories[0]}
+                      {post.category}
                     </span>
                   )}
                   <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.55rem', lineHeight: 1.05, color: '#362f35', margin: '0 0 10px', letterSpacing: '-0.03em' }}>
@@ -132,9 +109,9 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ s
                     </p>
                   )}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-                    {post.publishedAt && (
+                    {post.published_at && (
                       <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', color: '#a6967c' }}>
-                        {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        {new Date(post.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                       </span>
                     )}
                     <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700, color: '#ff7044', display: 'flex', alignItems: 'center', gap: 4 }}>

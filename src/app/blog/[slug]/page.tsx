@@ -1,49 +1,29 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { PortableText } from '@portabletext/react';
-import type { PortableTextComponents } from '@portabletext/react';
 import { ArrowLeft } from 'lucide-react';
 import SiteHeader from '../../SiteHeader';
 import SiteFooter from '../../SiteFooter';
 import FooterLinks from '../../FooterLinks';
 import NewsletterForm from '../../NewsletterForm';
-import { draftMode } from 'next/headers';
-import { client as sanityClient, getPreviewClient } from '@/sanity/lib/client';
-import { postBySlugQuery, postSlugsQuery } from '@/sanity/queries';
-import { urlFor } from '@/sanity/imageUrl';
-import PreviewBanner from '@/components/PreviewBanner';
+import BlogPostRenderer from '@/components/blog/BlogPostRenderer';
+import { getPostBySlug, getPublishedSlugs, getRecentPosts } from '@/lib/blog';
 
-interface Post {
-  _id: string;
-  title: string;
-  slug: { current: string };
-  excerpt?: string;
-  mainImage?: { asset: { _ref: string }; alt?: string };
-  body?: unknown[];
-  publishedAt?: string;
-  categories?: string[];
-  author?: string;
-  seoTitle?: string;
-  seoDescription?: string;
-}
+export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const slugs: { slug: string }[] = await sanityClient.fetch(postSlugsQuery);
-  return slugs.map(s => ({ slug: s.slug }));
+  const slugs = await getPublishedSlugs();
+  return slugs.map(slug => ({ slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post: Post | null = await sanityClient.fetch(postBySlugQuery, { slug });
+  const post = await getPostBySlug(slug);
   if (!post) return {};
 
-  const title = post.seoTitle ?? post.title;
-  const description = post.seoDescription ?? post.excerpt ?? '';
-  const ogImage = post.mainImage?.asset
-    ? urlFor(post.mainImage).width(1280).height(720).url()
-    : 'https://discoverfloridaparks.com/hero-1.jpg';
+  const title = post.seo_title ?? post.title;
+  const description = post.seo_description ?? post.excerpt ?? '';
+  const ogImage = post.featured_image_url ?? 'https://discoverfloridaparks.com/hero-1.jpg';
 
   return {
     title,
@@ -55,125 +35,26 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       url: `https://discoverfloridaparks.com/blog/${slug}`,
       type: 'article',
       images: [{ url: ogImage, width: 1280, height: 720, alt: title }],
-      ...(post.publishedAt && { publishedTime: post.publishedAt }),
+      ...(post.published_at && { publishedTime: post.published_at }),
     },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [ogImage],
-    },
+    twitter: { card: 'summary_large_image', title, description, images: [ogImage] },
   };
 }
 
-const portableTextComponents: PortableTextComponents = {
-  block: {
-    normal: ({ children }) => (
-      <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '1rem', color: '#726d6b', lineHeight: 1.75, margin: '0 0 1.4em' }}>{children}</p>
-    ),
-    h2: ({ children }) => (
-      <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '2.4rem', lineHeight: 1, color: '#362f35', margin: '1.6em 0 0.5em', letterSpacing: '-0.04em' }}>{children}</h2>
-    ),
-    h3: ({ children }) => (
-      <h3 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.8rem', lineHeight: 1.05, color: '#362f35', margin: '1.4em 0 0.4em', letterSpacing: '-0.03em' }}>{children}</h3>
-    ),
-    h4: ({ children }) => (
-      <h4 style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#413734', margin: '1.2em 0 0.3em' }}>{children}</h4>
-    ),
-    blockquote: ({ children }) => (
-      <blockquote style={{ borderLeft: '4px solid #ff7044', paddingLeft: 20, margin: '1.6em 0', fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '1rem', color: '#a6967c', fontStyle: 'italic', lineHeight: 1.7 }}>{children}</blockquote>
-    ),
-  },
-  marks: {
-    strong: ({ children }) => <strong style={{ fontWeight: 700, color: '#413734' }}>{children}</strong>,
-    em: ({ children }) => <em>{children}</em>,
-    link: ({ value, children }) => (
-      <a href={value?.href} style={{ color: '#ff7044', textDecoration: 'underline', textDecorationColor: 'rgba(255,112,68,0.3)', textUnderlineOffset: 3 }} target={value?.href?.startsWith('http') ? '_blank' : undefined} rel={value?.href?.startsWith('http') ? 'noopener noreferrer' : undefined}>
-        {children}
-      </a>
-    ),
-  },
-  list: {
-    bullet: ({ children }) => (
-      <ul style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '1rem', color: '#726d6b', lineHeight: 1.75, margin: '0 0 1.4em', paddingLeft: 24 }}>{children}</ul>
-    ),
-    number: ({ children }) => (
-      <ol style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '1rem', color: '#726d6b', lineHeight: 1.75, margin: '0 0 1.4em', paddingLeft: 24 }}>{children}</ol>
-    ),
-  },
-  listItem: {
-    bullet: ({ children }) => <li style={{ marginBottom: '0.4em' }}>{children}</li>,
-    number: ({ children }) => <li style={{ marginBottom: '0.4em' }}>{children}</li>,
-  },
-  types: {
-    table: ({ value }) => {
-      if (!value?.rows?.length) return null;
-      return (
-        <div style={{ overflowX: 'auto', margin: '2em 0' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Glegoo, serif', fontSize: '0.9rem', color: '#726d6b' }}>
-            <tbody>
-              {value.rows.map((row: { _key: string; cells: string[] }) => (
-                <tr key={row._key}>
-                  {row.cells.map((cell: string, i: number) => (
-                    <td key={i} style={{ border: '1px solid #eeeeee', padding: '10px 14px', lineHeight: 1.55 }}>
-                      {cell}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-    },
-    image: ({ value }) => {
-      if (!value?.asset) return null;
-      return (
-        <figure style={{ margin: '2em 0' }}>
-          <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', borderRadius: 12, overflow: 'hidden' }}>
-            <Image
-              src={urlFor(value).width(1200).height(675).url()}
-              alt={value.alt ?? ''}
-              fill
-              style={{ objectFit: 'cover' }}
-              sizes="(max-width: 800px) 100vw, 800px"
-            />
-          </div>
-          {value.caption && (
-            <figcaption style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c', textAlign: 'center', marginTop: 10 }}>
-              {value.caption}
-            </figcaption>
-          )}
-        </figure>
-      );
-    },
-  },
-};
-
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const { isEnabled } = await draftMode();
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const post: Post | null = isEnabled
-    ? (await getPreviewClient(process.env.SANITY_API_READ_TOKEN!).fetch(
-        postBySlugQuery, { slug }, { perspective: 'previewDrafts' } as Record<string, unknown>
-      ) as Post | null)
-    : await sanityClient.fetch(postBySlugQuery, { slug });
-
+  const post = await getPostBySlug(slug);
   if (!post) notFound();
 
-  const ogImage = post.mainImage?.asset
-    ? urlFor(post.mainImage).width(1280).height(720).url()
-    : null;
+  const recentPosts = await getRecentPosts(3, slug);
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: post.title,
     description: post.excerpt ?? '',
-    ...(ogImage && { image: ogImage }),
-    ...(post.publishedAt && { datePublished: post.publishedAt }),
+    ...(post.featured_image_url && { image: post.featured_image_url }),
+    ...(post.published_at && { datePublished: post.published_at }),
     ...(post.author && { author: { '@type': 'Person', name: post.author } }),
     publisher: {
       '@type': 'Organization',
@@ -184,7 +65,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <div style={{ background: '#fff', color: '#413734', minHeight: '100vh' }}>
-      {isEnabled && <PreviewBanner />}
       <SiteHeader />
 
       <script
@@ -194,7 +74,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
       <article style={{ maxWidth: 800, margin: '0 auto', padding: '48px 24px 80px' }}>
 
-        {/* Back link */}
         <Link
           href="/blog"
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700, color: '#a6967c', marginBottom: 32 }}
@@ -203,17 +82,20 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <ArrowLeft size={13} /> Back to Blog
         </Link>
 
-        {/* Meta */}
-        {(post.categories?.length || post.publishedAt || post.author) && (
+        {(post.category || post.published_at || post.author) && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 20px', alignItems: 'center', marginBottom: 20 }}>
-            {post.categories?.map(cat => (
-              <span key={cat} style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                {cat}
-              </span>
-            ))}
-            {post.publishedAt && (
+            {post.category && (
+              <Link
+                href={`/blog/category/${post.category.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
+                style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', textDecoration: 'none' }}
+                className="hover:underline"
+              >
+                {post.category}
+              </Link>
+            )}
+            {post.published_at && (
               <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c' }}>
-                {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                {new Date(post.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               </span>
             )}
             {post.author && (
@@ -224,33 +106,23 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
         )}
 
-        {/* Title */}
         <h1 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2.2rem, 5vw, 3.6rem)', lineHeight: 1, color: '#362f35', margin: '0 0 28px', letterSpacing: '-0.04em' }}>
           {post.title}
         </h1>
 
-        {/* Hero image */}
-        {post.mainImage?.asset && (
-          <div style={{ position: 'relative', width: '100%', paddingTop: '52%', borderRadius: 16, overflow: 'hidden', marginBottom: 40 }}>
-            <Image
-              src={urlFor(post.mainImage).width(1600).height(832).url()}
-              alt={post.mainImage.alt ?? post.title}
-              fill
-              priority
-              style={{ objectFit: 'cover' }}
-              sizes="(max-width: 800px) 100vw, 800px"
+        {post.featured_image_url && (
+          <div style={{ width: '100%', paddingTop: '52%', borderRadius: 16, overflow: 'hidden', marginBottom: 40, position: 'relative' }}>
+            <img
+              src={post.featured_image_url}
+              alt={post.title}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </div>
         )}
 
-        {/* Body */}
-        {post.body && (
-          <div>
-            <PortableText value={post.body as Parameters<typeof PortableText>[0]['value']} components={portableTextComponents} />
-          </div>
-        )}
+        {post.body && <BlogPostRenderer html={post.body} />}
 
-        {/* Newsletter signup */}
+        {/* Newsletter */}
         <div style={{ background: '#f9f7f5', borderRadius: 20, padding: '40px 36px', marginTop: 64, textAlign: 'center' }}>
           <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.74rem', fontWeight: 700, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.14em', margin: '0 0 10px' }}>
             Stay in the know
@@ -266,7 +138,40 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
         </div>
 
-        {/* Disclaimer */}
+        {/* Keep Exploring */}
+        {recentPosts.length > 0 && (
+          <div style={{ marginTop: 64 }}>
+            <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.8rem', fontWeight: 700, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
+              Keep Exploring
+            </p>
+            <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '2rem', color: '#362f35', letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 28px' }}>
+              More from the blog
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20 }}>
+              {recentPosts.map(p => (
+                <Link key={p.id} href={`/blog/${p.slug}`} style={{ display: 'block', textDecoration: 'none', border: '1px solid #eeeeee', borderRadius: 12, overflow: 'hidden' }} className="hover:shadow-md transition-shadow">
+                  {p.featured_image_url && (
+                    <div style={{ width: '100%', paddingTop: '56.25%', position: 'relative', overflow: 'hidden' }}>
+                      <img src={p.featured_image_url} alt={p.title} loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  )}
+                  <div style={{ padding: '14px 16px' }}>
+                    {p.category && (
+                      <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.68rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 4 }}>
+                        {p.category}
+                      </span>
+                    )}
+                    <p style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.1rem', lineHeight: 1.1, color: '#362f35', margin: 0, letterSpacing: '-0.02em' }}>
+                      {p.title}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Disclaimers */}
         <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#b8b0a8', lineHeight: 1.6, marginTop: 40, paddingTop: 24, borderTop: '1px solid #eeeeee' }}>
           Discover Florida Parks is an independent guide to Florida&apos;s parks and outdoor attractions. We are not affiliated with the Florida State Parks system, the National Park Service, or any government agency.
         </p>

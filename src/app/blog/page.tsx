@@ -1,15 +1,12 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import SiteHeader from '../SiteHeader';
 import SiteFooter from '../SiteFooter';
 import FooterLinks from '../FooterLinks';
-import { client as sanityClient } from '@/sanity/lib/client';
-import { postsListQuery } from '@/sanity/queries';
-import { urlFor } from '@/sanity/imageUrl';
+import { getPublishedPosts } from '@/lib/blog';
 
-export const revalidate = 300; // re-fetch from Sanity every 5 minutes
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'Florida Parks Blog',
@@ -22,25 +19,13 @@ export const metadata: Metadata = {
   },
 };
 
-interface Post {
-  _id: string;
-  title: string;
-  slug: { current: string };
-  excerpt?: string;
-  mainImage?: { asset: { _ref: string }; alt?: string };
-  publishedAt?: string;
-  categories?: string[];
-  author?: string;
-}
-
 export default async function BlogPage() {
-  const posts: Post[] = await sanityClient.fetch(postsListQuery);
+  const posts = await getPublishedPosts();
 
   return (
     <div style={{ background: '#fff', color: '#413734', minHeight: '100vh' }}>
       <SiteHeader />
 
-      {/* Banner */}
       <div style={{ background: '#f9f7f5', borderBottom: '1px solid #eeeeee', padding: '56px 24px' }}>
         <div style={{ maxWidth: 1278, margin: '0 auto' }}>
           <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.85rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
@@ -55,7 +40,6 @@ export default async function BlogPage() {
         </div>
       </div>
 
-      {/* Posts grid */}
       <div style={{ maxWidth: 1278, margin: '0 auto', padding: '56px 24px 80px' }}>
         {posts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
@@ -70,19 +54,18 @@ export default async function BlogPage() {
           <div className="park-cards-grid">
             {posts.map(post => (
               <div
-                key={post._id}
+                key={post.id}
                 style={{ display: 'flex', flexDirection: 'column', background: '#fff', border: '1px solid #eeeeee', borderRadius: 16, overflow: 'hidden', transition: 'box-shadow 0.2s' }}
                 className="hover:shadow-md"
               >
-                <Link href={`/blog/${post.slug.current}`} style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
-                  {post.mainImage?.asset ? (
-                    <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#f9f7f5' }}>
-                      <Image
-                        src={urlFor(post.mainImage).width(800).height(450).url()}
-                        alt={post.mainImage.alt ?? post.title}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                <Link href={`/blog/${post.slug}`} style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
+                  {post.featured_image_url ? (
+                    <div style={{ width: '100%', paddingTop: '56.25%', background: '#f9f7f5', position: 'relative', overflow: 'hidden' }}>
+                      <img
+                        src={post.featured_image_url}
+                        alt={post.title}
+                        loading="lazy"
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     </div>
                   ) : (
@@ -95,16 +78,16 @@ export default async function BlogPage() {
                 </Link>
 
                 <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  {post.categories && post.categories.length > 0 && (
+                  {post.category && (
                     <Link
-                      href={`/blog/category/${post.categories[0].toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
+                      href={`/blog/category/${post.category.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
                       style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8, textDecoration: 'none', display: 'inline-block' }}
                       className="hover:underline"
                     >
-                      {post.categories[0]}
+                      {post.category}
                     </Link>
                   )}
-                  <Link href={`/blog/${post.slug.current}`} style={{ textDecoration: 'none' }}>
+                  <Link href={`/blog/${post.slug}`} style={{ textDecoration: 'none' }}>
                     <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.55rem', lineHeight: 1.05, color: '#362f35', margin: '0 0 10px', letterSpacing: '-0.03em' }}>
                       {post.title}
                     </h2>
@@ -115,12 +98,12 @@ export default async function BlogPage() {
                     </p>
                   )}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-                    {post.publishedAt && (
+                    {post.published_at && (
                       <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', color: '#a6967c' }}>
-                        {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        {new Date(post.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                       </span>
                     )}
-                    <Link href={`/blog/${post.slug.current}`} style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700, color: '#ff7044', display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
+                    <Link href={`/blog/${post.slug}`} style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700, color: '#ff7044', display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
                       Read more <ArrowRight size={13} />
                     </Link>
                   </div>

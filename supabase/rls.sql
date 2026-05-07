@@ -224,3 +224,30 @@ CREATE POLICY "experience_photos_admin_delete" ON storage.objects
     bucket_id = 'experience-photos'
     AND ((auth.jwt() -> 'app_metadata') ->> 'role') = 'admin'
   );
+
+-- ─── blog_posts ───────────────────────────────────────────────────────────────
+
+ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "blog_posts_public_read"   ON blog_posts;
+DROP POLICY IF EXISTS "blog_posts_editor_insert" ON blog_posts;
+DROP POLICY IF EXISTS "blog_posts_editor_update" ON blog_posts;
+DROP POLICY IF EXISTS "blog_posts_editor_delete" ON blog_posts;
+
+CREATE POLICY "blog_posts_public_read" ON blog_posts
+  FOR SELECT USING (published = true);
+
+CREATE POLICY "blog_posts_editor_insert" ON blog_posts
+  FOR INSERT WITH CHECK (
+    ((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor')
+  );
+
+CREATE POLICY "blog_posts_editor_update" ON blog_posts
+  FOR UPDATE USING (
+    ((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor')
+  );
+
+CREATE POLICY "blog_posts_editor_delete" ON blog_posts
+  FOR DELETE USING (
+    ((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor')
+  );
