@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import LinkExt from '@tiptap/extension-link';
@@ -22,6 +23,10 @@ interface TipTapEditorProps {
 }
 
 export default function TipTapEditor({ content, onChange, placeholder = 'Start writing...' }: TipTapEditorProps) {
+  const [sourceMode, setSourceMode] = useState(false);
+  // Uncontrolled ref — avoids re-rendering on every keystroke in source mode
+  const sourceRef = useRef(content);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -45,10 +50,46 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Start w
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   });
 
+  function toggleSource() {
+    if (!sourceMode) {
+      // Visual → Source: snapshot current editor HTML
+      sourceRef.current = editor?.getHTML() ?? sourceRef.current;
+      setSourceMode(true);
+    } else {
+      // Source → Visual: parse raw HTML back into TipTap
+      // TipTap will normalize unknown elements (iframes, scripts, etc.) on this transition
+      editor?.commands.setContent(sourceRef.current);
+      setSourceMode(false);
+    }
+  }
+
   return (
     <div className="tiptap-editor">
-      <EditorToolbar editor={editor} />
-      <EditorContent editor={editor} />
+      <EditorToolbar editor={editor} sourceMode={sourceMode} onToggleSource={toggleSource} />
+      {sourceMode ? (
+        <textarea
+          key="source"
+          defaultValue={sourceRef.current}
+          onChange={e => { sourceRef.current = e.target.value; onChange(e.target.value); }}
+          style={{
+            width: '100%',
+            minHeight: 500,
+            padding: '16px 20px',
+            fontFamily: 'monospace',
+            fontSize: '0.82rem',
+            lineHeight: 1.7,
+            border: 'none',
+            outline: 'none',
+            resize: 'vertical',
+            color: '#413734',
+            background: '#fafaf9',
+            boxSizing: 'border-box',
+          }}
+          spellCheck={false}
+        />
+      ) : (
+        <EditorContent editor={editor} />
+      )}
     </div>
   );
 }
