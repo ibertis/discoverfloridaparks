@@ -44,7 +44,7 @@ function portableTextToHtml(body: any[]): string {
         },
       },
       marks: {
-        link: ({ children, value }: { children: string; value: { href?: string } }) => {
+        link: ({ children, value }: { children: string; value?: { href?: string } }) => {
           const href = value?.href ?? '#';
           const external = href.startsWith('http');
           return `<a href="${href}"${external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${children}</a>`;
