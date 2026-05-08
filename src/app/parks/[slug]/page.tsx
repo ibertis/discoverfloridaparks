@@ -23,6 +23,7 @@ interface Trail {
 }
 interface FunFact { id: string; fact: string; sort_order: number; }
 interface SeasonalEvent { id: string; event_name: string; month: string; description: string; sort_order: number; }
+interface OpeningHoursSpec { dayOfWeek: string; opens: string; closes: string; }
 interface Park {
   id: string; slug: string; name: string; short_description: string; full_description: string;
   park_types: string[]; park_regions: string[]; county: string; park_status: string;
@@ -30,7 +31,8 @@ interface Park {
   address: string; city: string; zip_code: string;
   latitude: number; longitude: number;
   entrance_fee: string; operating_hours: string; website: string; phone: string; email: string;
-  google_maps_link: string; google_rating: number;
+  google_maps_link: string; google_rating: number; google_review_count: number | null;
+  opening_hours_spec: OpeningHoursSpec[] | null;
   managing_agency: string; year_established: number; park_size_acres: number;
   best_season: string; typical_visit_duration: string; crowd_level: string;
   visitor_tips: string; safety_notes: string; parking_info: string;
@@ -56,6 +58,13 @@ interface NearbyPark {
   id: string; slug: string; name: string; city: string;
   featured_image_url: string | null; latitude: number; longitude: number;
   park_types: string[]; distance: number;
+}
+
+function fmtTime(t: string): string {
+  const [h, m] = t.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour = h % 12 || 12;
+  return m === 0 ? `${hour} ${period}` : `${hour}:${m.toString().padStart(2, '0')} ${period}`;
 }
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
@@ -218,6 +227,23 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
     ...(park.phone && { telephone: park.phone }),
     ...(park.website && { sameAs: park.website }),
     ...(park.entrance_fee && { priceRange: park.entrance_fee }),
+    ...(park.google_rating && park.google_review_count && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: park.google_rating,
+        ratingCount: park.google_review_count,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
+    ...(park.opening_hours_spec?.length && {
+      openingHoursSpecification: park.opening_hours_spec.map(h => ({
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: `https://schema.org/${h.dayOfWeek}`,
+        opens: h.opens,
+        closes: h.closes,
+      })),
+    }),
   };
 
   const breadcrumbSchema = {
@@ -522,8 +548,24 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
               )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
-                {park.entrance_fee     && <InfoRow icon={<DollarSign size={14} />} label="Entrance Fee" value={park.entrance_fee} />}
-                {park.operating_hours  && <InfoRow icon={<Clock size={14} />}      label="Hours"        value={park.operating_hours} />}
+                {park.entrance_fee && <InfoRow icon={<DollarSign size={14} />} label="Entrance Fee" value={park.entrance_fee} />}
+                {park.opening_hours_spec?.length ? (
+                  <div>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 7, fontFamily: 'Archivo, sans-serif', fontSize: '0.7rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+                      <span style={{ color: '#ff7044', lineHeight: 0 }}><Clock size={14} /></span>
+                      Hours
+                    </span>
+                    <div style={{ paddingLeft: 21, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {park.opening_hours_spec.map(h => (
+                        <span key={h.dayOfWeek} style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#413734' }}>
+                          {h.dayOfWeek.slice(0, 3)}: {fmtTime(h.opens)} – {fmtTime(h.closes)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : park.operating_hours ? (
+                  <InfoRow icon={<Clock size={14} />} label="Hours" value={park.operating_hours} />
+                ) : null}
                 {park.phone            && <InfoRow icon={<Phone size={14} />}      label="Phone"        value={park.phone} />}
                 {park.email            && (
                   <div style={{ display: 'flex', gap: 12 }}>

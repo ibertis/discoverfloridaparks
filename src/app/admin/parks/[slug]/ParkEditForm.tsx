@@ -88,6 +88,57 @@ interface SeasonalEvent {
   sort_order: number;
 }
 
+interface OpeningHoursSpec { dayOfWeek: string; opens: string; closes: string; }
+
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+function HoursBuilder({ value, onChange }: { value: OpeningHoursSpec[] | null; onChange: (v: OpeningHoursSpec[] | null) => void }) {
+  function getDay(day: string) { return value?.find(h => h.dayOfWeek === day) ?? null; }
+  function toggleDay(day: string, open: boolean) {
+    if (!open) {
+      const rest = (value ?? []).filter(h => h.dayOfWeek !== day);
+      onChange(rest.length ? rest : null);
+    } else {
+      const rest = (value ?? []).filter(h => h.dayOfWeek !== day);
+      onChange([...rest, { dayOfWeek: day, opens: '09:00', closes: '17:00' }]);
+    }
+  }
+  function setTime(day: string, field: 'opens' | 'closes', val: string) {
+    const entry = getDay(day);
+    if (!entry) return;
+    const rest = (value ?? []).filter(h => h.dayOfWeek !== day);
+    onChange([...rest, { ...entry, [field]: val }]);
+  }
+  return (
+    <div className="col-span-2 space-y-2 pt-1">
+      {DAYS.map(day => {
+        const entry = getDay(day);
+        const isOpen = !!entry;
+        return (
+          <div key={day} className="flex items-center gap-3 flex-wrap">
+            <span className="w-24 text-sm font-semibold text-[#413734] shrink-0">{day}</span>
+            <label className="flex items-center gap-1.5 text-sm text-[#726d6b] cursor-pointer shrink-0">
+              <input type="checkbox" checked={isOpen} onChange={e => toggleDay(day, e.target.checked)} />
+              Open
+            </label>
+            {isOpen ? (
+              <>
+                <input type="time" value={entry.opens} onChange={e => setTime(day, 'opens', e.target.value)}
+                  className="border border-[#dfdfdf] rounded-lg px-3 py-2 text-sm text-[#413734] outline-none focus:border-[#ff7044] transition bg-white w-32" />
+                <span className="text-sm text-[#a6967c]">to</span>
+                <input type="time" value={entry.closes} onChange={e => setTime(day, 'closes', e.target.value)}
+                  className="border border-[#dfdfdf] rounded-lg px-3 py-2 text-sm text-[#413734] outline-none focus:border-[#ff7044] transition bg-white w-32" />
+              </>
+            ) : (
+              <span className="text-sm text-[#a6967c]">Closed</span>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 interface Park {
   id?: string;
   slug: string;
@@ -103,8 +154,10 @@ interface Park {
   website: string | null;
   email: string | null;
   google_rating: number | null;
+  google_review_count: number | null;
   google_maps_link: string | null;
   operating_hours: string | null;
+  opening_hours_spec: OpeningHoursSpec[] | null;
   featured_image_url: string | null;
   gallery_urls: string[] | null;
   latitude: number | null;
@@ -180,7 +233,7 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
   const [form, setForm] = useState<Park>(park ?? {
     slug: '', name: '', park_types: [], park_regions: [], county: null, park_status: null,
     city: null, address: null, zip_code: null, phone: null, website: null, email: null,
-    google_rating: null, google_maps_link: null, operating_hours: null, featured_image_url: null,
+    google_rating: null, google_review_count: null, google_maps_link: null, operating_hours: null, opening_hours_spec: null, featured_image_url: null,
     gallery_urls: null, latitude: null, longitude: null,
     short_description: null, full_description: null, visitor_tips: null,
     wildlife_summary: null, safety_notes: null, parking_info: null, terrain: null,
@@ -530,6 +583,9 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
           <Field label="Google Rating">
             <input type="number" step="0.1" min="0" max="5" value={form.google_rating ?? ''} onChange={e => set('google_rating', e.target.value ? parseFloat(e.target.value) : null)} className={inputCls} />
           </Field>
+          <Field label="Google Review Count">
+            <input type="number" step="1" min="0" value={form.google_review_count ?? ''} onChange={e => set('google_review_count', e.target.value ? parseInt(e.target.value) : null)} className={inputCls} placeholder="e.g. 1842" />
+          </Field>
           <Field label="Parking Info">
             <input value={form.parking_info ?? ''} onChange={e => set('parking_info', e.target.value)} className={inputCls} placeholder="Free parking lot, limited spaces" />
           </Field>
@@ -539,8 +595,11 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
           <Field label="Reservation URL" span2>
             <input type="url" value={form.reservation_url ?? ''} onChange={e => set('reservation_url', e.target.value)} className={inputCls} placeholder="https://" />
           </Field>
-          <Field label="Operating Hours" span2>
-            <textarea rows={4} value={form.operating_hours ?? ''} onChange={e => set('operating_hours', e.target.value)} className={textareaCls} placeholder="Monday: 8:00 AM – 5:00 PM&#10;Tuesday: 8:00 AM – 5:00 PM" />
+          <Field label="Hours" span2>
+            <HoursBuilder value={form.opening_hours_spec} onChange={v => set('opening_hours_spec', v)} />
+          </Field>
+          <Field label="Hours Notes" span2>
+            <input value={form.operating_hours ?? ''} onChange={e => set('operating_hours', e.target.value)} className={inputCls} placeholder="e.g. Closed Thanksgiving &amp; Christmas · Seasonal hours may vary" />
           </Field>
         </Section>
 
