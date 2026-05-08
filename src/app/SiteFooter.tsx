@@ -44,7 +44,7 @@ export default function SiteFooter() {
         </div>
 
       </div>
-      <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.68rem', color: '#a6967c', textAlign: 'center', margin: '16px auto 0', maxWidth: '50%', paddingTop: 16, borderTop: '1px solid #ddd8d0', lineHeight: 1.6 }}>
+      <p className="max-w-full sm:max-w-[50%]" style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.68rem', color: '#a6967c', textAlign: 'center', margin: '16px auto 0', paddingTop: 16, borderTop: '1px solid #ddd8d0', lineHeight: 1.6, padding: '16px 24px 0' }}>
         Discover Florida Parks is an independent guide to Florida&apos;s parks and outdoor attractions. We are not affiliated with the Florida State Parks system, the National Park Service, or any government agency.
       </p>
     </footer>
