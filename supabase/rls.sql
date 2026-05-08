@@ -225,6 +225,31 @@ CREATE POLICY "experience_photos_admin_delete" ON storage.objects
     AND ((auth.jwt() -> 'app_metadata') ->> 'role') = 'admin'
   );
 
+-- ─── Storage: blog-images bucket ─────────────────────────────────────────────
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('blog-images', 'blog-images', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+DROP POLICY IF EXISTS "blog_images_public_read"   ON storage.objects;
+DROP POLICY IF EXISTS "blog_images_editor_upload" ON storage.objects;
+DROP POLICY IF EXISTS "blog_images_admin_delete"  ON storage.objects;
+
+CREATE POLICY "blog_images_public_read" ON storage.objects
+  FOR SELECT USING (bucket_id = 'blog-images');
+
+CREATE POLICY "blog_images_editor_upload" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'blog-images'
+    AND ((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor')
+  );
+
+CREATE POLICY "blog_images_admin_delete" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'blog-images'
+    AND ((auth.jwt() -> 'app_metadata') ->> 'role') = 'admin'
+  );
+
 -- ─── blog_posts ───────────────────────────────────────────────────────────────
 
 ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;

@@ -227,7 +227,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
     ...(park.phone && { telephone: park.phone }),
     ...(park.website && { sameAs: park.website }),
     ...(park.entrance_fee && { priceRange: park.entrance_fee }),
-    ...(park.google_rating && park.google_review_count && {
+    ...(park.google_rating && park.google_review_count && park.google_review_count > 0 && {
       aggregateRating: {
         '@type': 'AggregateRating',
         ratingValue: park.google_rating,

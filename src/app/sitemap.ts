@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
 import { getDistinctCategories } from '@/lib/blog';
+import { categoryToSlug } from '@/lib/slug';
 
 const BASE = 'https://discoverfloridaparks.com';
 
@@ -26,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const categoryUrls: MetadataRoute.Sitemap = categories.map(cat => ({
-    url: `${BASE}/blog/category/${cat.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`,
+    url: `${BASE}/blog/category/${categoryToSlug(cat)}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.6,

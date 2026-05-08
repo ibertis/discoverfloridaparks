@@ -5,32 +5,29 @@ import SiteHeader from '@/app/SiteHeader';
 import SiteFooter from '@/app/SiteFooter';
 import FooterLinks from '@/app/FooterLinks';
 import { getPostsByCategory, getDistinctCategories } from '@/lib/blog';
+import { categoryToSlug, slugToCategory } from '@/lib/slug';
 
 export const revalidate = 60;
 
-function slugToCategory(slug: string): string {
-  return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-}
-
 export async function generateStaticParams() {
   const categories = await getDistinctCategories();
-  return categories.map(cat => ({
-    slug: cat.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-  }));
+  return categories.map(cat => ({ slug: categoryToSlug(cat) }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const category = slugToCategory(slug);
+  const description = `Browse all ${category} posts on the Discover Florida Parks blog.`;
   return {
-    title: `${category} | Florida Parks Blog`,
-    description: `Browse all ${category} posts on the Discover Florida Parks blog.`,
+    title: category,
+    description,
     alternates: { canonical: `https://discoverfloridaparks.com/blog/category/${slug}` },
     openGraph: {
-      title: `${category} | Florida Parks Blog`,
-      description: `Browse all ${category} posts on the Discover Florida Parks blog.`,
+      title: `${category} | Discover Florida Parks`,
+      description,
       url: `https://discoverfloridaparks.com/blog/category/${slug}`,
       type: 'website',
+      images: [{ url: 'https://discoverfloridaparks.com/hero-1.jpg', width: 1280, height: 853, alt: `${category} — Discover Florida Parks` }],
     },
     twitter: { card: 'summary_large_image' },
   };
@@ -41,8 +38,31 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ s
   const category = slugToCategory(slug);
   const posts = await getPostsByCategory(category);
 
+  const categoryUrl = `https://discoverfloridaparks.com/blog/category/${slug}`;
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://discoverfloridaparks.com' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://discoverfloridaparks.com/blog' },
+      { '@type': 'ListItem', position: 3, name: category, item: categoryUrl },
+    ],
+  };
+
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `${category} — Florida Parks Blog`,
+    description: `Browse all ${category} posts on the Discover Florida Parks blog.`,
+    url: categoryUrl,
+    isPartOf: { '@type': 'WebSite', url: 'https://discoverfloridaparks.com', name: 'Discover Florida Parks' },
+  };
+
   return (
     <div style={{ background: '#fff', color: '#413734', minHeight: '100vh' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }} />
       <SiteHeader />
 
       <div style={{ background: '#f9f7f5', borderBottom: '1px solid #eeeeee', padding: '56px 24px' }}>

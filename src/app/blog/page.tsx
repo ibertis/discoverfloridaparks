@@ -5,6 +5,7 @@ import SiteHeader from '../SiteHeader';
 import SiteFooter from '../SiteFooter';
 import FooterLinks from '../FooterLinks';
 import { getPublishedPosts } from '@/lib/blog';
+import { categoryToSlug } from '@/lib/slug';
 
 export const revalidate = 60;
 
@@ -16,7 +17,10 @@ export const metadata: Metadata = {
     title: 'Florida Parks Blog',
     description: 'Stories, guides, and inspiration for exploring Florida\'s best parks, beaches, and outdoor adventures.',
     url: 'https://discoverfloridaparks.com/blog',
+    type: 'website',
+    images: [{ url: 'https://discoverfloridaparks.com/hero-1.jpg', width: 1280, height: 853, alt: 'Florida Parks Blog — Discover Florida Parks' }],
   },
+  twitter: { card: 'summary_large_image' },
 };
 
 export default async function BlogPage() {
@@ -80,7 +84,7 @@ export default async function BlogPage() {
                 <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
                   {(post.categories ?? [])[0] && (
                     <Link
-                      href={`/blog/category/${(post.categories![0]).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
+                      href={`/blog/category/${categoryToSlug(post.categories![0])}`}
                       style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', textDecoration: 'none', display: 'block', marginBottom: 8 }}
                       className="hover:underline"
                     >

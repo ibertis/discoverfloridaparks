@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import SiteHeader from '../../SiteHeader';
@@ -8,6 +9,7 @@ import FooterLinks from '../../FooterLinks';
 import NewsletterForm from '../../NewsletterForm';
 import BlogPostRenderer from '@/components/blog/BlogPostRenderer';
 import { getPostBySlug, getPublishedSlugs, getRecentPosts } from '@/lib/blog';
+import { categoryToSlug } from '@/lib/slug';
 
 export const revalidate = 60;
 
@@ -62,7 +64,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       '@type': 'Organization',
       name: 'Discover Florida Parks',
       url: 'https://discoverfloridaparks.com',
-      logo: 'https://discoverfloridaparks.com/dfp-logo.png',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://discoverfloridaparks.com/dfp-logo.png',
+        width: 200,
+        height: 60,
+      },
     },
   };
 
@@ -89,7 +96,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 20px', alignItems: 'center', marginBottom: 20 }}>
             {(post.categories ?? [])[0] && (
               <Link
-                href={`/blog/category/${(post.categories![0]).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
+                href={`/blog/category/${categoryToSlug(post.categories![0])}`}
                 style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#ff7044', textTransform: 'uppercase', letterSpacing: '0.1em', textDecoration: 'none' }}
                 className="hover:underline"
               >
@@ -115,10 +122,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
         {post.featured_image_url && (
           <div style={{ width: '100%', paddingTop: '52%', borderRadius: 16, overflow: 'hidden', marginBottom: 40, position: 'relative' }}>
-            <img
+            <Image
               src={post.featured_image_url}
               alt={post.title}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              fill
+              sizes="(max-width: 800px) 100vw, 800px"
+              style={{ objectFit: 'cover' }}
+              priority
             />
           </div>
         )}

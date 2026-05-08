@@ -19,6 +19,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing file or fileName' }, { status: 400 });
   }
 
+  const VALID_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+  if (!VALID_MIME_TYPES.includes(file.type)) {
+    return NextResponse.json({ error: 'Invalid file type. Only JPEG, PNG, WebP, GIF, and AVIF are allowed.' }, { status: 400 });
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    return NextResponse.json({ error: 'File too large. Maximum size is 10 MB.' }, { status: 413 });
+  }
+
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
