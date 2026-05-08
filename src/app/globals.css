@@ -638,3 +638,15 @@ a { color: inherit; text-decoration: none; }
   position: absolute;
   z-index: 2;
 }
+
+/* ── Google AdSense ───────────────────────────────────────────────────────── */
+.adsbygoogle {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Hide empty ad slots — prevents blank white gaps on low-traffic pages */
+ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+}

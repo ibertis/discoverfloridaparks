@@ -15,6 +15,7 @@ import FooterLinks from '../../FooterLinks';
 import PhotoGallery from './PhotoGallery';
 import WeatherStatCard from './WeatherStatCard';
 import ParkMap from './ParkMap';
+import AdUnit from '@/components/AdUnit';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -379,6 +380,15 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
               </section>
             )}
 
+            {/* Mid-content ad — between overview and gallery/activities */}
+            <div style={{ margin: '0.5rem 0' }}>
+              <AdUnit
+                slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_PARK_DETAIL_INCONTENT!}
+                format="auto"
+                style={{ minHeight: '250px' }}
+              />
+            </div>
+
             {/* Gallery */}
             {park.gallery_urls?.length > 0 && (
               <section>
@@ -672,6 +682,15 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                 Last updated {updatedAt}
               </p>
             )}
+
+            {/* Sidebar ad unit */}
+            <div style={{ marginTop: '1.5rem' }}>
+              <AdUnit
+                slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_PARK_DETAIL_SIDEBAR!}
+                format="auto"
+                style={{ minHeight: '250px' }}
+              />
+            </div>
 
           </aside>
         </div>

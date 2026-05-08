@@ -5,6 +5,7 @@ import SiteHeader from '../SiteHeader';
 import SiteFooter from '../SiteFooter';
 import FooterLinks from '../FooterLinks';
 import ParkCard from '@/components/ParkCard';
+import AdUnit from '@/components/AdUnit';
 
 export const dynamic = 'force-dynamic';
 
@@ -161,6 +162,15 @@ export default async function ParksPage({ searchParams }: { searchParams: Promis
             </div>
           )}
         </main>
+      </div>
+
+      {/* Directory footer ad — full-width above footer */}
+      <div style={{ maxWidth: 1278, margin: '4rem auto 0', padding: '0 24px' }}>
+        <AdUnit
+          slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_DIRECTORY_FOOTER!}
+          format="horizontal"
+          style={{ minHeight: '90px' }}
+        />
       </div>
 
       <FooterLinks />

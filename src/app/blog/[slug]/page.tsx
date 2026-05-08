@@ -10,6 +10,7 @@ import NewsletterForm from '../../NewsletterForm';
 import BlogPostRenderer from '@/components/blog/BlogPostRenderer';
 import { getPostBySlug, getPublishedSlugs, getRecentPosts } from '@/lib/blog';
 import { categoryToSlug } from '@/lib/slug';
+import AdUnit from '@/components/AdUnit';
 
 export const revalidate = 60;
 
@@ -153,6 +154,15 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <div style={{ maxWidth: 400, margin: '0 auto' }}>
             <NewsletterForm />
           </div>
+        </div>
+
+        {/* In-content ad — between post body and related posts */}
+        <div style={{ margin: '3rem 0 2rem' }}>
+          <AdUnit
+            slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_BLOG_INCONTENT!}
+            format="auto"
+            style={{ minHeight: '250px' }}
+          />
         </div>
 
         {/* Keep Exploring */}
