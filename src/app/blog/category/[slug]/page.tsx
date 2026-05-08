@@ -25,6 +25,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${category} | Florida Parks Blog`,
     description: `Browse all ${category} posts on the Discover Florida Parks blog.`,
+    alternates: { canonical: `https://discoverfloridaparks.com/blog/category/${slug}` },
+    openGraph: {
+      title: `${category} | Florida Parks Blog`,
+      description: `Browse all ${category} posts on the Discover Florida Parks blog.`,
+      url: `https://discoverfloridaparks.com/blog/category/${slug}`,
+      type: 'website',
+    },
+    twitter: { card: 'summary_large_image' },
   };
 }
 

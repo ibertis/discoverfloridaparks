@@ -217,6 +217,15 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
     }),
     ...(park.phone && { telephone: park.phone }),
     ...(park.website && { sameAs: park.website }),
+    ...(park.entrance_fee && { priceRange: park.entrance_fee }),
+    ...(park.google_rating && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: park.google_rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
   };
 
   const breadcrumbSchema = {

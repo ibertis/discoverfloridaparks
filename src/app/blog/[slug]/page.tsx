@@ -50,16 +50,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': 'BlogPosting',
     headline: post.title,
     description: post.excerpt ?? '',
     ...(post.featured_image_url && { image: post.featured_image_url }),
     ...(post.published_at && { datePublished: post.published_at }),
+    dateModified: post.updated_at ?? post.published_at,
+    ...(post.tags?.length && { keywords: post.tags.join(', ') }),
     ...(post.author && { author: { '@type': 'Person', name: post.author } }),
     publisher: {
       '@type': 'Organization',
       name: 'Discover Florida Parks',
       url: 'https://discoverfloridaparks.com',
+      logo: 'https://discoverfloridaparks.com/dfp-logo.png',
     },
   };
 

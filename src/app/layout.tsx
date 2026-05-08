@@ -58,6 +58,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             url: 'https://discoverfloridaparks.com',
             logo: 'https://discoverfloridaparks.com/dfp-logo.png',
             description: 'Your all-in-one guide to Florida\'s best parks, beaches, and outdoor adventures.',
+            sameAs: [
+              'https://www.facebook.com/flparks101',
+              'https://www.instagram.com/flparks101',
+              'https://www.youtube.com/@flparks101',
+            ],
           }) }}
         />
       </head>
