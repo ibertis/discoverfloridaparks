@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import SiteHeader from '../SiteHeader';
 import SiteFooter from '../SiteFooter';
@@ -65,11 +66,12 @@ export default async function BlogPage() {
                 <Link href={`/blog/${post.slug}`} style={{ display: 'block', textDecoration: 'none', flexShrink: 0 }}>
                   {post.featured_image_url ? (
                     <div style={{ width: '100%', paddingTop: '56.25%', background: '#f9f7f5', position: 'relative', overflow: 'hidden' }}>
-                      <img
+                      <Image
                         src={post.featured_image_url}
                         alt={post.title}
-                        loading="lazy"
-                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        style={{ objectFit: 'cover' }}
                       />
                     </div>
                   ) : (

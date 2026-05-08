@@ -50,9 +50,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   const recentPosts = await getRecentPosts(3, slug);
 
+  const postUrl = `https://discoverfloridaparks.com/blog/${slug}`;
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
+    '@id': postUrl,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
     headline: post.title,
     description: post.excerpt ?? '',
     ...(post.featured_image_url && { image: post.featured_image_url }),

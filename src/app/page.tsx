@@ -62,8 +62,26 @@ export default async function HomePage() {
     .from('parks')
     .select('*', { count: 'exact', head: true });
 
+  const itemListSchema = featuredParks && featuredParks.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Featured Florida Parks — Editor\'s Picks',
+    url: 'https://discoverfloridaparks.com',
+    numberOfItems: featuredParks.length,
+    itemListElement: featuredParks.map((park, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: park.name,
+      url: `https://discoverfloridaparks.com/parks/${park.slug}`,
+      ...(park.featured_image_url && { image: park.featured_image_url }),
+    })),
+  } : null;
+
   return (
     <div style={{ background: '#fff', color: '#413734' }}>
+      {itemListSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
+      )}
 
       {/* ── Nav ─────────────────────────────────────────────── */}
       <SiteHeader />

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import SiteHeader from '@/app/SiteHeader';
 import SiteFooter from '@/app/SiteFooter';
@@ -113,7 +114,13 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ s
               >
                 {post.featured_image_url ? (
                   <div style={{ width: '100%', paddingTop: '56.25%', background: '#f9f7f5', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-                    <img src={post.featured_image_url} alt={post.title} loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <Image
+                      src={post.featured_image_url}
+                      alt={post.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      style={{ objectFit: 'cover' }}
+                    />
                   </div>
                 ) : (
                   <div style={{ width: '100%', paddingTop: '56.25%', background: '#f9f7f5', flexShrink: 0, position: 'relative' }}>

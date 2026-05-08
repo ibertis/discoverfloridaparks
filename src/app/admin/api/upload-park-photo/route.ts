@@ -27,15 +27,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'File too large. Maximum size is 10 MB.' }, { status: 413 });
   }
 
+  // Strip path components and sanitize to safe characters only
+  const safeName = fileName
+    .replace(/^.*[/\\]/, '')
+    .replace(/\.{2,}/g, '.')
+    .replace(/[^a-zA-Z0-9._-]/g, '-');
+  if (!safeName || safeName.length < 3) {
+    return NextResponse.json({ error: 'Invalid filename' }, { status: 400 });
+  }
+
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
   const { error } = await serviceClient.storage
     .from('park-photos')
-    .upload(fileName, buffer, { upsert: true, contentType: file.type });
+    .upload(safeName, buffer, { upsert: true, contentType: file.type });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const { data } = serviceClient.storage.from('park-photos').getPublicUrl(fileName);
+  const { data } = serviceClient.storage.from('park-photos').getPublicUrl(safeName);
   return NextResponse.json({ url: data.publicUrl });
 }
