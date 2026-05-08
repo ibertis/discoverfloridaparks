@@ -34,10 +34,7 @@ const nextConfig: NextConfig = {
         protocol: 'http',
         hostname: 'discoverfloridaparks.local',
       },
-      {
-        protocol: 'https',
-        hostname: 'cdn.sanity.io',
-      },
+
     ],
   },
 };
