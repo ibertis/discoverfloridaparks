@@ -45,7 +45,7 @@ export default function SiteFooter() {
 
       </div>
       <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.68rem', color: '#a6967c', textAlign: 'center', margin: '16px auto 0', maxWidth: '50%', paddingTop: 16, borderTop: '1px solid #ddd8d0', lineHeight: 1.6 }}>
-        Discover Florida Parks is a participant in the Amazon Services LLC Associates Program, an affiliate advertising program designed to provide a means for sites to earn advertising fees by advertising and linking to Amazon.com.
+        Discover Florida Parks is an independent guide to Florida&apos;s parks and outdoor attractions. We are not affiliated with the Florida State Parks system, the National Park Service, or any government agency.
       </p>
     </footer>
   );
