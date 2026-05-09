@@ -640,6 +640,11 @@ a { color: inherit; text-decoration: none; }
 }
 
 
+/* ── Gear item rows ───────────────────────────────────────────────────────── */
+.gear-item-row:hover {
+  background: #f2ede8 !important;
+}
+
 /* ── Google AdSense ───────────────────────────────────────────────────────── */
 .adsbygoogle {
   display: block;

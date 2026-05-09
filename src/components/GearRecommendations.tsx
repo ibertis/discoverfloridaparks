@@ -59,22 +59,18 @@ export default function GearRecommendations({ amenities }: Props) {
                       href={item.url}
                       target="_blank"
                       rel="nofollow sponsored noopener noreferrer"
+                      className="gear-item-row"
                       style={{
-                        display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
-                        gap: 12, padding: '10px 18px', textDecoration: 'none', background: '#faf8f6',
+                        display: 'flex', alignItems: 'baseline',
+                        gap: 8, padding: '10px 18px', textDecoration: 'none', background: '#faf8f6',
                         borderTop: j > 0 ? '1px solid #f2eeeb' : 'none',
                       }}
                     >
-                      <span style={{ display: 'flex', alignItems: 'baseline', gap: 8, minWidth: 0 }}>
-                        <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.88rem', fontWeight: 700, color: '#362f35', whiteSpace: 'nowrap' }}>
-                          {item.name}
-                        </span>
-                        <span style={{ fontFamily: 'Glegoo, serif', fontSize: '0.78rem', fontWeight: 400, color: '#a6967c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {item.description}
-                        </span>
+                      <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.88rem', fontWeight: 700, color: '#362f35', whiteSpace: 'nowrap' }}>
+                        {item.name}
                       </span>
-                      <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 700, color: '#ff7044', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                        View on Amazon →
+                      <span style={{ fontFamily: 'Glegoo, serif', fontSize: '0.78rem', fontWeight: 400, color: '#a6967c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {item.description}
                       </span>
                     </a>
                   ))}
