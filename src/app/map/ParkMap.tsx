@@ -31,6 +31,7 @@ const TYPE_FILTERS = [
   'Community Parks',
   'Seasonal Attractions',
   'National Estuarine Research Reserve',
+  'Wildlife Preserve',
 ];
 
 const AMENITY_OPTIONS = [
