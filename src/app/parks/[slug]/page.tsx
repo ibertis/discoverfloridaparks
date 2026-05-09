@@ -28,7 +28,7 @@ interface SeasonalEvent { id: string; event_name: string; month: string; descrip
 interface OpeningHoursSpec { dayOfWeek: string; opens: string; closes: string; }
 interface Park {
   id: string; slug: string; name: string; short_description: string; full_description: string;
-  park_types: string[]; park_regions: string[]; county: string; park_status: string;
+  park_types: string[]; park_regions: string[]; activity_types: string[]; county: string; park_status: string;
   featured_image_url: string; gallery_urls: string[];
   address: string; city: string; zip_code: string;
   latitude: number; longitude: number;
@@ -404,6 +404,21 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                     <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: '2.3em', border: '1px solid #eeeeee', background: '#fff', fontFamily: 'Archivo, sans-serif', fontSize: '0.85rem', fontWeight: 600, color: '#413734' }}>
                       <Icon size={15} style={{ color: '#ff7044' }} />
                       {label}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Activities Available */}
+            {park.activity_types?.length > 0 && (
+              <section>
+                <SectionHeading>Activities Available</SectionHeading>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                  {park.activity_types.map(activity => (
+                    <div key={activity} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: '2.3em', border: '1px solid #eeeeee', background: '#fff', fontFamily: 'Archivo, sans-serif', fontSize: '0.85rem', fontWeight: 600, color: '#413734' }}>
+                      <Sparkles size={14} style={{ color: '#ff7044', flexShrink: 0 }} />
+                      {activity}
                     </div>
                   ))}
                 </div>

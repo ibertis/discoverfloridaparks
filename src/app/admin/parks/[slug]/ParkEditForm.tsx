@@ -43,6 +43,14 @@ const AGENCIES = [
   { value: 'county', label: 'County' },
   { value: 'private', label: 'Private' },
 ];
+const ACTIVITY_TYPES = [
+  'Airboat Tours', 'Bike Rentals', 'Eco Tours', 'Fishing Charters',
+  'Glass Bottom Boat Tours', 'Guided Hiking', 'Kayak / Canoe Rentals',
+  'Manatee Swimming', 'Paddleboard Rentals', 'Photography Tours',
+  'Ranger Programs', 'Scuba Diving', 'Snorkeling Tours',
+  'Sunset Cruises', 'Wildlife Watching Tours',
+];
+
 const TRAIL_DIFFICULTIES = ['Easy', 'Moderate', 'Hard', 'Strenuous'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December', 'Year-Round'];
 
@@ -164,6 +172,7 @@ interface Park {
   name: string;
   park_types: string[] | null;
   park_regions: string[] | null;
+  activity_types: string[] | null;
   county: string | null;
   park_status: string | null;
   city: string | null;
@@ -250,7 +259,7 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
   const isNew = !park?.id;
 
   const [form, setForm] = useState<Park>(park ?? {
-    slug: '', name: '', park_types: [], park_regions: [], county: null, park_status: null,
+    slug: '', name: '', park_types: [], park_regions: [], activity_types: [], county: null, park_status: null,
     city: null, address: null, zip_code: null, phone: null, website: null, email: null,
     google_rating: null, google_review_count: null, google_maps_link: null, operating_hours: null, opening_hours_spec: null, featured_image_url: null,
     gallery_urls: null, latitude: null, longitude: null,
@@ -522,6 +531,30 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
                 {label}
               </label>
             ))}
+          </div>
+        </Section>
+
+        {/* ── Available Activities ── */}
+        <Section title="Available Activities">
+          <p className="text-xs text-[#a6967c] -mt-2 mb-3">Commercial experiences offered at or near this park (tours, rentals, etc.).</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {ACTIVITY_TYPES.map(t => {
+              const checked = (form.activity_types ?? []).includes(t);
+              return (
+                <label key={t} className="flex items-center gap-2 text-sm text-[#413734] font-medium cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => {
+                      const current = form.activity_types ?? [];
+                      set('activity_types', checked ? current.filter(x => x !== t) : [...current, t]);
+                    }}
+                    className="accent-[#ff7044]"
+                  />
+                  {t}
+                </label>
+              );
+            })}
           </div>
         </Section>
 
