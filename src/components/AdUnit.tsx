@@ -28,7 +28,7 @@ export default function AdUnit({ slot, format = 'auto', className, style }: AdUn
   if (!process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || !slot) return null
 
   return (
-    <div className={className} style={{ overflow: 'hidden', textAlign: 'center', ...style }}>
+    <div className={`ad-unit${className ? ` ${className}` : ''}`} style={{ overflow: 'hidden', textAlign: 'center', ...style }}>
       <ins
         ref={adRef}
         className="adsbygoogle"

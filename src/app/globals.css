@@ -658,7 +658,10 @@ a { color: inherit; text-decoration: none; }
   max-width: 100%;
 }
 
-/* Hide empty ad slots — prevents blank white gaps on low-traffic pages */
+/* Hide empty ad slots + their wrapper — prevents blank white gaps */
 ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+}
+.ad-unit:has(> ins.adsbygoogle[data-ad-status="unfilled"]) {
   display: none !important;
 }

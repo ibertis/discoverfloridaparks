@@ -381,15 +381,6 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
               </section>
             )}
 
-            {/* Mid-content ad — between overview and gallery/activities */}
-            <div style={{ margin: '0.5rem 0' }}>
-              <AdUnit
-                slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_PARK_DETAIL_INCONTENT!}
-                format="auto"
-                style={{ minHeight: '250px' }}
-              />
-            </div>
-
             {/* Gallery */}
             {park.gallery_urls?.length > 0 && (
               <section>
