@@ -16,6 +16,7 @@ import PhotoGallery from './PhotoGallery';
 import WeatherStatCard from './WeatherStatCard';
 import ParkMap from './ParkMap';
 import AdUnit from '@/components/AdUnit';
+import GearRecommendations from '@/components/GearRecommendations';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -411,6 +412,9 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                 </div>
               </section>
             )}
+
+            {/* Gear Recommendations */}
+            <GearRecommendations amenities={amenities} />
 
             {/* Trails */}
             {trails.length > 0 && (

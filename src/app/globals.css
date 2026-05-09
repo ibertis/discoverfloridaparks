@@ -639,6 +639,18 @@ a { color: inherit; text-decoration: none; }
   z-index: 2;
 }
 
+/* ── Gear Recommendations grid ───────────────────────────────────────────── */
+.gear-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .gear-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Google AdSense ───────────────────────────────────────────────────────── */
 .adsbygoogle {
   display: block;
