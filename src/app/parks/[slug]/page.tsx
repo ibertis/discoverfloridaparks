@@ -210,10 +210,14 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
   const touristAttractionSchema = {
     '@context': 'https://schema.org',
     '@type': 'TouristAttraction',
+    '@id': parkUrl,
+    additionalType: 'https://schema.org/Park',
     name: park.name,
     description: park.short_description,
     url: parkUrl,
-    ...(park.featured_image_url && { image: park.featured_image_url }),
+    ...(park.featured_image_url && {
+      image: { '@type': 'ImageObject', url: park.featured_image_url },
+    }),
     ...(park.latitude && park.longitude && {
       geo: { '@type': 'GeoCoordinates', latitude: park.latitude, longitude: park.longitude },
     }),
