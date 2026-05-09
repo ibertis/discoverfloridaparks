@@ -10,6 +10,10 @@ export interface GearCategory {
   items: GearItem[];
 }
 
+export const UNIVERSAL_ITEMS: GearItem[] = [
+  { name: 'Sunscreen SPF 50+', description: 'Reef-safe, broad spectrum', url: 'https://amzn.to/PLACEHOLDER' },
+];
+
 export const GEAR_CATEGORIES: GearCategory[] = [
   {
     label: 'Camping Gear',

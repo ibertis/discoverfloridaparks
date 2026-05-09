@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { GEAR_CATEGORIES } from '@/lib/gear';
+import { GEAR_CATEGORIES, UNIVERSAL_ITEMS } from '@/lib/gear';
 
 interface Props {
   amenities: Record<string, unknown>;
@@ -13,9 +13,12 @@ export default function GearRecommendations({ amenities }: Props) {
     cat => amenities?.[cat.amenityKey] === true
   );
 
-  const [openKey, setOpenKey] = useState<string | null>(null);
+  const allCategories = [
+    { label: 'Florida Essentials', amenityKey: '_universal', items: UNIVERSAL_ITEMS },
+    ...activeCategories,
+  ];
 
-  if (activeCategories.length === 0) return null;
+  const [openKey, setOpenKey] = useState<string | null>(null);
 
   return (
     <section>
@@ -27,7 +30,7 @@ export default function GearRecommendations({ amenities }: Props) {
       </h2>
 
       <div style={{ borderRadius: 12, border: '1px solid #eeeeee', overflow: 'hidden' }}>
-        {activeCategories.map((category, i) => {
+        {allCategories.map((category, i) => {
           const isOpen = openKey === category.amenityKey;
           return (
             <div key={category.amenityKey} style={{ borderTop: i > 0 ? '1px solid #eeeeee' : 'none' }}>
