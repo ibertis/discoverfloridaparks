@@ -66,7 +66,7 @@ export default function GearRecommendations({ amenities }: Props) {
                         borderTop: j > 0 ? '1px solid #f2eeeb' : 'none',
                       }}
                     >
-                      <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.88rem', fontWeight: 700, color: '#362f35', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.88rem', fontWeight: 700, color: '#ff7044', whiteSpace: 'nowrap' }}>
                         {item.name}
                       </span>
                       <span style={{ fontFamily: 'Glegoo, serif', fontSize: '0.78rem', fontWeight: 400, color: '#a6967c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
