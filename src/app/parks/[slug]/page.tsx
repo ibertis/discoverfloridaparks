@@ -74,7 +74,7 @@ function fmtTime(t: string): string {
 async function getPark(slug: string): Promise<Park | null> {
   const { data, error } = await supabase
     .from('parks')
-    .select(`*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*)`)
+    .select(`*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*), park_experiences:experiences(id, name, description, duration, price_from, href, source, business_name, sort_order), park_hotels(id, name, description, url, price_from, sort_order)`)
     .eq('slug', slug)
     .single();
   if (error || !data) return null;
@@ -177,6 +177,8 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
   const trails = park.park_trails?.sort((a, b) => a.sort_order - b.sort_order) ?? [];
   const facts = park.park_fun_facts?.sort((a, b) => a.sort_order - b.sort_order) ?? [];
   const events = park.park_seasonal_events?.sort((a, b) => a.sort_order - b.sort_order) ?? [];
+  const experiences = (park as any).park_experiences?.sort((a: any, b: any) => a.sort_order - b.sort_order) ?? [];
+  const hotels = (park as any).park_hotels?.sort((a: any, b: any) => a.sort_order - b.sort_order) ?? [];
 
   const amenityList = [
     { label: 'Dog Friendly',      icon: Dog,           active: amenities.dog_friendly },
@@ -408,6 +410,48 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
               </section>
             )}
 
+            {/* Guided Tours & Experiences */}
+            {experiences.length > 0 && (
+              <section>
+                <SectionHeading>Guided Tours & Experiences</SectionHeading>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {experiences.map((exp: any) => (
+                    <div key={exp.id} style={{ borderRadius: 16, padding: '20px 24px', border: '1px solid #eeeeee', background: '#fff' }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
+                        <div>
+                          <a href={exp.href} target="_blank" rel="nofollow sponsored noopener noreferrer"
+                            style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', textDecoration: 'none' }}>
+                            {exp.name}
+                          </a>
+                          {exp.business_name && (
+                            <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c', margin: '2px 0 0' }}>{exp.business_name}</p>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                          {exp.duration && (
+                            <span style={{ background: '#f0ece6', color: '#726d6b', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>{exp.duration}</span>
+                          )}
+                          {exp.price_from && (
+                            <span style={{ background: '#f0ece6', color: '#726d6b', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>{exp.price_from}</span>
+                          )}
+                          {exp.source === 'viator'
+                            ? <span style={{ background: '#e8f4f8', color: '#0066cc', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>Viator</span>
+                            : <span style={{ background: '#f0ece6', color: '#726d6b', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>Partner</span>
+                          }
+                        </div>
+                      </div>
+                      {exp.description && (
+                        <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>{exp.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#c4bab3', marginTop: 12, lineHeight: 1.6 }}>
+                  Tour links may be affiliate links or sponsored placements. We earn a small commission at no extra cost to you.
+                </p>
+              </section>
+            )}
+
             {/* Gear Recommendations */}
             <GearRecommendations amenities={amenities} />
 
@@ -482,6 +526,34 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                     </div>
                   ))}
                 </div>
+              </section>
+            )}
+
+            {/* Where to Stay */}
+            {hotels.length > 0 && (
+              <section>
+                <SectionHeading>Where to Stay Nearby</SectionHeading>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {hotels.map((hotel: any) => (
+                    <div key={hotel.id} style={{ borderRadius: 16, padding: '20px 24px', border: '1px solid #eeeeee', background: '#fff' }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: hotel.description ? 8 : 0 }}>
+                        <a href={hotel.url} target="_blank" rel="nofollow sponsored noopener noreferrer"
+                          style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', textDecoration: 'none' }}>
+                          {hotel.name}
+                        </a>
+                        {hotel.price_from && (
+                          <span style={{ background: '#f0ece6', color: '#726d6b', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, flexShrink: 0 }}>{hotel.price_from}</span>
+                        )}
+                      </div>
+                      {hotel.description && (
+                        <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>{hotel.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#c4bab3', marginTop: 12, lineHeight: 1.6 }}>
+                  Hotel links are Booking.com affiliate links. We earn a small commission at no extra cost to you.
+                </p>
               </section>
             )}
 

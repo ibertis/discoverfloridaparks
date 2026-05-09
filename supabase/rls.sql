@@ -276,3 +276,30 @@ CREATE POLICY "blog_posts_editor_delete" ON blog_posts
   FOR DELETE USING (
     ((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor')
   );
+
+-- ─── park_hotels ──────────────────────────────────────────────────────────────
+
+ALTER TABLE park_hotels ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "park_hotels_public_read"   ON park_hotels;
+DROP POLICY IF EXISTS "park_hotels_editor_insert" ON park_hotels;
+DROP POLICY IF EXISTS "park_hotels_editor_update" ON park_hotels;
+DROP POLICY IF EXISTS "park_hotels_admin_delete"  ON park_hotels;
+
+CREATE POLICY "park_hotels_public_read" ON park_hotels
+  FOR SELECT USING (true);
+
+CREATE POLICY "park_hotels_editor_insert" ON park_hotels
+  FOR INSERT WITH CHECK (
+    ((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor')
+  );
+
+CREATE POLICY "park_hotels_editor_update" ON park_hotels
+  FOR UPDATE USING (
+    ((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor')
+  );
+
+CREATE POLICY "park_hotels_admin_delete" ON park_hotels
+  FOR DELETE USING (
+    ((auth.jwt() -> 'app_metadata') ->> 'role') = 'admin'
+  );

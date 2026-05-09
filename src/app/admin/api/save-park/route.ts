@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const { park, amenities, trails, facts, events } = await req.json();
+  const { park, amenities, trails, facts, events, experiences, hotels } = await req.json();
   const { park_amenities, park_trails, park_fun_facts, park_seasonal_events, ...payload } = park;
 
   let parkId: string;
@@ -56,6 +56,30 @@ export async function POST(req: NextRequest) {
       events.map((e: { event_name: string; month: string; description: string }, i: number) => ({
         park_id: parkId, event_name: e.event_name, month: e.month,
         description: e.description, sort_order: i,
+      }))
+    );
+  }
+
+  // Experiences — delete + re-insert
+  await db.from('experiences').delete().eq('park_id', parkId);
+  if (experiences?.length > 0) {
+    await db.from('experiences').insert(
+      experiences.map((e: any, i: number) => ({
+        park_id: parkId, name: e.name, description: e.description,
+        duration: e.duration, price_from: e.price_from, href: e.href,
+        source: e.source ?? 'viator', business_name: e.business_name,
+        sort_order: i, is_active: true,
+      }))
+    );
+  }
+
+  // Hotels — delete + re-insert
+  await db.from('park_hotels').delete().eq('park_id', parkId);
+  if (hotels?.length > 0) {
+    await db.from('park_hotels').insert(
+      hotels.map((h: any, i: number) => ({
+        park_id: parkId, name: h.name, description: h.description,
+        url: h.url, price_from: h.price_from, sort_order: i,
       }))
     );
   }

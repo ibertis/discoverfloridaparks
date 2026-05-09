@@ -26,3 +26,8 @@ CREATE TABLE IF NOT EXISTS experiences (
 -- ─── Migrations ───────────────────────────────────────────────────────────────
 
 ALTER TABLE experiences ADD COLUMN IF NOT EXISTS is_featured boolean DEFAULT false;
+ALTER TABLE experiences ADD COLUMN IF NOT EXISTS park_id    uuid REFERENCES parks(id) ON DELETE CASCADE;
+ALTER TABLE experiences ADD COLUMN IF NOT EXISTS source     text DEFAULT 'viator';
+ALTER TABLE experiences ADD COLUMN IF NOT EXISTS price_from text;
+
+CREATE INDEX IF NOT EXISTS experiences_park_id_idx ON experiences(park_id);

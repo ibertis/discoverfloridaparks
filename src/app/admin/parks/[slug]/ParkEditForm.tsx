@@ -88,6 +88,25 @@ interface SeasonalEvent {
   sort_order: number;
 }
 
+interface Experience {
+  id?: string;
+  name: string;
+  description: string;
+  duration: string;
+  price_from: string;
+  href: string;
+  source: 'viator' | 'direct' | 'partner';
+  business_name: string;
+}
+
+interface Hotel {
+  id?: string;
+  name: string;
+  description: string;
+  url: string;
+  price_from: string;
+}
+
 interface OpeningHoursSpec { dayOfWeek: string; opens: string; closes: string; }
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -250,6 +269,8 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
   const [trails, setTrails] = useState<Trail[]>(park?.park_trails ?? []);
   const [facts, setFacts] = useState<FunFact[]>(park?.park_fun_facts ?? []);
   const [events, setEvents] = useState<SeasonalEvent[]>(park?.park_seasonal_events ?? []);
+  const [experiences, setExperiences] = useState<Experience[]>((park as any)?.experiences ?? []);
+  const [hotels, setHotels] = useState<Hotel[]>((park as any)?.park_hotels ?? []);
 
   function set(field: keyof Park, value: unknown) {
     setForm(f => ({ ...f, [field]: value === '' ? null : value }));
@@ -306,7 +327,7 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
     const res = await fetch('/admin/api/save-park', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ park: form, amenities, trails, facts, events }),
+      body: JSON.stringify({ park: form, amenities, trails, facts, events, experiences, hotels }),
     });
     const json = await res.json();
     setSaving(false);
@@ -716,6 +737,84 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
               <button type="button" onClick={() => setEvents(e => [...e, { event_name: '', month: '', description: '', sort_order: e.length }])}
                 className="flex items-center gap-2 text-sm font-semibold text-[#ff7044] hover:text-[#e85a2e] transition">
                 <Plus size={14} /> Add Event
+              </button>
+            </div>
+          </Section>
+        )}
+
+        {/* ── Guided Tours & Experiences ── (existing parks only) */}
+        {!isNew && (
+          <Section title="Guided Tours & Experiences">
+            <div className="space-y-3">
+              {experiences.map((exp, i) => (
+                <div key={i} className="border border-[#eeeeee] rounded-lg p-4 grid grid-cols-2 gap-3 relative">
+                  <button type="button" onClick={() => setExperiences(e => e.filter((_, j) => j !== i))}
+                    className="absolute top-3 right-3 text-[#a6967c] hover:text-red-500 transition">
+                    <X size={14} />
+                  </button>
+                  <Field label="Experience Name" span2>
+                    <input value={exp.name} onChange={e => setExperiences(ex => ex.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} className={inputCls} />
+                  </Field>
+                  <Field label="Source">
+                    <select value={exp.source} onChange={e => setExperiences(ex => ex.map((x, j) => j === i ? { ...x, source: e.target.value as Experience['source'] } : x))} className={inputCls}>
+                      <option value="viator">Viator (affiliate)</option>
+                      <option value="direct">Direct Deal</option>
+                      <option value="partner">Partner / Sponsor</option>
+                    </select>
+                  </Field>
+                  <Field label="Business Name">
+                    <input value={exp.business_name} onChange={e => setExperiences(ex => ex.map((x, j) => j === i ? { ...x, business_name: e.target.value } : x))} className={inputCls} placeholder="e.g. Everglades Tours Co." />
+                  </Field>
+                  <Field label="Duration">
+                    <input value={exp.duration} onChange={e => setExperiences(ex => ex.map((x, j) => j === i ? { ...x, duration: e.target.value } : x))} className={inputCls} placeholder="e.g. 2 hours" />
+                  </Field>
+                  <Field label="Price From">
+                    <input value={exp.price_from} onChange={e => setExperiences(ex => ex.map((x, j) => j === i ? { ...x, price_from: e.target.value } : x))} className={inputCls} placeholder="e.g. From $89" />
+                  </Field>
+                  <Field label="Booking URL" span2>
+                    <input value={exp.href} onChange={e => setExperiences(ex => ex.map((x, j) => j === i ? { ...x, href: e.target.value } : x))} className={inputCls} placeholder="https://..." />
+                  </Field>
+                  <Field label="Short Description" span2>
+                    <textarea rows={2} value={exp.description} onChange={e => setExperiences(ex => ex.map((x, j) => j === i ? { ...x, description: e.target.value } : x))} className={textareaCls} />
+                  </Field>
+                </div>
+              ))}
+              <button type="button" onClick={() => setExperiences(e => [...e, { name: '', description: '', duration: '', price_from: '', href: '', source: 'viator', business_name: '' }])}
+                className="flex items-center gap-2 text-sm font-semibold text-[#ff7044] hover:text-[#e85a2e] transition">
+                <Plus size={14} /> Add Experience
+              </button>
+            </div>
+          </Section>
+        )}
+
+        {/* ── Where to Stay (Hotels) ── (existing parks only) */}
+        {!isNew && (
+          <Section title="Where to Stay Nearby">
+            <p className="text-xs text-[#a6967c] -mt-2 mb-3">Recommended: add 3 hand-picked hotel picks per park (Booking.com affiliate links).</p>
+            <div className="space-y-3">
+              {hotels.map((hotel, i) => (
+                <div key={i} className="border border-[#eeeeee] rounded-lg p-4 grid grid-cols-2 gap-3 relative">
+                  <button type="button" onClick={() => setHotels(h => h.filter((_, j) => j !== i))}
+                    className="absolute top-3 right-3 text-[#a6967c] hover:text-red-500 transition">
+                    <X size={14} />
+                  </button>
+                  <Field label="Hotel Name">
+                    <input value={hotel.name} onChange={e => setHotels(h => h.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} className={inputCls} />
+                  </Field>
+                  <Field label="Price From">
+                    <input value={hotel.price_from} onChange={e => setHotels(h => h.map((x, j) => j === i ? { ...x, price_from: e.target.value } : x))} className={inputCls} placeholder="e.g. From $89/night" />
+                  </Field>
+                  <Field label="Booking.com URL" span2>
+                    <input value={hotel.url} onChange={e => setHotels(h => h.map((x, j) => j === i ? { ...x, url: e.target.value } : x))} className={inputCls} placeholder="https://booking.com/..." />
+                  </Field>
+                  <Field label="Short Description" span2>
+                    <input value={hotel.description} onChange={e => setHotels(h => h.map((x, j) => j === i ? { ...x, description: e.target.value } : x))} className={inputCls} placeholder="e.g. 5 miles from park, outdoor pool" />
+                  </Field>
+                </div>
+              ))}
+              <button type="button" onClick={() => setHotels(h => [...h, { name: '', description: '', url: '', price_from: '' }])}
+                className="flex items-center gap-2 text-sm font-semibold text-[#ff7044] hover:text-[#e85a2e] transition">
+                <Plus size={14} /> Add Hotel
               </button>
             </div>
           </Section>
