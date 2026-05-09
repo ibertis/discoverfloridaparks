@@ -44,11 +44,12 @@ const AGENCIES = [
   { value: 'private', label: 'Private' },
 ];
 const ACTIVITY_TYPES = [
-  'Airboat Tours', 'Bike Rentals', 'Eco Tours', 'Fishing Charters',
-  'Glass Bottom Boat Tours', 'Guided Hiking', 'Kayak / Canoe Rentals',
-  'Manatee Swimming', 'Paddleboard Rentals', 'Photography Tours',
-  'Ranger Programs', 'Scuba Diving', 'Snorkeling Tours',
-  'Sunset Cruises', 'Wildlife Watching Tours',
+  'Airboat Tours', 'Biking & Cycling', 'Boat Tours & Rentals',
+  'Camping Experiences', 'Fishing', 'Guided Hiking & Nature Walks',
+  'Horseback Riding', 'Kayaking & Canoeing', 'Manatee Encounters',
+  'Paddleboarding & Water Sports', 'Photography & Birding Tours',
+  'Snorkeling & Diving', 'Sunset & Scenic Cruises', 'Swimming',
+  'Theme Park Experiences', 'Water Park Experiences', 'Wildlife & Eco Tours',
 ];
 
 const TRAIL_DIFFICULTIES = ['Easy', 'Moderate', 'Hard', 'Strenuous'];
