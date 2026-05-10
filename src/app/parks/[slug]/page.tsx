@@ -17,6 +17,8 @@ import WeatherStatCard from './WeatherStatCard';
 import ParkMap from './ParkMap';
 import AdUnit from '@/components/AdUnit';
 import GearRecommendations from '@/components/GearRecommendations';
+import ExperiencesSection from '@/components/ExperiencesSection';
+import type { CatalogExperience } from '@/components/ExperienceCard';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -74,7 +76,7 @@ function fmtTime(t: string): string {
 async function getPark(slug: string): Promise<Park | null> {
   const { data, error } = await supabase
     .from('parks')
-    .select(`*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*), park_experiences:experiences(id, name, description, duration, price_from, href, source, business_name, sort_order), park_hotels(id, name, description, url, price_from, sort_order)`)
+    .select(`*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*), park_experiences(id, name, description, duration, price_from, href, source, business_name, sort_order), park_hotels(id, name, description, url, price_from, sort_order)`)
     .eq('slug', slug)
     .single();
   if (error || !data) return null;
@@ -171,7 +173,14 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
   const park = await getPark(slug);
   if (!park) notFound();
 
-  const nearbyParks = await getNearbyParks(slug, park.latitude, park.longitude);
+  const [nearbyParks, catalogExperiencesResult] = await Promise.all([
+    getNearbyParks(slug, park.latitude, park.longitude),
+    supabase.rpc('get_park_experiences', {
+      park_activity_types: park.activity_types ?? [],
+      park_region_list: park.park_regions ?? [],
+    }),
+  ]);
+  const catalogExperiences: CatalogExperience[] = catalogExperiencesResult.data ?? [];
 
   const amenities = park.park_amenities ?? {};
   const trails = park.park_trails?.sort((a, b) => a.sort_order - b.sort_order) ?? [];
@@ -781,33 +790,36 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
           </aside>
         </div>
 
-        {/* ── Nearby Parks ────────────────────────────────── */}
-        {nearbyParks.length > 0 && (
-          <section style={{ marginTop: 64 }}>
-            <SectionHeading>Parks Nearby</SectionHeading>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
-              {nearbyParks.map(p => (
-                <Link key={p.id} href={`/parks/${p.slug}`}
-                  style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid #eeeeee', textDecoration: 'none', display: 'block', background: '#fff' }}
-                  className="hover:border-[#dfdfdf] hover:shadow-sm transition-all">
-                  <div style={{ position: 'relative', height: 130, background: '#f0ece6' }}>
-                    {p.featured_image_url && (
-                      <Image src={p.featured_image_url} alt={p.name} fill style={{ objectFit: 'cover' }} sizes="280px" />
-                    )}
-                  </div>
-                  <div style={{ padding: '14px 16px' }}>
-                    <p style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: '#362f35', margin: '0 0 4px', lineHeight: 1.3 }}>{p.name}</p>
-                    <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', color: '#a6967c', margin: 0 }}>
-                      {p.city} · {Math.round(p.distance)} mi away
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
       </div>
+
+      {/* ── Catalog Experiences — full-bleed section ─── */}
+      <ExperiencesSection parkName={park.name} experiences={catalogExperiences} />
+
+      {/* ── Nearby Parks ────────────────────────────────── */}
+      {nearbyParks.length > 0 && (
+        <div style={{ maxWidth: 1278, margin: '0 auto', padding: '64px 24px' }}>
+          <SectionHeading>Parks Nearby</SectionHeading>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+            {nearbyParks.map(p => (
+              <Link key={p.id} href={`/parks/${p.slug}`}
+                style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid #eeeeee', textDecoration: 'none', display: 'block', background: '#fff' }}
+                className="hover:border-[#dfdfdf] hover:shadow-sm transition-all">
+                <div style={{ position: 'relative', height: 130, background: '#f0ece6' }}>
+                  {p.featured_image_url && (
+                    <Image src={p.featured_image_url} alt={p.name} fill style={{ objectFit: 'cover' }} sizes="280px" />
+                  )}
+                </div>
+                <div style={{ padding: '14px 16px' }}>
+                  <p style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: '#362f35', margin: '0 0 4px', lineHeight: 1.3 }}>{p.name}</p>
+                  <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', color: '#a6967c', margin: 0 }}>
+                    {p.city} · {Math.round(p.distance)} mi away
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <FooterLinks />
       <SiteFooter />

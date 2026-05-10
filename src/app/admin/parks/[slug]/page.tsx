@@ -20,7 +20,7 @@ export default async function ParkEditPage({ params }: Props) {
   if (slug !== 'new') {
     const { data } = await supabase
       .from('parks')
-      .select('*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*)')
+      .select('*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*), park_experiences(id, name, description, duration, price_from, href, source, business_name, sort_order), park_hotels(id, name, description, url, price_from, sort_order)')
       .eq('slug', slug)
       .single();
     if (!data) notFound();

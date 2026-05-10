@@ -279,7 +279,7 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
   const [trails, setTrails] = useState<Trail[]>(park?.park_trails ?? []);
   const [facts, setFacts] = useState<FunFact[]>(park?.park_fun_facts ?? []);
   const [events, setEvents] = useState<SeasonalEvent[]>(park?.park_seasonal_events ?? []);
-  const [experiences, setExperiences] = useState<Experience[]>((park as any)?.experiences ?? []);
+  const [experiences, setExperiences] = useState<Experience[]>((park as any)?.park_experiences ?? []);
   const [hotels, setHotels] = useState<Hotel[]>((park as any)?.park_hotels ?? []);
 
   function set(field: keyof Park, value: unknown) {

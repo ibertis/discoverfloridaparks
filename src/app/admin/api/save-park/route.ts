@@ -60,10 +60,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Experiences — delete + re-insert
-  await db.from('experiences').delete().eq('park_id', parkId);
+  // Per-park experiences (direct/partner) — delete + re-insert
+  await db.from('park_experiences').delete().eq('park_id', parkId);
   if (experiences?.length > 0) {
-    await db.from('experiences').insert(
+    await db.from('park_experiences').insert(
       experiences.map((e: any, i: number) => ({
         park_id: parkId, name: e.name, description: e.description,
         duration: e.duration, price_from: e.price_from, href: e.href,
