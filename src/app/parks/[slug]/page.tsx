@@ -273,10 +273,53 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
     ],
   };
 
+  const experiencesSchema = catalogExperiences.length > 0 ? catalogExperiences.map(exp => ({
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: exp.name,
+    description: exp.description ?? undefined,
+    url: exp.affiliate_url ?? undefined,
+    location: {
+      '@type': 'Place',
+      name: park.name,
+      address: park.city ? { '@type': 'PostalAddress', addressLocality: park.city, addressRegion: 'FL', addressCountry: 'US' } : undefined,
+    },
+    organizer: exp.provider ? { '@type': 'Organization', name: exp.provider } : undefined,
+    ...(exp.rating && exp.review_count && {
+      aggregateRating: { '@type': 'AggregateRating', ratingValue: exp.rating, reviewCount: exp.review_count, bestRating: 5 },
+    }),
+    offers: {
+      '@type': 'Offer',
+      url: exp.affiliate_url ?? undefined,
+      ...(exp.price_from && { price: exp.price_from, priceCurrency: 'USD' }),
+      availability: 'https://schema.org/InStock',
+    },
+  })) : null;
+
+  const faqItems = [
+    ...(park.entrance_fee ? [{ q: `What is the entrance fee for ${park.name}?`, a: park.entrance_fee }] : []),
+    ...(park.opening_hours_spec?.length ? [{ q: `What are the hours for ${park.name}?`, a: park.opening_hours_spec.map((h: any) => `${h.dayOfWeek}: ${h.opens}–${h.closes}`).join(', ') }] : []),
+    ...(park.parking_info ? [{ q: `Is there parking at ${park.name}?`, a: park.parking_info }] : []),
+    ...(amenities.dog_friendly ? [{ q: `Are dogs allowed at ${park.name}?`, a: 'Yes, dogs are welcome at this park.' }] : []),
+  ];
+  const faqSchema = faqItems.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  } : null;
+
   return (
     <div style={{ background: '#fff', color: '#413734', minHeight: '100vh' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(touristAttractionSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
+      {experiencesSchema && experiencesSchema.map((s, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
+      ))}
 
       <SiteHeader />
 
@@ -368,7 +411,9 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
             <StatCard icon={<Calendar size={17} style={{ color: '#a6967c' }} />} label="Best Season" value={SEASON_LABELS[park.best_season] ?? park.best_season} />
           )}
           {park.latitude && park.longitude && (
-            <WeatherStatCard lat={park.latitude} lng={park.longitude} />
+            <div style={{ minHeight: 120 }}>
+              <WeatherStatCard lat={park.latitude} lng={park.longitude} />
+            </div>
           )}
         </div>
 

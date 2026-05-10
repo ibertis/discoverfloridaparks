@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     .from('blog-images')
     .upload(fileName, buffer, { upsert: false, contentType: file.type });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error('upload-blog-image:', error.message); return NextResponse.json({ error: 'Upload failed.' }, { status: 500 }); }
 
   const { data } = serviceClient.storage.from('blog-images').getPublicUrl(fileName);
   return NextResponse.json({ url: data.publicUrl });
@@ -66,7 +66,7 @@ export async function DELETE(req: NextRequest) {
   );
 
   const { error } = await serviceClient.storage.from('blog-images').remove([fileName]);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error('upload-blog-image:', error.message); return NextResponse.json({ error: 'Upload failed.' }, { status: 500 }); }
 
   return NextResponse.json({ ok: true });
 }

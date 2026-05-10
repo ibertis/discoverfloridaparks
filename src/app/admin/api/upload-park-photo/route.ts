@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     .from('park-photos')
     .upload(safeName, buffer, { upsert: true, contentType: file.type });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error('upload-park-photo:', error.message); return NextResponse.json({ error: 'Upload failed.' }, { status: 500 }); }
 
   const { data } = serviceClient.storage.from('park-photos').getPublicUrl(safeName);
   return NextResponse.json({ url: data.publicUrl });

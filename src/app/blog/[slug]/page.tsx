@@ -39,6 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       type: 'article',
       images: [{ url: ogImage, width: 1280, height: 720, alt: title }],
       ...(post.published_at && { publishedTime: post.published_at }),
+      ...(post.author && { authors: [post.author] }),
     },
     twitter: { card: 'summary_large_image', title, description, images: [ogImage] },
   };

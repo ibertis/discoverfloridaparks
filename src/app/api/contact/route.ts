@@ -19,6 +19,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'All fields are required.' }, { status: 400 });
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim()) || /[\r\n]/.test(email)) {
+      return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 });
+    }
+
     const safeName = escapeHtml(name.trim());
     const safeEmail = escapeHtml(email.trim());
     const safeMessage = escapeHtml(message.trim());

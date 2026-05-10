@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     .from('experience-photos')
     .upload(safeName, buffer, { upsert: true, contentType: file.type });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error('upload-experience-photo:', error.message); return NextResponse.json({ error: 'Upload failed.' }, { status: 500 }); }
 
   const { data } = serviceClient.storage.from('experience-photos').getPublicUrl(safeName);
   revalidatePath('/');

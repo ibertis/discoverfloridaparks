@@ -23,11 +23,11 @@ export async function POST(req: NextRequest) {
 
   if (park.id) {
     const { error } = await db.from('parks').update(payload).eq('id', park.id);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) { console.error('save-park update:', error.message); return NextResponse.json({ error: 'Failed to save park.' }, { status: 500 }); }
     parkId = park.id;
   } else {
     const { data, error } = await db.from('parks').insert(payload).select('id').single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) { console.error('save-park insert:', error.message); return NextResponse.json({ error: 'Failed to save park.' }, { status: 500 }); }
     parkId = data.id;
   }
 
@@ -103,6 +103,6 @@ export async function DELETE(req: NextRequest) {
 
   const { id } = await req.json();
   const { error } = await db.from('parks').delete().eq('id', id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error('save-park delete:', error.message); return NextResponse.json({ error: 'Failed to delete park.' }, { status: 500 }); }
   return NextResponse.json({ ok: true });
 }

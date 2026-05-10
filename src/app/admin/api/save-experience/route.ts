@@ -12,17 +12,26 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
+  function isSafeUrl(url: string | null | undefined): boolean {
+    if (!url) return true;
+    try { return /^https?:\/\//i.test(new URL(url).href); } catch { return false; }
+  }
+
   const body = await req.json();
   const { id, ...payload } = body;
 
+  if (payload.affiliate_url && !isSafeUrl(payload.affiliate_url)) {
+    payload.affiliate_url = null;
+  }
+
   if (id) {
     const { error } = await db.from('experiences').update(payload).eq('id', id);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) { console.error('save-experience update:', error.message); return NextResponse.json({ error: 'Failed to save experience.' }, { status: 500 }); }
     revalidatePath('/');
     return NextResponse.json({ id });
   } else {
     const { data, error } = await db.from('experiences').insert(payload).select('id').single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) { console.error('save-experience insert:', error.message); return NextResponse.json({ error: 'Failed to save experience.' }, { status: 500 }); }
     revalidatePath('/');
     return NextResponse.json({ id: data.id });
   }
@@ -39,6 +48,6 @@ export async function DELETE(req: NextRequest) {
 
   const { id } = await req.json();
   const { error } = await db.from('experiences').delete().eq('id', id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error('save-experience delete:', error.message); return NextResponse.json({ error: 'Failed to delete experience.' }, { status: 500 }); }
   return NextResponse.json({ ok: true });
 }
