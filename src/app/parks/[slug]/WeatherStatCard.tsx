@@ -55,9 +55,7 @@ export default function WeatherStatCard({ lat, lng }: Props) {
   const [weather, setWeather] = useState<Weather | null>(null);
 
   useEffect(() => {
-    fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weather_code,wind_speed_10m,is_day&temperature_unit=fahrenheit&wind_speed_unit=mph`
-    )
+    fetch(`/api/weather?lat=${lat}&lng=${lng}`)
       .then(r => r.json())
       .then(d => {
         const c = d.current;
