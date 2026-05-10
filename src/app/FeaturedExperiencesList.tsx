@@ -103,15 +103,19 @@ export default function FeaturedExperiencesList({ listings }: { listings: Featur
           <div className="featured-listing-row">
 
             {item.image_url ? (
-              <Image
-                src={item.image_url}
-                alt={item.name}
-                width={120}
-                height={120}
-                style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-              />
+              <div style={{ width: 136, height: 136, borderRadius: '50%', background: '#e8ddd0', padding: 8, flexShrink: 0 }}>
+                <Image
+                  src={item.image_url}
+                  alt={item.name}
+                  width={120}
+                  height={120}
+                  style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
             ) : (
-              <div style={{ width: 120, height: 120, borderRadius: '50%', background: '#f5f1ec', flexShrink: 0 }} />
+              <div style={{ width: 136, height: 136, borderRadius: '50%', background: '#e8ddd0', padding: 8, flexShrink: 0 }}>
+                <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#f5f1ec' }} />
+              </div>
             )}
 
             <div style={{ flex: 1 }}>
