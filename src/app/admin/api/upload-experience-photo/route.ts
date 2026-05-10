@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import { getAdminUser } from '@/lib/supabase-server';
 
@@ -46,5 +47,6 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const { data } = serviceClient.storage.from('experience-photos').getPublicUrl(safeName);
+  revalidatePath('/');
   return NextResponse.json({ url: data.publicUrl });
 }

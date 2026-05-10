@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import { getAdminUser } from '@/lib/supabase-server';
 
@@ -17,10 +18,12 @@ export async function POST(req: NextRequest) {
   if (id) {
     const { error } = await db.from('experiences').update(payload).eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    revalidatePath('/');
     return NextResponse.json({ id });
   } else {
     const { data, error } = await db.from('experiences').insert(payload).select('id').single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    revalidatePath('/');
     return NextResponse.json({ id: data.id });
   }
 }
