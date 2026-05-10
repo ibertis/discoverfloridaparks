@@ -15,22 +15,13 @@ const ACTIVITY_TYPES = [
 ];
 
 const ALL_REGIONS = [
-  'Central Florida',
-  'Central Florida, East Coast',
-  'Central Florida, West Coast',
-  'East Coast',
-  'North Florida',
-  'North Florida, East Coast',
-  'North Florida, West Coast',
-  'Northeast Florida',
   'Northwest Florida / Panhandle',
-  'South Florida',
-  'South Florida, East Coast',
-  'South Florida, The Keys',
-  'South Florida, West Coast',
-  'Southeast Florida',
-  'Southwest Florida',
-  'West Coast',
+  'North Florida', 'North Florida, West Coast', 'North Florida, East Coast',
+  'Northeast Florida',
+  'Central Florida', 'Central Florida, West Coast', 'Central Florida, East Coast',
+  'East Coast', 'West Coast',
+  'Southwest Florida', 'Southeast Florida',
+  'South Florida', 'South Florida, The Keys',
 ];
 
 const AFFILIATE_SOURCES = ['viator', 'getyourguide', 'direct', 'other'];

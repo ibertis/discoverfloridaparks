@@ -13,7 +13,7 @@ const PARK_TYPES = [
 ];
 const PARK_REGIONS = [
   'Northwest Florida / Panhandle',
-  'North Florida', 'North Florida, West Coast',
+  'North Florida', 'North Florida, West Coast', 'North Florida, East Coast',
   'Northeast Florida',
   'Central Florida', 'Central Florida, West Coast', 'Central Florida, East Coast',
   'East Coast', 'West Coast',
