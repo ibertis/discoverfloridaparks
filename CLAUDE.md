@@ -190,6 +190,8 @@ src/
 │   └── studio/[[...tool]]/page.tsx        # Sanity Studio embedded at /studio
 ├── components/
 │   ├── ParkCard.tsx                       # Reusable park card (used on homepage + directory)
+│   ├── ExperienceCard.tsx                 # Catalog experience card — exports CatalogExperience interface
+│   ├── ExperiencesSection.tsx             # Full-bleed "Book an Experience" section — shown on park pages when RPC returns matches
 │   └── WeCarePage.tsx                     # Shared template for conservation/preservation/our-efforts pages
 ├── lib/
 │   ├── supabase.ts                        # Public Supabase client (anon key)
@@ -209,8 +211,11 @@ src/
         └── post.ts                        # Blog post schema (title, slug, categories[], excerpt, mainImage, body, seoTitle, seoDescription)
 
 supabase/
-├── schema_experiences.sql                 # experiences table structure + migrations ONLY — no RLS
+├── schema_experiences_v2.sql              # Rename migration (experiences→park_experiences) + new catalog experiences table + get_park_experiences RPC
+├── seed_experiences.sql                   # Phase 1: 5 Viator affiliate experiences (INSERT only — run after schema_experiences_v2.sql)
 ├── rls.sql                                # ALL RLS policies + storage bucket policies — single source of truth
+docs/
+└── experiences-system-as-built.md        # Reference doc: divergences from original design, actual schemas, full region list, RPC signature
 scripts/
 └── enrich-one-park.ts                     # CLI: enrich a park with Google Places + AI content
 
@@ -236,13 +241,30 @@ public/
 | `park_fun_facts` | Repeater — fact text, sort_order |
 | `park_seasonal_events` | Repeater — event_name, month, description, sort_order |
 | `park_nearby` | Junction — park_id ↔ nearby_park_id. Public read-only. |
-| `experiences` | Featured experiences/attractions — see fields below |
+| `park_experiences` | Per-park direct/partner deals — managed via park edit form in admin. Renamed from old `experiences` table. |
+| `park_hotels` | Per-park Booking.com affiliate hotel picks — managed via park edit form in admin. |
+| `experiences` | **Catalog** of Viator affiliate experiences — auto-matched to park pages by `activity_type` + `regions`. Managed via `/admin/experiences/`. |
 
-Key `parks` fields: `slug` (unique), `name`, `short_description`, `full_description`, `park_types` (text[]), `park_regions` (text[]), `county`, `park_status`, `featured_image_url`, `gallery_urls` (text[]), `address`, `city`, `zip_code`, `latitude`, `longitude`, `park_size_acres`, `year_established`, `managing_agency`, `best_season`, `typical_visit_duration`, `crowd_level`, `google_rating`, `website`, `phone`, `email`, `entrance_fee`, `operating_hours`, `google_maps_link`, `reservation_url`, `camping_url`, `reservation_required`, `visitor_tips`, `instagram_hashtag`, `terrain`, `wildlife_summary`, `safety_notes`, `parking_info`, `nearby_cities`, `distance_from_miami`, `distance_from_orlando`, `distance_from_tampa`, `seo_title`, `seo_description`, `is_featured`
+### Hybrid Experiences Model
 
-Key `experiences` fields: `name`, `description`, `duration`, `image_url`, `href`, `cta_label` (default `'Get Details'`), `placement_type` (`editorial` | `sponsored`), `business_name`, `contact_email`, `is_active` (default true), `is_featured` (default false — controls Upcoming Trips page), `sort_order`, `expires_at`
+There are **two separate experiences systems** — do not confuse them:
 
-**Important:** `park_types` and `park_regions` are `text[]` arrays. Use `.contains('park_types', [value])` for filtering, not `.eq()`.
+| System | Table | How matched | Managed |
+|---|---|---|---|
+| Per-park deals | `park_experiences` | Direct FK (`park_id`) — hand-curated per park | Park edit form → "Guided Tours & Experiences" |
+| Catalog (Viator) | `experiences` | RPC auto-match by `activity_type` + `regions` | `/admin/experiences/` |
+
+The RPC `get_park_experiences(park_activity_types text[], park_region_list text[])` returns up to 3 matching catalog experiences for a park detail page. Called in `src/app/parks/[slug]/page.tsx`. Results rendered by `ExperiencesSection` (full-bleed, outside max-width container, after main body).
+
+Key `parks` fields: `slug` (unique), `name`, `short_description`, `full_description`, `park_types` (text[]), `park_regions` (text[]), `activity_types` (text[]), `county`, `park_status`, `featured_image_url`, `gallery_urls` (text[]), `address`, `city`, `zip_code`, `latitude`, `longitude`, `park_size_acres`, `year_established`, `managing_agency`, `best_season`, `typical_visit_duration`, `crowd_level`, `google_rating`, `website`, `phone`, `email`, `entrance_fee`, `operating_hours`, `google_maps_link`, `reservation_url`, `camping_url`, `reservation_required`, `visitor_tips`, `instagram_hashtag`, `terrain`, `wildlife_summary`, `safety_notes`, `parking_info`, `nearby_cities`, `distance_from_miami`, `distance_from_orlando`, `distance_from_tampa`, `seo_title`, `seo_description`, `is_featured`
+
+Key `experiences` (catalog) fields: `name`, `provider`, `description`, `activity_type` (text, required), `regions` (text[], required), `affiliate_url` (required), `affiliate_source` (default `'viator'`), `price_from` (numeric), `price_currency` (default `'USD'`), `review_count`, `rating`, `duration_hours`, `is_active` (default true), `is_featured`, `notes`
+
+Key `park_experiences` fields: `park_id` (FK), `name`, `description`, `duration`, `price_from` (text), `href`, `source` (`'viator'` | `'direct'` | `'partner'`), `business_name`, `sort_order`, `is_active`
+
+Key `park_hotels` fields: `park_id` (FK), `name`, `description`, `url`, `price_from` (text), `sort_order`
+
+**Important:** `park_types`, `park_regions`, and `activity_types` are `text[]` arrays. Use `.contains('park_types', [value])` for filtering, not `.eq()`. `park_regions` is already `text[]` — never call `.split(',')` on it.
 
 **Visitor tips format** — stored as a single `•`-delimited string. Split with `.split('•').map(t => t.trim()).filter(Boolean)` at render time.
 
@@ -342,9 +364,11 @@ Used for all functional UI icons (navigation arrows, map pin, star, search, X, e
 
 ### `/admin` — Admin Panel
 - Protected by `middleware.ts` — requires `app_metadata.role` of `admin` or `editor`
-- Parks + Experiences: full CRUD with photo upload
-- Experiences admin: `is_active` (visible on homepage) + `is_featured` (visible on Upcoming Trips page)
-- Users: admin-only — invite + manage roles
+- **Parks** (`/admin/parks/`): full CRUD with photo upload. Park edit form includes:
+  - "Guided Tours & Experiences" section → writes to `park_experiences` (per-park direct/partner deals)
+  - "Where to Stay Nearby" section → writes to `park_hotels`
+- **Experiences** (`/admin/experiences/`): manages the **catalog** `experiences` table (Viator affiliate listings). Fields: `activity_type`, `regions` (multi-select), `affiliate_url`, `affiliate_source`, `price_from`, `rating`, `review_count`, `duration_hours`, `is_active`, `is_featured`, `notes`. These auto-match to park pages via RPC — no park_id needed.
+- **Users**: admin-only — invite + manage roles
 
 ---
 
@@ -388,9 +412,12 @@ Footer links use pre-slugified paths: `family-trips`, `travel-tips`, `our-picks`
 | File | Purpose |
 |---|---|
 | `supabase/rls.sql` | **Single source of truth** — all RLS policies + all storage bucket policies. Re-run to audit or reset. |
-| `supabase/schema_experiences.sql` | Table structure + `ALTER TABLE` migrations for experiences. No RLS. |
+| `supabase/schema_experiences_v2.sql` | Rename (`experiences` → `park_experiences`), new catalog `experiences` table, `get_park_experiences` RPC. No seed data. |
+| `supabase/seed_experiences.sql` | Phase 1 seed: 5 Viator affiliate experiences. Run once after `schema_experiences_v2.sql`. |
 
 **Rule:** When adding a new table — define columns in a `schema_*.sql` file, add RLS block to `rls.sql` in the same task. Never split policies across both files.
+
+**Trigger gotcha:** `CREATE OR REPLACE TRIGGER` using `update_updated_at_column()` will fail if that function isn't yet defined (it lives in `schema_blog.sql`). If a migration file includes both schema + seed data and a trigger creation fails, the INSERT statements in the same transaction will roll back. Separate seed data into its own file when in doubt.
 
 ---
 
@@ -409,6 +436,10 @@ Footer links use pre-slugified paths: `family-trips`, `travel-tips`, `our-picks`
 6. **JSX whitespace around expressions** — `No {category} posts` loses the space. Use template literals: `` {`No ${category} posts`} ``.
 
 7. **RLS role checks** — always use `app_metadata`, never `user_metadata`. `user_metadata` is writable by the client.
+
+8. **`/experiences` and `/experiences/featured` pages are broken** — these public pages still query old `experiences` columns (`duration`, `image_url`, `href`, `cta_label`, `placement_type`, `expires_at`) that no longer exist on the catalog table. They need to be either rebuilt for the new catalog schema or repurposed. Until fixed, they will return Supabase errors and show the empty-state UI.
+
+9. **Two separate save-park child record patterns** — `src/app/admin/api/save-park/route.ts` uses delete+re-insert for both `park_experiences` and `park_hotels`, keyed on `park_id`. The catalog `experiences` table is NOT touched by save-park; it has its own `/admin/api/save-experience/route.ts`.
 
 ---
 
