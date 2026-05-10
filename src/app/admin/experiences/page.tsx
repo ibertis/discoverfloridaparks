@@ -28,7 +28,7 @@ export default async function AdminExperiencesPage({ searchParams }: Props) {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 style={{ fontFamily: 'Shrikhand, cursive', letterSpacing: '-0.04em' }} className="text-lg font-bold text-[#362f35]">
-          Experiences {experiences?.length ? <span className="text-[#a6967c] text-sm">({experiences.length})</span> : null}
+          Experiences {experiences?.length ? <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.01em' }} className="ml-2 inline-flex items-center justify-center bg-[#f0ece8] text-[#726d6b] rounded-full px-2 py-0.5">{experiences.length}</span> : null}
         </h1>
         <Link
           href="/admin/experiences/new"

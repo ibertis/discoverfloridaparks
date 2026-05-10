@@ -34,7 +34,7 @@ export default async function AdminParksPage({ searchParams }: Props) {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-lg font-bold text-[#362f35]" style={{ fontFamily: 'Shrikhand, cursive', letterSpacing: '-0.04em' }}>
-          Parks {parks?.length ? <span className="text-[#a6967c] text-sm">({parks.length})</span> : null}
+          Parks {parks?.length ? <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.01em' }} className="ml-2 inline-flex items-center justify-center bg-[#f0ece8] text-[#726d6b] rounded-full px-2 py-0.5">{parks.length}</span> : null}
         </h1>
         <Link
           href="/admin/parks/new"
