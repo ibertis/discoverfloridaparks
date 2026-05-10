@@ -1,28 +1,16 @@
-import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import NewsletterForm from './NewsletterForm';
-
-const ClockIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a6967c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-    <circle cx="12" cy="12" r="10" />
-    <polyline points="12 6 12 12 16 14" />
-  </svg>
-);
-
-function formatDuration(hours: number | null): string | null {
-  if (hours == null) return null;
-  return hours === Math.floor(hours) ? `${hours} hrs` : `${hours} hrs`;
-}
+import FeaturedExperiencesList from './FeaturedExperiencesList';
 
 export default async function FeaturedExperiences() {
   const { data: listings } = await supabase
     .from('experiences')
-    .select('id,name,description,duration_hours,image_url,affiliate_url,homepage_order')
+    .select('id,name,description,duration_hours,image_url,affiliate_url,homepage_order,regions')
     .eq('is_active', true)
     .eq('is_featured', true)
     .order('homepage_order', { ascending: true })
     .order('rating', { ascending: false })
-    .limit(3);
+    .limit(10);
 
   return (
     <section style={{ background: '#fff', borderTop: '1px solid #eeeeee' }} className="page-section-pad">
@@ -37,63 +25,7 @@ export default async function FeaturedExperiences() {
             Plan your next<br />Adventure
           </h2>
 
-          {listings && listings.length > 0 ? (
-            listings.map((item, i) => (
-              <div key={item.id}>
-                {i > 0 && <hr style={{ border: 'none', borderTop: '1px solid #eeeeee', margin: '32px 0' }} />}
-                <div className="featured-listing-row">
-
-                  {item.image_url ? (
-                    <Image
-                      src={item.image_url}
-                      alt={item.name}
-                      width={120}
-                      height={120}
-                      style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-                    />
-                  ) : (
-                    <div style={{ width: 120, height: 120, borderRadius: '50%', background: '#f5f1ec', flexShrink: 0 }} />
-                  )}
-
-                  <div style={{ flex: 1 }}>
-                    {formatDuration(item.duration_hours) && (
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3f0', borderRadius: '2.3em', padding: '4px 12px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: '#726d6b', marginBottom: 10 }}>
-                        <ClockIcon />
-                        {formatDuration(item.duration_hours)}
-                      </span>
-                    )}
-                    <h3 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.45rem', color: '#362f35', margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-                      {item.name}
-                    </h3>
-                    {item.description && (
-                      <p style={{
-                        fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b',
-                        lineHeight: 1.6, margin: '0 0 14px',
-                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                      } as React.CSSProperties}>
-                        {item.description}
-                      </p>
-                    )}
-                    {item.affiliate_url && (
-                      <a
-                        href={item.affiliate_url}
-                        target="_blank"
-                        rel="noopener nofollow sponsored"
-                        style={{ display: 'inline-block', background: '#ff7044', color: '#fff', borderRadius: '2.3em', padding: '9px 24px', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.82rem', textDecoration: 'none' }}
-                        className="hover:opacity-85 transition-opacity"
-                      >
-                        Get Details →
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p style={{ fontFamily: 'Glegoo, serif', fontSize: '0.9rem', color: '#a6967c' }}>
-              Check back soon for featured experiences.
-            </p>
-          )}
+          <FeaturedExperiencesList listings={listings ?? []} />
         </div>
 
         {/* Right — sidebar */}
