@@ -18,7 +18,7 @@ const PARK_REGIONS = [
   'Central Florida', 'Central Florida, West Coast', 'Central Florida, East Coast',
   'East Coast', 'West Coast',
   'Southwest Florida', 'Southeast Florida',
-  'South Florida', 'South Florida, West Coast', 'South Florida, East Coast', 'South Florida, The Keys',
+  'South Florida', 'South Florida, The Keys',
 ];
 const PARK_STATUSES = ['Active', 'Closed', 'Seasonal', 'Under Renovation'];
 const SEASONS = [

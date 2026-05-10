@@ -38,8 +38,6 @@ function coordsToRegions(lat: number, lon: number): string[] {
   if (lon > -81) matched.push('East Coast');
   if (lat < 27.5) matched.push('South Florida');
   if (lat < 25.3) matched.push('South Florida, The Keys');
-  if (lat < 27.5 && lon < -81.5) matched.push('South Florida, West Coast');
-  if (lat < 27.5 && lon > -80.5) matched.push('South Florida, East Coast');
   if (lat >= 25.5 && lat < 27.5 && lon > -80.5) matched.push('Southeast Florida');
   if (lat < 27.5 && lon < -82) matched.push('Southwest Florida');
   return matched;
