@@ -17,11 +17,12 @@ function formatDuration(hours: number | null): string | null {
 export default async function FeaturedExperiences() {
   const { data: listings } = await supabase
     .from('experiences')
-    .select('id,name,description,duration_hours,image_url,affiliate_url')
+    .select('id,name,description,duration_hours,image_url,affiliate_url,homepage_order')
     .eq('is_active', true)
     .eq('is_featured', true)
+    .order('homepage_order', { ascending: true, nullsFirst: false })
     .order('rating', { ascending: false })
-    .limit(4);
+    .limit(3);
 
   return (
     <section style={{ background: '#fff', borderTop: '1px solid #eeeeee' }} className="page-section-pad">
@@ -65,7 +66,11 @@ export default async function FeaturedExperiences() {
                       {item.name}
                     </h3>
                     {item.description && (
-                      <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: '0 0 14px' }}>
+                      <p style={{
+                        fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b',
+                        lineHeight: 1.6, margin: '0 0 14px',
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                      } as React.CSSProperties}>
                         {item.description}
                       </p>
                     )}

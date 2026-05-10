@@ -52,6 +52,7 @@ interface Experience {
   image_url: string | null;
   is_active: boolean;
   is_featured: boolean;
+  homepage_order: number | null;
   notes: string | null;
 }
 
@@ -81,6 +82,7 @@ export default function ExperienceEditForm({ experience }: { experience: Experie
     image_url: null,
     is_active: true,
     is_featured: false,
+    homepage_order: null,
     notes: null,
     ...experience,
   });
@@ -289,15 +291,31 @@ export default function ExperienceEditForm({ experience }: { experience: Experie
       {/* Settings */}
       <div className="bg-white rounded-xl border border-[#eeeeee] p-5 space-y-4">
         <h2 className="text-sm font-bold text-[#362f35]">Settings</h2>
-        <div className="flex gap-6">
+        <div className="flex gap-6 flex-wrap">
           <label className="flex items-center gap-2 text-sm text-[#413734] cursor-pointer">
             <input type="checkbox" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="accent-[#ff7044] w-4 h-4" />
             Active (shows on park pages)
           </label>
           <label className="flex items-center gap-2 text-sm text-[#413734] cursor-pointer">
             <input type="checkbox" checked={form.is_featured} onChange={e => set('is_featured', e.target.checked)} className="accent-[#ff7044] w-4 h-4" />
-            Featured (surfaces first + shows on homepage)
+            Featured (eligible for homepage)
           </label>
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-[#726d6b] uppercase tracking-wide mb-1.5">
+            Homepage Slot <span className="normal-case font-normal text-[#a6967c]">— pin to a guaranteed position (Featured must be on)</span>
+          </label>
+          <select
+            value={form.homepage_order ?? ''}
+            onChange={e => set('homepage_order', e.target.value === '' ? null : parseInt(e.target.value))}
+            className={inputCls}
+            style={{ maxWidth: 240 }}
+          >
+            <option value="">Auto (ranked by rating)</option>
+            <option value="1">Slot 1 — always shows, shown first</option>
+            <option value="2">Slot 2 — always shows, shown second</option>
+            <option value="3">Slot 3 — always shows, shown third</option>
+          </select>
         </div>
         <div>
           <label className="block text-xs font-semibold text-[#726d6b] uppercase tracking-wide mb-1.5">Internal Notes</label>
