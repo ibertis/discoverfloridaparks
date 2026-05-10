@@ -101,7 +101,7 @@ export default function FeaturedExperiencesList({ listings }: { listings: Featur
           <div className="featured-listing-row">
 
             {item.image_url ? (
-              <div style={{ width: 136, height: 136, borderRadius: '50%', background: '#e8ddd0', padding: 8, flexShrink: 0 }}>
+              <div className="featured-exp-img-wrap" style={{ borderRadius: '50%', background: '#e8ddd0', padding: 8, flexShrink: 0 }}>
                 <Image
                   src={item.image_url}
                   alt={item.name}
@@ -111,19 +111,19 @@ export default function FeaturedExperiencesList({ listings }: { listings: Featur
                 />
               </div>
             ) : (
-              <div style={{ width: 136, height: 136, borderRadius: '50%', background: '#e8ddd0', padding: 8, flexShrink: 0 }}>
+              <div className="featured-exp-img-wrap" style={{ borderRadius: '50%', background: '#e8ddd0', padding: 8, flexShrink: 0 }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#f5f1ec' }} />
               </div>
             )}
 
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               {formatDuration(item.duration_hours) && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3f0', borderRadius: '2.3em', padding: '4px 12px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: '#726d6b', marginBottom: 10 }}>
                   <ClockIcon />
                   {formatDuration(item.duration_hours)}
                 </span>
               )}
-              <h3 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.45rem', color: '#362f35', margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+              <h3 className="featured-exp-title" style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, color: '#362f35', margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
                 {item.name}
               </h3>
               {item.description && (
