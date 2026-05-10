@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import NewsletterForm from './NewsletterForm';
 
@@ -10,15 +9,19 @@ const ClockIcon = () => (
   </svg>
 );
 
+function formatDuration(hours: number | null): string | null {
+  if (hours == null) return null;
+  return hours === Math.floor(hours) ? `${hours} hrs` : `${hours} hrs`;
+}
+
 export default async function FeaturedExperiences() {
   const { data: listings } = await supabase
     .from('experiences')
-    .select('id,name,description,duration,image_url,href,cta_label')
+    .select('id,name,description,duration_hours,image_url,affiliate_url')
     .eq('is_active', true)
-    .or('expires_at.is.null,expires_at.gt.now()')
-    .order('sort_order')
-    .order('created_at')
-    .limit(6);
+    .eq('is_featured', true)
+    .order('rating', { ascending: false })
+    .limit(4);
 
   return (
     <section style={{ background: '#fff', borderTop: '1px solid #eeeeee' }} className="page-section-pad">
@@ -29,17 +32,9 @@ export default async function FeaturedExperiences() {
           <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 10px' }}>
             Explore &amp; Experience
           </p>
-          <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2.4rem, 3.5vw, 3.6rem)', lineHeight: 0.95, color: '#362f35', margin: '0 0 16px', letterSpacing: '-0.04em' }}>
+          <h2 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2.4rem, 3.5vw, 3.6rem)', lineHeight: 0.95, color: '#362f35', margin: '0 0 48px', letterSpacing: '-0.04em' }}>
             Plan your next<br />Adventure
           </h2>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 40, flexWrap: 'wrap' }}>
-            <Link href="/experiences" style={{ display: 'inline-block', background: '#ff7044', color: '#fff', borderRadius: '2.3em', padding: '9px 22px', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.82rem', textDecoration: 'none' }} className="hover:opacity-85 transition-opacity">
-              All Experiences →
-            </Link>
-            <Link href="/experiences/featured" style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.82rem', color: '#a6967c', textDecoration: 'none' }} className="hover:text-[#ff7044] transition-colors">
-              Upcoming Trips →
-            </Link>
-          </div>
 
           {listings && listings.length > 0 ? (
             listings.map((item, i) => (
@@ -60,10 +55,10 @@ export default async function FeaturedExperiences() {
                   )}
 
                   <div style={{ flex: 1 }}>
-                    {item.duration && (
+                    {formatDuration(item.duration_hours) && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3f0', borderRadius: '2.3em', padding: '4px 12px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: '#726d6b', marginBottom: 10 }}>
                         <ClockIcon />
-                        {item.duration}
+                        {formatDuration(item.duration_hours)}
                       </span>
                     )}
                     <h3 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.45rem', color: '#362f35', margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
@@ -74,13 +69,15 @@ export default async function FeaturedExperiences() {
                         {item.description}
                       </p>
                     )}
-                    {item.href && (
+                    {item.affiliate_url && (
                       <a
-                        href={item.href}
+                        href={item.affiliate_url}
+                        target="_blank"
+                        rel="noopener nofollow sponsored"
                         style={{ display: 'inline-block', background: '#ff7044', color: '#fff', borderRadius: '2.3em', padding: '9px 24px', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.82rem', textDecoration: 'none' }}
                         className="hover:opacity-85 transition-opacity"
                       >
-                        {item.cta_label ?? 'Get Details'} →
+                        Get Details →
                       </a>
                     )}
                   </div>

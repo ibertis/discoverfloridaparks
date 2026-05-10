@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Save, Trash2 } from 'lucide-react';
+import { Save, Trash2, Upload } from 'lucide-react';
 
 const ACTIVITY_TYPES = [
   'Airboat Tours', 'Biking & Cycling', 'Boat Tours & Rentals',
@@ -48,6 +49,7 @@ interface Experience {
   review_count: number;
   rating: number | null;
   duration_hours: number | null;
+  image_url: string | null;
   is_active: boolean;
   is_featured: boolean;
   notes: string | null;
@@ -57,8 +59,10 @@ const inputCls = 'w-full border border-[#dfdfdf] rounded-lg px-3 py-2.5 text-sm 
 
 export default function ExperienceEditForm({ experience }: { experience: Experience | null }) {
   const router = useRouter();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
   const [form, setForm] = useState<Experience>({
@@ -74,6 +78,7 @@ export default function ExperienceEditForm({ experience }: { experience: Experie
     review_count: 0,
     rating: null,
     duration_hours: null,
+    image_url: null,
     is_active: true,
     is_featured: false,
     notes: null,
@@ -94,6 +99,23 @@ export default function ExperienceEditForm({ experience }: { experience: Experie
   function showToast(msg: string, ok = true) {
     setToast({ msg, ok });
     setTimeout(() => setToast(null), 3000);
+  }
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    const ext = file.name.split('.').pop() ?? 'jpg';
+    const fileName = `experience-${Date.now()}.${ext}`;
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('fileName', fileName);
+    const res = await fetch('/admin/api/upload-experience-photo', { method: 'POST', body: fd });
+    const json = await res.json();
+    setUploadingPhoto(false);
+    if (!res.ok) { showToast(`Upload failed: ${json.error}`, false); return; }
+    set('image_url', json.url);
+    showToast('Photo uploaded');
   }
 
   async function handleSave() {
@@ -163,6 +185,35 @@ export default function ExperienceEditForm({ experience }: { experience: Experie
           <label className="block text-xs font-semibold text-[#726d6b] uppercase tracking-wide mb-1.5">Description</label>
           <textarea rows={4} value={form.description ?? ''} onChange={e => set('description', e.target.value)}
             className={`${inputCls} resize-y`} placeholder="Compelling 2-3 sentence description shown on park pages…" />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-[#726d6b] uppercase tracking-wide mb-1.5">Photo <span className="normal-case font-normal text-[#a6967c]">(shown as round image on homepage when Featured)</span></label>
+          <div className="flex items-start gap-4">
+            {form.image_url ? (
+              <div className="relative w-24 h-24 rounded-full overflow-hidden border border-[#eeeeee] shrink-0">
+                <Image src={form.image_url} alt="" fill className="object-cover" unoptimized />
+              </div>
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-[#f7f5f2] border border-[#eeeeee] flex items-center justify-center shrink-0">
+                <span className="text-xs text-[#a6967c] text-center leading-tight px-2">No photo</span>
+              </div>
+            )}
+            <div className="space-y-2 pt-1">
+              <input ref={fileRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+              <button type="button" onClick={() => fileRef.current?.click()} disabled={uploadingPhoto}
+                className="flex items-center gap-2 text-sm font-semibold border border-[#dfdfdf] rounded-lg px-4 py-2 hover:bg-[#f7f5f2] transition disabled:opacity-50">
+                <Upload size={14} />
+                {uploadingPhoto ? 'Uploading…' : form.image_url ? 'Replace photo' : 'Upload photo'}
+              </button>
+              {form.image_url && (
+                <button type="button" onClick={() => set('image_url', null)}
+                  className="flex items-center gap-2 text-xs text-red-500 hover:text-red-700 transition">
+                  <Trash2 size={12} /> Remove
+                </button>
+              )}
+              <p className="text-xs text-[#a6967c]">JPG or PNG, max 10 MB</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -245,7 +296,7 @@ export default function ExperienceEditForm({ experience }: { experience: Experie
           </label>
           <label className="flex items-center gap-2 text-sm text-[#413734] cursor-pointer">
             <input type="checkbox" checked={form.is_featured} onChange={e => set('is_featured', e.target.checked)} className="accent-[#ff7044] w-4 h-4" />
-            Featured (surfaces first)
+            Featured (surfaces first + shows on homepage)
           </label>
         </div>
         <div>
