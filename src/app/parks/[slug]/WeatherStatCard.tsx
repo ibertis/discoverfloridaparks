@@ -56,14 +56,14 @@ export default function WeatherStatCard({ lat, lng }: Props) {
 
   useEffect(() => {
     fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weathercode,wind_speed_10m,is_day&temperature_unit=fahrenheit&wind_speed_unit=mph`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weather_code,wind_speed_10m,is_day&temperature_unit=fahrenheit&wind_speed_unit=mph`
     )
       .then(r => r.json())
       .then(d => {
         const c = d.current;
         setWeather({
           temp: Math.round(c.temperature_2m),
-          code: c.weathercode,
+          code: c.weather_code,
           wind: Math.round(c.wind_speed_10m),
           isDay: c.is_day === 1,
         });
