@@ -11,7 +11,15 @@ const PARK_TYPES = [
   'Seasonal Attractions', 'National Estuarine Research Reserve',
   'Nature Preserve', 'Wildlife Preserve', 'Wildlife Refuge', 'State Forest', 'State Trail', 'Other',
 ];
-const PARK_REGIONS = ['North Florida', 'Northeast Florida', 'Central Florida', 'Southwest Florida', 'Southeast Florida', 'South Florida', 'Northwest Florida / Panhandle', 'East Coast', 'West Coast'];
+const PARK_REGIONS = [
+  'Northwest Florida / Panhandle',
+  'North Florida', 'North Florida, West Coast',
+  'Northeast Florida',
+  'Central Florida', 'Central Florida, West Coast', 'Central Florida, East Coast',
+  'East Coast', 'West Coast',
+  'Southwest Florida', 'Southeast Florida',
+  'South Florida', 'South Florida, West Coast', 'South Florida, East Coast', 'South Florida, The Keys',
+];
 const PARK_STATUSES = ['Active', 'Closed', 'Seasonal', 'Under Renovation'];
 const SEASONS = [
   { value: 'year_round', label: 'Year-Round' },
