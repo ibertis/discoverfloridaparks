@@ -20,7 +20,7 @@ export default async function FeaturedExperiences() {
     .select('id,name,description,duration_hours,image_url,affiliate_url,homepage_order')
     .eq('is_active', true)
     .eq('is_featured', true)
-    .order('homepage_order', { ascending: true, nullsFirst: false })
+    .order('homepage_order', { ascending: true })
     .order('rating', { ascending: false })
     .limit(3);
 
