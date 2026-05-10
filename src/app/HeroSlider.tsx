@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Map, ChevronRight as ChevronRightIcon } from 'lucide-react';
 
@@ -60,16 +61,23 @@ export default function HeroSlider({ parkCount: _parkCount }: { parkCount: numbe
 
   return (
     <section style={{ position: 'relative', height: '88vh', minHeight: 600, overflow: 'hidden' }} className="hero-section">
-      {/* Background image */}
-      <div
-        style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: `url(${slide.image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          transition: 'background-image 0.5s ease',
-        }}
-      />
+      {/* Background images — stacked, opacity-transitioned for LCP optimization */}
+      {SLIDES.map((s, i) => (
+        <Image
+          key={s.image}
+          src={s.image}
+          alt=""
+          fill
+          priority={i === 0}
+          sizes="100vw"
+          style={{
+            objectFit: 'cover',
+            objectPosition: 'center',
+            opacity: i === current ? 1 : 0,
+            transition: 'opacity 0.5s ease',
+          }}
+        />
+      ))}
       {/* Dark overlay */}
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(30,25,20,0.52)' }} />
 

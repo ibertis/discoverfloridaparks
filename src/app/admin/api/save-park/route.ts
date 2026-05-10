@@ -12,6 +12,11 @@ export async function POST(req: NextRequest) {
   );
 
   const { park, amenities, trails, facts, events, experiences, hotels } = await req.json();
+
+  function isSafeUrl(url: string | null | undefined): boolean {
+    if (!url) return true;
+    try { return /^https?:\/\//i.test(new URL(url).href); } catch { return false; }
+  }
   const { park_amenities, park_trails, park_fun_facts, park_seasonal_events, ...payload } = park;
 
   let parkId: string;
@@ -66,7 +71,7 @@ export async function POST(req: NextRequest) {
     await db.from('park_experiences').insert(
       experiences.map((e: any, i: number) => ({
         park_id: parkId, name: e.name, description: e.description,
-        duration: e.duration, price_from: e.price_from, href: e.href,
+        duration: e.duration, price_from: e.price_from, href: isSafeUrl(e.href) ? e.href : null,
         source: e.source ?? 'viator', business_name: e.business_name,
         sort_order: i, is_active: true,
       }))
@@ -79,7 +84,7 @@ export async function POST(req: NextRequest) {
     await db.from('park_hotels').insert(
       hotels.map((h: any, i: number) => ({
         park_id: parkId, name: h.name, description: h.description,
-        url: h.url, price_from: h.price_from, sort_order: i,
+        url: isSafeUrl(h.url) ? h.url : null, price_from: h.price_from, sort_order: i,
       }))
     );
   }

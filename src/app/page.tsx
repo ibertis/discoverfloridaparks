@@ -118,15 +118,15 @@ export default async function HomePage() {
                 <VideoPlayButton />
               </div>
               <div className="intro-hide-mobile" style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                <div style={{ width: '80%', borderRadius: 12, overflow: 'hidden' }}>
+                <div style={{ width: '80%', borderRadius: 12, overflow: 'hidden', aspectRatio: '3/2' }}>
                   <Image src="/planning-florida-trip.jpg" alt="Kayaking at sunset in Florida"
-                    width={600} height={400} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                    width={600} height={400} style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }} />
                 </div>
               </div>
             </div>
-            <div className="intro-hide-mobile" style={{ borderRadius: 12, overflow: 'hidden', width: '90%' }}>
+            <div className="intro-hide-mobile" style={{ borderRadius: 12, overflow: 'hidden', width: '90%', aspectRatio: '3/2' }}>
               <Image src="/plan-your-trip.jpg" alt="Couple planning a Florida trip"
-                width={600} height={400} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                width={600} height={400} style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }} />
             </div>
           </div>
 
@@ -154,9 +154,9 @@ export default async function HomePage() {
             className="intro-hide-mobile"
             style={{ gridColumn: 3, gridRow: 2 }}
           >
-            <div style={{ width: '95%', borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ width: '95%', borderRadius: 12, overflow: 'hidden', aspectRatio: '3/2' }}>
               <Image src="/your-ultimate-park-guide.jpg" alt="Discover Florida Parks on mobile"
-                width={600} height={400} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                width={600} height={400} style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }} />
             </div>
           </div>
 

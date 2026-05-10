@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 const PDF_URL = 'https://discoverfloridaparks.com/downloads/2026-florida-travel-trends.pdf';
 
 export async function POST(req: Request) {
@@ -17,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 });
     }
 
-    const firstName = name.trim().split(' ')[0];
+    const firstName = escapeHtml(name.trim().split(' ')[0]);
 
     // Email to the subscriber
     const { error: deliveryError } = await resend.emails.send({
@@ -66,8 +75,8 @@ export async function POST(req: Request) {
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #362f35;">New Travel Trends download</h2>
-          <p style="color: #726d6b;"><strong>Name:</strong> ${name}</p>
-          <p style="color: #726d6b;"><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+          <p style="color: #726d6b;"><strong>Name:</strong> ${escapeHtml(name)}</p>
+          <p style="color: #726d6b;"><strong>Email:</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></p>
         </div>
       `,
       text: `New Travel Trends download\nName: ${name}\nEmail: ${email}`,
