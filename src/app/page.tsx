@@ -3,6 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: 'Discover Florida Parks — State Parks, National Parks & Outdoor Attractions',
   description: 'Your all-in-one guide to Florida\'s best parks, beaches, and outdoor adventures. Browse 49+ state parks, national parks, wildlife refuges, and more.',
