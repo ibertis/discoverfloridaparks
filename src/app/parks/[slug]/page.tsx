@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import {
   MapPin, Phone, Globe, Clock, DollarSign, Star, Users, Calendar,
   Tent, Fish, Waves, Dog, Ship, TreePine, ParkingCircle, AlertTriangle,
-  Leaf, Footprints, Sparkles, ArrowLeft, Mail, Hash,
+  Leaf, Footprints, ArrowLeft, Mail, Hash,
   Bike, Bird, Crosshair, MountainSnow, Sailboat,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -413,21 +413,6 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                     <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: '2.3em', border: '1px solid #eeeeee', background: '#fff', fontFamily: 'Archivo, sans-serif', fontSize: '0.85rem', fontWeight: 600, color: '#413734' }}>
                       <Icon size={15} style={{ color: '#ff7044' }} />
                       {label}
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Activities Available */}
-            {park.activity_types?.length > 0 && (
-              <section>
-                <SectionHeading>Activities Available</SectionHeading>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-                  {park.activity_types.map(activity => (
-                    <div key={activity} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: '2.3em', border: '1px solid #eeeeee', background: '#fff', fontFamily: 'Archivo, sans-serif', fontSize: '0.85rem', fontWeight: 600, color: '#413734' }}>
-                      <Sparkles size={14} style={{ color: '#ff7044', flexShrink: 0 }} />
-                      {activity}
                     </div>
                   ))}
                 </div>
