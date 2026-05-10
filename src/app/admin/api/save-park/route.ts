@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     if (!url) return true;
     try { return /^https?:\/\//i.test(new URL(url).href); } catch { return false; }
   }
-  const { park_amenities, park_trails, park_fun_facts, park_seasonal_events, ...payload } = park;
+  const { park_amenities, park_trails, park_fun_facts, park_seasonal_events, park_experiences, park_hotels, ...payload } = park;
 
   let parkId: string;
 
