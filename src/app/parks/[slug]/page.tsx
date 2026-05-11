@@ -595,9 +595,14 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                           style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', textDecoration: 'none' }}>
                           {hotel.name}
                         </a>
-                        {hotel.price_from && (
-                          <span style={{ background: '#f0ece6', color: '#726d6b', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, flexShrink: 0 }}>{hotel.price_from}</span>
-                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                          {/pet.friendly|dog.friendly|pets welcome/i.test(hotel.name + ' ' + (hotel.description ?? '')) && (
+                            <span style={{ background: '#e6f2ea', color: '#3d7a52', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>🐾 Pet-friendly</span>
+                          )}
+                          {hotel.price_from && (
+                            <span style={{ background: '#f0ece6', color: '#726d6b', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>{hotel.price_from}</span>
+                          )}
+                        </div>
                       </div>
                       {hotel.description && (
                         <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>{hotel.description}</p>
