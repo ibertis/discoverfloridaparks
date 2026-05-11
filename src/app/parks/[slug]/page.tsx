@@ -830,15 +830,15 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
 
       </div>
 
-      {/* ── Newsletter — between article content and experiences ─── */}
-      <section style={{ background: '#f9f7f5', borderTop: '1px solid #eeeeee', borderBottom: '1px solid #eeeeee', padding: '48px 24px' }}>
+      {/* ── Catalog Experiences — full-bleed section ─── */}
+      <ExperiencesSection parkName={park.name} experiences={catalogExperiences} />
+
+      {/* ── Newsletter ───────────────────────────────────── */}
+      <section style={{ background: '#fff', borderTop: '1px solid #eeeeee', padding: '48px 24px' }}>
         <div style={{ maxWidth: 560, margin: '0 auto' }}>
           <NewsletterSignup variant="inline" source={park.slug} />
         </div>
       </section>
-
-      {/* ── Catalog Experiences — full-bleed section ─── */}
-      <ExperiencesSection parkName={park.name} experiences={catalogExperiences} />
 
       {/* ── Nearby Parks ────────────────────────────────── */}
       {nearbyParks.length > 0 && (
