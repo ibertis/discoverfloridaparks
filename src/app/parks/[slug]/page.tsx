@@ -178,6 +178,8 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
     supabase.rpc('get_park_experiences', {
       park_activity_types: park.activity_types ?? [],
       park_region_list: park.park_regions ?? [],
+      park_lat: park.latitude ?? null,
+      park_lng: park.longitude ?? null,
     }),
   ]);
   const catalogExperiences: CatalogExperience[] = catalogExperiencesResult.data ?? [];

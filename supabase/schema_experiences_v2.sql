@@ -46,19 +46,53 @@ CREATE OR REPLACE TRIGGER update_experiences_updated_at
 -- ─── Step 3: RPC — match experiences to a park ───────────────────────────────
 -- park_activity_types: the park's activity_types text[] column
 -- park_region_list:    the park's park_regions text[] column (already an array — no splitting needed)
+-- park_lat / park_lng: park coordinates (added in migrate_experiences_coords.sql)
+--   Primary match: experience within 50 miles by haversine distance
+--   Fallback: region string overlap (when either side lacks coordinates)
 
 CREATE OR REPLACE FUNCTION get_park_experiences(
   park_activity_types text[],
-  park_region_list    text[]
+  park_region_list    text[],
+  park_lat            float8 DEFAULT NULL,
+  park_lng            float8 DEFAULT NULL
 )
 RETURNS SETOF experiences AS $$
   SELECT * FROM experiences
   WHERE
     activity_type = ANY(park_activity_types)
-    AND regions && park_region_list
     AND is_active = true
+    AND (
+      CASE
+        WHEN park_lat  IS NOT NULL
+         AND park_lng  IS NOT NULL
+         AND latitude  IS NOT NULL
+         AND longitude IS NOT NULL
+        THEN
+          (3959 * acos(
+            LEAST(1.0,
+              cos(radians(park_lat)) * cos(radians(latitude))
+                * cos(radians(longitude) - radians(park_lng))
+              + sin(radians(park_lat)) * sin(radians(latitude))
+            )
+          )) <= 50
+        ELSE
+          regions && park_region_list
+      END
+    )
   ORDER BY
-    is_featured DESC,
+    CASE
+      WHEN park_lat  IS NOT NULL AND park_lng  IS NOT NULL
+       AND latitude  IS NOT NULL AND longitude IS NOT NULL
+      THEN
+        (3959 * acos(
+          LEAST(1.0,
+            cos(radians(park_lat)) * cos(radians(latitude))
+              * cos(radians(longitude) - radians(park_lng))
+            + sin(radians(park_lat)) * sin(radians(latitude))
+          )
+        ))
+    END ASC NULLS LAST,
+    is_featured  DESC,
     rating       DESC,
     review_count DESC
   LIMIT 3;
