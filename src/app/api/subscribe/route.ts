@@ -44,29 +44,25 @@ export async function POST(req: Request) {
   }
 
   const apiKey = process.env.KIT_API_KEY;
-  const formId = process.env.KIT_FORM_ID;
 
-  if (!apiKey || !formId) {
-    console.error('[subscribe] Missing KIT_API_KEY or KIT_FORM_ID');
+  if (!apiKey) {
+    console.error('[subscribe] Missing KIT_API_KEY');
     return NextResponse.json({ success: false, error: 'Service unavailable.' }, { status: 503 });
   }
 
   try {
-    const kitRes = await fetch(
-      `https://api.kit.com/v4/forms/${formId}/subscribers`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Kit-Api-Key': apiKey,
-        },
-        body: JSON.stringify({
-          email_address: email.trim(),
-          ...(firstName?.trim() && { first_name: firstName.trim() }),
-          fields: { source: source ?? 'unknown' },
-        }),
+    const kitRes = await fetch('https://api.kit.com/v4/subscribers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Kit-Api-Key': apiKey,
       },
-    );
+      body: JSON.stringify({
+        email_address: email.trim(),
+        ...(firstName?.trim() && { first_name: firstName.trim() }),
+        fields: { source: source ?? 'unknown' },
+      }),
+    });
 
     // Kit returns 200/201 for new subscribers and handles duplicates gracefully
     if (kitRes.ok) {
