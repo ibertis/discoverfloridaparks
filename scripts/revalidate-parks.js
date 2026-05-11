@@ -3,6 +3,8 @@
 // Requires REVALIDATE_SECRET env var (or pass via .env.local).
 // Defaults to http://localhost:3000 — set NEXT_PUBLIC_SITE_URL for production.
 
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env.local') });
+
 const slugs = process.argv.slice(2);
 
 if (slugs.length === 0) {
