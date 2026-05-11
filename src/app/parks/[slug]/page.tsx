@@ -19,7 +19,6 @@ import AdUnit from '@/components/AdUnit';
 import GearRecommendations from '@/components/GearRecommendations';
 import ExperiencesSection from '@/components/ExperiencesSection';
 import type { CatalogExperience } from '@/components/ExperienceCard';
-import NewsletterSignup from '@/components/NewsletterSignup';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -832,13 +831,6 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
 
       {/* ── Catalog Experiences — full-bleed section ─── */}
       <ExperiencesSection parkName={park.name} experiences={catalogExperiences} />
-
-      {/* ── Newsletter ───────────────────────────────────── */}
-      <section style={{ background: '#fff', borderTop: '1px solid #eeeeee', padding: '48px 24px' }}>
-        <div style={{ maxWidth: 560, margin: '0 auto' }}>
-          <NewsletterSignup variant="inline" source={park.slug} />
-        </div>
-      </section>
 
       {/* ── Nearby Parks ────────────────────────────────── */}
       {nearbyParks.length > 0 && (
