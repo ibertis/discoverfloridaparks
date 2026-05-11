@@ -33,6 +33,7 @@ import VideoPlayButton from './VideoModal';
 import HomeMapSection from './HomeMapSection';
 import FeaturedExperiences from './FeaturedExperiences';
 import ParkCard from '@/components/ParkCard';
+import NewsletterSignup from '@/components/NewsletterSignup';
 
 const REGIONS: { name: string; icon: Icon; description: string }[] = [
   { name: 'Southeast Florida',             icon: WavesIcon,    description: 'Everglades, Keys & Miami' },
@@ -255,6 +256,11 @@ export default async function HomePage() {
 
       {/* ── Featured Experiences ─────────────────────────────── */}
       <FeaturedExperiences />
+
+      {/* ── Newsletter ──────────────────────────────────────── */}
+      <section style={{ padding: '80px 24px' }}>
+        <NewsletterSignup variant="card" source="homepage" />
+      </section>
 
       {/* ── Map CTA ─────────────────────────────────────────── */}
       <section style={{ background: '#362f35', padding: '80px 24px' }}>

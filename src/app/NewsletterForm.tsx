@@ -15,9 +15,20 @@ export default function NewsletterForm() {
     setError('');
     setLoading(true);
     try {
-      await new Promise(r => setTimeout(r, 600));
-      setSuccess(true);
-      setEmail('');
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), source: 'blog' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSuccess(true);
+        setEmail('');
+      } else {
+        setError(data.error ?? 'Something went wrong — try again.');
+      }
+    } catch {
+      setError('Something went wrong — try again.');
     } finally {
       setLoading(false);
     }

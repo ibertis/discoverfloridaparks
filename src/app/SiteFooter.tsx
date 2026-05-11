@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import ScrollToTop from './ScrollToTop';
+import NewsletterSignup from '@/components/NewsletterSignup';
 
 const SOCIALS = [
   {
@@ -19,6 +20,13 @@ const SOCIALS = [
 
 export default function SiteFooter() {
   return (
+    <>
+      <section style={{ background: '#f9f7f5', borderTop: '1px solid #eeeeee', padding: '48px 24px' }}>
+        <div style={{ maxWidth: 560, margin: '0 auto' }}>
+          <NewsletterSignup variant="inline" source="footer" />
+        </div>
+      </section>
+
     <footer style={{ background: '#edeae5', borderTop: '1px solid #ddd8d0', padding: '28px 24px' }}>
       <div className="site-footer-inner" style={{ maxWidth: 1278, margin: '0 auto' }}>
 
@@ -48,5 +56,6 @@ export default function SiteFooter() {
         Discover Florida Parks is an independent guide to Florida&apos;s parks and outdoor attractions. We are not affiliated with the Florida State Parks system, the National Park Service, or any government agency.
       </p>
     </footer>
+    </>
   );
 }
