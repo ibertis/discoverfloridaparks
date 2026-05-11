@@ -59,9 +59,12 @@ export default async function FeaturedExperiences() {
             <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 8px' }}>
               Subscribe to our free newsletter
             </p>
-            <h3 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.6rem', color: '#362f35', margin: '0 0 20px', letterSpacing: '-0.04em', lineHeight: 1.05 }}>
+            <h3 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.6rem', color: '#362f35', margin: '0 0 12px', letterSpacing: '-0.04em', lineHeight: 1.05 }}>
               Hundreds of Parks. Endless Adventures.
             </h3>
+            <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: '0 0 20px' }}>
+              The Florida Parks Insider delivers the best parks, hidden gems, and seasonal guides straight to your inbox.
+            </p>
             <NewsletterForm />
           </div>
 
