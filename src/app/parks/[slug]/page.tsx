@@ -19,6 +19,7 @@ import AdUnit from '@/components/AdUnit';
 import GearRecommendations from '@/components/GearRecommendations';
 import ExperiencesSection from '@/components/ExperiencesSection';
 import type { CatalogExperience } from '@/components/ExperienceCard';
+import NewsletterSignup from '@/components/NewsletterSignup';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -857,6 +858,12 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
           </div>
         </div>
       )}
+
+      <section style={{ background: '#f9f7f5', borderTop: '1px solid #eeeeee', padding: '48px 24px' }}>
+        <div style={{ maxWidth: 560, margin: '0 auto' }}>
+          <NewsletterSignup variant="inline" source={park.slug} />
+        </div>
+      </section>
 
       <FooterLinks />
       <SiteFooter />

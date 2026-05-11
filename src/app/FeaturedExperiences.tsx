@@ -66,6 +66,9 @@ export default async function FeaturedExperiences() {
               The Florida Parks Insider delivers the best parks, hidden gems, and seasonal guides straight to your inbox.
             </p>
             <NewsletterForm />
+            <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#b8b0a8', margin: '12px 0 0' }}>
+              No spam. Unsubscribe anytime.
+            </p>
           </div>
 
         </div>
