@@ -1,11 +1,17 @@
 #!/usr/bin/env node
 // Usage: node scripts/revalidate-parks.js slug-1 slug-2 slug-3
 // Requires REVALIDATE_SECRET env var (or pass via .env.local).
-// Defaults to http://localhost:3000 — set NEXT_PUBLIC_SITE_URL for production.
+// To target production: node scripts/revalidate-parks.js --base-url https://discoverfloridaparks.com slug-1 slug-2
 
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env.local') });
 
-const slugs = process.argv.slice(2);
+const args = process.argv.slice(2);
+let baseUrlOverride = null;
+const slugs = [];
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === '--base-url' && args[i + 1]) { baseUrlOverride = args[++i]; }
+  else { slugs.push(args[i]); }
+}
 
 if (slugs.length === 0) {
   console.error('Usage: node scripts/revalidate-parks.js <slug-1> [slug-2] ...');
@@ -18,7 +24,7 @@ if (!secret) {
   process.exit(1);
 }
 
-const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '');
+const baseUrl = (baseUrlOverride || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '');
 const url = `${baseUrl}/api/revalidate-parks`;
 
 console.log(`Revalidating ${slugs.length} park(s) via ${url} ...`);
