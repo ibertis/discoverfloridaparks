@@ -57,10 +57,10 @@ export default async function FeaturedExperiences() {
           {/* Newsletter card */}
           <div style={{ background: '#f5f3f0', borderRadius: 16, padding: 28 }}>
             <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 8px' }}>
-              Get all news &amp; deals!
+              Subscribe to our free newsletter
             </p>
             <h3 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.6rem', color: '#362f35', margin: '0 0 20px', letterSpacing: '-0.04em', lineHeight: 1.05 }}>
-              Subscribe to Our Newsletter!
+              Hundreds of Parks. Endless Adventures.
             </h3>
             <NewsletterForm />
           </div>
