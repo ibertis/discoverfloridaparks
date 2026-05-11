@@ -29,6 +29,13 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      { source: '/events/:path*',    destination: '/blog',         permanent: true },
+      { source: '/park/:slug*',      destination: '/parks/:slug*', permanent: true },
+      { source: '/trip-type/:path*', destination: '/parks',        permanent: true },
+    ];
+  },
   async headers() {
     return [
       {
