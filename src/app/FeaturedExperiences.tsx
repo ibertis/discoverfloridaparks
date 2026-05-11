@@ -63,7 +63,7 @@ export default async function FeaturedExperiences() {
               Hundreds of Parks. Endless Adventures.
             </h3>
             <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: '0 0 20px' }}>
-              The Florida Parks Insider delivers the best parks, hidden gems, and seasonal guides straight to your inbox.
+              The Florida Parks Insider delivers the best parks, hidden gems &amp; seasonal guides straight to your inbox.
             </p>
             <NewsletterForm />
             <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#b8b0a8', margin: '12px 0 0' }}>
