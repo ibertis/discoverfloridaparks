@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     images: ['https://discoverfloridaparks.com/hero-1.jpg'],
   },
   alternates: { canonical: 'https://discoverfloridaparks.com' },
+  other: { 'impact-site-verification': '9e0ab2e7-f008-4f4c-85ff-5f2a070d4442' },
 };
 import { ArrowRight, Map as MapIcon } from 'lucide-react';
 import { WavesIcon, TicketIcon, RocketIcon, PlantIcon, UmbrellaIcon, MountainsIcon, TreeIcon, BirdIcon, StarIcon as PhosphorStar, TreePalmIcon, DropIcon } from '@phosphor-icons/react/dist/ssr';
