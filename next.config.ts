@@ -31,9 +31,21 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   async redirects() {
     return [
+      // Existing redirects
       { source: '/events/:path*',    destination: '/blog',         permanent: true },
       { source: '/park/:slug*',      destination: '/parks/:slug*', permanent: true },
       { source: '/trip-type/:path*', destination: '/parks',        permanent: true },
+      // Slug fixes — long slugs shortened for SEO
+      {
+        source: '/parks/guana-tolomato-matanzas-national-estuarine-research-reserve-gtm-nerr',
+        destination: '/parks/gtm-nerr',
+        permanent: true,
+      },
+      {
+        source: '/parks/gamble-rogers-memorial-state-recreation-area-at-flagler-beach',
+        destination: '/parks/gamble-rogers-state-park',
+        permanent: true,
+      },
     ];
   },
   async headers() {

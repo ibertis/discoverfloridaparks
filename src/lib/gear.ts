@@ -62,7 +62,7 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       { name: 'Trail Running Shoes',  description: 'Grip & support on Florida trails',  url: 'https://amzn.to/49wJOzJ' },
       { name: 'Hydration Pack (2L)',  description: 'Hands-free water on the trail',     url: 'https://amzn.to/4we76El' },
       { name: 'Trekking Poles',       description: 'Reduce knee strain',                url: 'https://amzn.to/4fcoRxH' },
-      { name: 'Insect Repellent',     description: 'DEET-free, long-lasting',           url: 'https://amzn.to/3RdmsZI' },
+      { name: 'Insect Repellent',     description: 'Alcohol-free, long-lasting',           url: 'https://amzn.to/3RdmsZI' },
     ],
   },
 ];
