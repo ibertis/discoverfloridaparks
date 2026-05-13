@@ -421,6 +421,53 @@ Footer links use pre-slugified paths: `family-trips`, `travel-tips`, `our-picks`
 
 ---
 
+## Hermes — Monitoring Agent
+
+**Location:** `hermes/`
+**Schedule:** Daily at 9:00 AM via macOS launchd (`hermes/com.dfp.hermes.plist`)
+**What it monitors:** 269 park URLs (website + camping_url health) + 264 affiliate links (Booking.com `aid=`/`label=` + Viator `pid=`/`mcid=`) + entrance fee change detection
+**Email report:** Sent to `gabriel@discoverfloridaparks.com`
+
+**Manual run:**
+```bash
+cd /Users/gabrielibertis/Sites/discoverfloridaparks/hermes
+node index.js --dry-run   # test run, no email sent
+node index.js             # full run, sends email report
+```
+
+**Requires LM Studio running** at `http://localhost:1234` before execution.
+
+---
+
+## LM Studio
+
+**Model:** `meta-llama-3.1-8b-instruct` (Q4_K_M, 4.92 GB)
+**API endpoint:** `http://localhost:1234`
+**Purpose:** Powers Hermes alert analysis and fee change detection
+
+Start before running Hermes:
+1. Open LM Studio
+2. Developer → Start Server
+3. Confirm status shows Running at `http://127.0.0.1:1234`
+
+---
+
+## Park Onboarding
+
+See [PARK-ONBOARDING.md](./PARK-ONBOARDING.md) for the complete step-by-step workflow for adding a new park.
+
+---
+
+## Scripts
+
+| Script | Usage | Description |
+|---|---|---|
+| `scripts/enrich-one-park.ts` | `npx ts-node scripts/enrich-one-park.ts <slug>` | Enriches a park record with Google Places data + AI-generated content |
+| `hermes/validate-park.js` | `node validate-park.js <slug>` | Runs all 8 quality checks on a single park record before publishing |
+| `hermes/validate-park.js` | `node validate-park.js --all` | Runs quality checks across all parks and prints a grouped summary |
+
+---
+
 ## Key Gotchas
 
 1. **Tailwind v4 CSS import order:** `@import url(...)` for Google Fonts **must come before** `@import "tailwindcss"` in `globals.css`.
