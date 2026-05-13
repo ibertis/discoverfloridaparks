@@ -277,6 +277,34 @@ CREATE POLICY "blog_posts_editor_delete" ON blog_posts
     ((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor')
   );
 
+-- ─── park_experiences ────────────────────────────────────────────────────────
+-- Per-park direct/partner deals. Renamed from old `experiences` table.
+
+ALTER TABLE park_experiences ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "park_experiences_public_read"   ON park_experiences;
+DROP POLICY IF EXISTS "park_experiences_editor_insert" ON park_experiences;
+DROP POLICY IF EXISTS "park_experiences_editor_update" ON park_experiences;
+DROP POLICY IF EXISTS "park_experiences_admin_delete"  ON park_experiences;
+
+CREATE POLICY "park_experiences_public_read" ON park_experiences
+  FOR SELECT USING (true);
+
+CREATE POLICY "park_experiences_editor_insert" ON park_experiences
+  FOR INSERT WITH CHECK (
+    ((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor')
+  );
+
+CREATE POLICY "park_experiences_editor_update" ON park_experiences
+  FOR UPDATE USING (
+    ((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor')
+  );
+
+CREATE POLICY "park_experiences_admin_delete" ON park_experiences
+  FOR DELETE USING (
+    ((auth.jwt() -> 'app_metadata') ->> 'role') = 'admin'
+  );
+
 -- ─── park_hotels ──────────────────────────────────────────────────────────────
 
 ALTER TABLE park_hotels ENABLE ROW LEVEL SECURITY;
@@ -303,3 +331,54 @@ CREATE POLICY "park_hotels_admin_delete" ON park_hotels
   FOR DELETE USING (
     ((auth.jwt() -> 'app_metadata') ->> 'role') = 'admin'
   );
+
+-- ─── Data API Grants ──────────────────────────────────────────────────────────
+-- Required from Oct 30, 2026: Supabase no longer auto-grants public schema
+-- access to API roles. These GRANTs must accompany every new table.
+-- All statements are idempotent — safe to re-run alongside this file.
+--
+-- Pattern:
+--   anon        → SELECT only (unauthenticated public visitors)
+--   authenticated → full DML (RLS policies above enforce admin/editor restriction)
+--   service_role  → full DML (bypasses RLS — server-side only)
+
+GRANT SELECT                         ON parks                TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON parks                TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON parks                TO service_role;
+
+GRANT SELECT                         ON park_amenities       TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_amenities       TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_amenities       TO service_role;
+
+GRANT SELECT                         ON park_trails          TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_trails          TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_trails          TO service_role;
+
+GRANT SELECT                         ON park_fun_facts       TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_fun_facts       TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_fun_facts       TO service_role;
+
+GRANT SELECT                         ON park_seasonal_events TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_seasonal_events TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_seasonal_events TO service_role;
+
+GRANT SELECT                         ON park_experiences     TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_experiences     TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_experiences     TO service_role;
+
+GRANT SELECT                         ON park_hotels          TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_hotels          TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_hotels          TO service_role;
+
+GRANT SELECT                         ON experiences          TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON experiences          TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON experiences          TO service_role;
+
+GRANT SELECT                         ON blog_posts           TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON blog_posts           TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON blog_posts           TO service_role;
+
+-- park_nearby is server-managed only; authenticated users have no direct write access
+GRANT SELECT                         ON park_nearby          TO anon;
+GRANT SELECT                         ON park_nearby          TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON park_nearby          TO service_role;

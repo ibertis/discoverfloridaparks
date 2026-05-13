@@ -415,7 +415,15 @@ Footer links use pre-slugified paths: `family-trips`, `travel-tips`, `our-picks`
 | `supabase/schema_experiences_v2.sql` | Rename (`experiences` → `park_experiences`), new catalog `experiences` table, `get_park_experiences` RPC. No seed data. |
 | `supabase/seed_experiences.sql` | Phase 1 seed: 5 Viator affiliate experiences. Run once after `schema_experiences_v2.sql`. |
 
-**Rule:** When adding a new table — define columns in a `schema_*.sql` file, add RLS block to `rls.sql` in the same task. Never split policies across both files.
+**Rule:** When adding a new table — define columns in a `schema_*.sql` file, add both an RLS block **and a GRANT block** to `rls.sql` in the same task. Never split policies across both files.
+
+**GRANT requirement (enforced Oct 30, 2026):** Supabase no longer auto-grants Data API access to public schema tables. Every new table needs explicit GRANTs alongside its RLS policies. Pattern:
+```sql
+GRANT SELECT                         ON your_table TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON your_table TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON your_table TO service_role;
+```
+The GRANT section at the bottom of `rls.sql` covers all existing tables and serves as the template.
 
 **Trigger gotcha:** `CREATE OR REPLACE TRIGGER` using `update_updated_at_column()` will fail if that function isn't yet defined (it lives in `schema_blog.sql`). If a migration file includes both schema + seed data and a trigger creation fails, the INSERT statements in the same transaction will roll back. Separate seed data into its own file when in doubt.
 
