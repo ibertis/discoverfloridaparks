@@ -158,7 +158,7 @@ export async function generateMetadata(
   const heroUrl = `https://dteajahghspuqrczutgp.supabase.co/storage/v1/object/public/park-photos/region-photos/${slug}.jpg`;
 
   return {
-    title: `${region.title} | Discover Florida Parks`,
+    title: region.title,
     description: region.description,
     openGraph: {
       title: region.headline,
