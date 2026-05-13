@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   other: { 'impact-site-verification': '9e0ab2e7-f008-4f4c-85ff-5f2a070d4442' },
 };
 import { ArrowRight, Map as MapIcon } from 'lucide-react';
-import { WavesIcon, TicketIcon, RocketIcon, PlantIcon, UmbrellaIcon, MountainsIcon, TreeIcon, BirdIcon, StarIcon as PhosphorStar, TreePalmIcon, DropIcon } from '@phosphor-icons/react/dist/ssr';
+import { WavesIcon, TicketIcon, PlantIcon, UmbrellaIcon, MountainsIcon, TreeIcon, BirdIcon, StarIcon as PhosphorStar, TreePalmIcon, DropIcon, LeafIcon, SailboatIcon, LighthouseIcon, FishIcon } from '@phosphor-icons/react/dist/ssr';
 import type { Icon } from '@phosphor-icons/react/dist/lib/types';
 import HeroSlider from './HeroSlider';
 import SiteHeader from './SiteHeader';
@@ -35,13 +35,16 @@ import HomeMapSection from './HomeMapSection';
 import FeaturedExperiences from './FeaturedExperiences';
 import ParkCard from '@/components/ParkCard';
 
-const REGIONS: { name: string; icon: Icon; description: string }[] = [
-  { name: 'Southeast Florida',             icon: WavesIcon,    description: 'Everglades, Keys & Miami' },
-  { name: 'Southwest Florida',             icon: TreePalmIcon, description: 'Gulf beaches & Naples' },
-  { name: 'Central Florida',               icon: TicketIcon,   description: 'Orlando & inland lakes' },
-  { name: 'East Coast',                    icon: RocketIcon,   description: 'Space Coast & springs' },
-  { name: 'North Florida',                 icon: PlantIcon,    description: 'Historic parks & springs' },
-  { name: 'Northwest Florida / Panhandle', icon: UmbrellaIcon, description: 'White sand beaches' },
+const REGIONS: { name: string; icon: Icon; description: string; slug: string }[] = [
+  { name: 'Central Florida',        icon: TicketIcon,      description: 'Springs, forests & wildlife',            slug: 'central-florida'      },
+  { name: 'North Florida',          icon: PlantIcon,       description: 'Historic parks & springs',               slug: 'north-florida'        },
+  { name: 'Florida Panhandle',      icon: UmbrellaIcon,    description: 'White sand beaches',                     slug: 'florida-panhandle'    },
+  { name: 'South Florida',          icon: LeafIcon,        description: 'Everglades, Miami & beyond',             slug: 'south-florida'        },
+  { name: 'Southeast Florida',      icon: WavesIcon,       description: 'Treasure Coast & barrier islands',       slug: 'southeast-florida'    },
+  { name: 'Tampa Bay & West Coast', icon: SailboatIcon,    description: 'Gulf beaches & island parks',            slug: 'tampa-bay-west-coast' },
+  { name: 'Northeast Florida',      icon: LighthouseIcon,  description: 'Jacksonville, St. Augustine & Daytona',  slug: 'northeast-florida'    },
+  { name: 'Florida Keys',           icon: FishIcon,        description: 'Reef, sea & island adventures',          slug: 'florida-keys'         },
+  { name: 'Southwest Florida',      icon: TreePalmIcon,    description: 'Gulf beaches & Naples',                  slug: 'southwest-florida'    },
 ];
 
 const TYPES: { name: string; icon: Icon }[] = [
@@ -214,7 +217,7 @@ export default async function HomePage() {
           </div>
           <div className="grid-regions">
             {REGIONS.map(r => (
-              <Link key={r.name} href={`/parks?region=${encodeURIComponent(r.name)}`}
+              <Link key={r.name} href={`/parks/region/${r.slug}`}
                 style={{ background: '#fff', border: '1px solid #eeeeee', borderRadius: 16, padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 18, transition: 'box-shadow 0.2s' }}
                 className="hover:shadow-md">
                 <r.icon weight="fill" size={36} color="#ff7044" style={{ flexShrink: 0 }} />
