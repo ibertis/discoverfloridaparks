@@ -67,6 +67,43 @@ These must be researched and entered manually:
 
 ---
 
+## Affiliate Content Guidelines
+
+**Core principle:** The park always leads. Affiliate content exists to help the visitor have a better visit — not to monetize the visit. DFP should always feel like a trusted local guide, not a product catalog.
+
+### Content hierarchy — always in this order
+
+1. **Park information** (about, amenities, facts, tips, safety) — always dominant
+2. **Experiences** (Viator / GetYourGuide) — enhances the visit
+3. **Where to stay** (Booking.com / Hotels.com) — practical necessity
+4. **Gear** (REI) — supporting context, park-specific only
+5. **Everything else** — contextual, not on every page
+
+### Rules
+
+- Maximum 3 hotels per park page — never more
+- Maximum 3 experiences per park page — never more
+- Gear links must be relevant to that specific park's activities — no generic gear on day-use-only parks
+- Never show duplicate booking platforms for the same need — pick the best one per park
+- Never add affiliate content before park information content
+- Affiliate disclosures must remain clear and present
+
+### Program-specific rules
+
+| Program | Only show when... |
+|---|---|
+| REI gear links | Park has a relevant activity (hiking, camping, kayaking, fishing, snorkeling) |
+| GetYourGuide | Experience not already available on Viator — no duplicates |
+| RVshare / Outdoorsy | Park has RV-accessible camping |
+| Hipcamp | Park has genuine Hipcamp inventory |
+| Second hotel platform | Booking.com has fewer than 2 options for that park |
+
+**What trustworthy looks like:** specific recommendations, genuine descriptions, restrained quantity, park-relevant context, clear disclosure.
+
+**What gimmicky looks like:** generic gear links, multiple competing booking platforms, affiliate sections before park content, forced placement on parks where it doesn't fit.
+
+---
+
 ### Step 4 — Set managing_agency
 
 Run this SQL in Supabase to auto-assign based on park_types:

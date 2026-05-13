@@ -476,6 +476,40 @@ See [PARK-ONBOARDING.md](./PARK-ONBOARDING.md) for the complete step-by-step wor
 
 ---
 
+## Affiliate Content Standards
+
+**Editorial principle:** The park always leads. Affiliate content exists to help the visitor have a better visit — not to monetize the visit. DFP should feel like a trusted local guide, not a product catalog.
+
+### Content hierarchy — always in this order
+
+1. **Park information** (about, amenities, facts, tips, safety) — always dominant
+2. **Experiences** (Viator / GetYourGuide) — enhances the visit
+3. **Where to stay** (Booking.com / Hotels.com) — practical necessity
+4. **Gear** (REI via Impact) — supporting context, park-specific only
+5. **Everything else** — contextual, not on every page
+
+### Hard limits
+
+- Maximum **3 hotels** per park page — never more
+- Maximum **3 experiences** per park page — never more
+- No duplicate booking platforms for the same need — pick the best one per park
+- No gear links on day-use-only parks (no camping, no water activities)
+- Never add affiliate content before park information content
+- Affiliate disclosures must remain clear and present
+
+### Affiliate program tracking params
+
+| Program | Required params |
+|---|---|
+| Booking.com | `aid=2889331&label=dfp-[park-slug]` |
+| Viator | `pid=P00300517&mcid=42383&medium=link&campaign=dfp-park-pages` |
+| REI (Impact) | TBD — verify in Impact dashboard before adding links |
+| GetYourGuide | TBD — only use when experience not already on Viator |
+
+When in doubt, less is more. A page that feels editorial ranks better and converts better than one that feels commercial.
+
+---
+
 ## Key Gotchas
 
 1. **Tailwind v4 CSS import order:** `@import url(...)` for Google Fonts **must come before** `@import "tailwindcss"` in `globals.css`.
