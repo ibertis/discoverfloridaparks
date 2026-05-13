@@ -47,13 +47,13 @@ const REGIONS: { name: string; icon: Icon; description: string; slug: string }[]
   { name: 'Southwest Florida',      icon: TreePalmIcon,    description: 'Gulf beaches & Naples',                  slug: 'southwest-florida'    },
 ];
 
-const TYPES: { name: string; icon: Icon }[] = [
-  { name: 'National Parks',           icon: MountainsIcon  },
-  { name: 'State Parks',              icon: TreeIcon       },
-  { name: 'National Wildlife Refuge', icon: BirdIcon       },
-  { name: 'Theme Parks',              icon: PhosphorStar   },
-  { name: 'County Parks',             icon: TreePalmIcon   },
-  { name: 'Water Parks',              icon: DropIcon       },
+const TYPES: { name: string; filterName: string; icon: Icon }[] = [
+  { name: 'National Parks',    filterName: 'National Parks',           icon: MountainsIcon },
+  { name: 'State Parks',       filterName: 'State Parks',              icon: TreeIcon      },
+  { name: 'Wildlife Refuges',  filterName: 'National Wildlife Refuge', icon: BirdIcon      },
+  { name: 'Theme Parks',       filterName: 'Theme Parks',              icon: PhosphorStar  },
+  { name: 'County Parks',      filterName: 'County Parks',             icon: TreePalmIcon  },
+  { name: 'Water Parks',       filterName: 'Water Parks',              icon: DropIcon      },
 ];
 
 export default async function HomePage() {
@@ -67,6 +67,17 @@ export default async function HomePage() {
   const { count } = await supabase
     .from('parks')
     .select('*', { count: 'exact', head: true });
+
+  const typeCounts = await Promise.all(
+    TYPES.map(t =>
+      supabase
+        .from('parks')
+        .select('*', { count: 'exact', head: true })
+        .contains('park_types', [t.filterName])
+        .then(({ count: c }) => c ?? 0)
+    )
+  );
+  const typeCountMap = Object.fromEntries(TYPES.map((t, i) => [t.filterName, typeCounts[i]]));
 
   const itemListSchema = featuredParks && featuredParks.length > 0 ? {
     '@context': 'https://schema.org',
@@ -244,11 +255,14 @@ export default async function HomePage() {
         </div>
         <div className="grid-types">
           {TYPES.map(t => (
-            <Link key={t.name} href={`/parks?type=${encodeURIComponent(t.name)}`}
+            <Link key={t.name} href={`/parks?type=${encodeURIComponent(t.filterName)}`}
               style={{ background: '#fff', border: '1px solid #eeeeee', borderRadius: 16, padding: '28px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, transition: 'box-shadow 0.2s, border-color 0.2s', textAlign: 'center' }}
               className="hover:shadow-md hover:border-[#ff7044]">
               <t.icon weight="fill" size={40} color="#ff7044" />
-              <p style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.8rem', color: '#362f35', margin: 0, lineHeight: 1.3 }}>{t.name}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                <p style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.8rem', color: '#362f35', margin: 0, lineHeight: 1.3 }}>{t.name}</p>
+                <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#a6967c', margin: 0 }}>{typeCountMap[t.filterName]} parks</p>
+              </div>
             </Link>
           ))}
         </div>
