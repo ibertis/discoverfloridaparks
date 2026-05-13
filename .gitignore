@@ -47,3 +47,4 @@ hermes/gsc-credentials.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+hermes/logs/
