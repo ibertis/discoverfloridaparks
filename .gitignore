@@ -39,6 +39,11 @@ yarn-error.log*
 # data population review output
 scripts/review/*.csv
 
+# hermes credential files — never commit
+hermes/oauth-credentials.json
+hermes/.gsc-token.json
+hermes/gsc-credentials.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
