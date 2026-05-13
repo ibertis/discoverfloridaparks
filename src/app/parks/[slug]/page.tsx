@@ -351,9 +351,11 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
               </span>
             )}
             {park.park_regions?.length > 0 && park.park_regions.map(r => (
-              <span key={r} style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', borderRadius: '2.3em', padding: '4px 14px', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600 }}>
+              <Link key={r} href={`/parks/region/${r.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}
+                style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', borderRadius: '2.3em', padding: '4px 14px', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600, textDecoration: 'none' }}
+                className="hover:bg-white/30 transition-colors">
                 {r}
-              </span>
+              </Link>
             ))}
           </div>
           <h1 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2.5rem, 5vw, 4.14rem)', lineHeight: 0.98, color: '#fff', margin: '0 0 10px', letterSpacing: '-0.04em' }}>
