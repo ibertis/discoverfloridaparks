@@ -33,7 +33,7 @@ export interface GearCategory {
 
 // ── Affiliate helpers ─────────────────────────────────────────────────────────
 
-const IMPACT_ID: string = 'PENDING'; // ← Update with DFP Impact Publisher ID when approved
+const IMPACT_ID = 'PENDING'; // ← Update with DFP Impact Publisher ID when approved
 
 function rei(path: string): string {
   if (IMPACT_ID === 'PENDING') {
@@ -184,7 +184,7 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Snorkel Mask Set',
         description: 'Anti-fog wide view — Florida springs are crystal clear',
-        url: rei('c/watersports'),
+        url: amz('snorkel mask set anti-fog wide view'),
       },
       {
         name: 'Water Shoes',
@@ -194,12 +194,12 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Rash Guard',
         description: 'UPF 50+ sun protection in and out of the water',
-        url: rei('c/swim-gear'),
+        url: rei('c/rashguards'),
       },
       {
         name: 'Swim Fins',
         description: 'Extend your range in springs and coastal waters',
-        url: rei('c/watersports'),
+        url: amz('swim fins snorkeling Florida springs'),
       },
     ],
   },
@@ -276,9 +276,9 @@ export const GEAR_CATEGORIES: GearCategory[] = [
         url: rei('c/binoculars'),
       },
       {
-        name: 'Field Guide: Florida Birds',
-        description: 'Identify Florida\'s 500+ bird species in the field',
-        url: rei('c/camping-and-hiking-guidebooks'),
+        name: 'Field Guide: Florida',
+        description: 'Curated Florida hiking and nature guides for every region',
+        url: 'https://www.rei.com/c/southeast-hiking-guidebooks?ir=category%3Acamping-and-hiking-guidebooks&r=category%3Acamping-and-hiking-guidebooks%7Csoutheast-hiking-guidebooks%3Bstate-province%3AFlorida',
       },
       {
         name: 'Action Camera',
