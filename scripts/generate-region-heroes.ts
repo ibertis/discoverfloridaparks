@@ -73,7 +73,7 @@ async function generateImage(region: Region): Promise<string> {
     body: JSON.stringify({
       prompt: region.prompt,
       resolution: '2k',
-      aspect_ratio: 'landscape_16_9',
+      aspect_ratio: 'widescreen_16_9',
       model: 'realism',
       hdr: 60,
       creative_detailing: 40,
