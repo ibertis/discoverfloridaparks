@@ -79,7 +79,7 @@ function InlineVariant({ status, email, errorMsg, setEmail, setErrorMsg, onSubmi
         Weekly hidden gems, seasonal tips & park guides — free.
       </p>
       <form onSubmit={onSubmit} noValidate>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div className="newsletter-form-row" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <label htmlFor="newsletter-inline-email" style={{ display: 'none' }}>Email address</label>
           <input
             id="newsletter-inline-email"
@@ -149,7 +149,7 @@ function CardVariant({ status, email, errorMsg, setEmail, setErrorMsg, onSubmit 
         The Florida Parks Insider delivers the best parks, hidden gems, and seasonal guides straight to your inbox.
       </p>
       <form onSubmit={onSubmit} noValidate>
-        <div style={{ display: 'flex', gap: 8, maxWidth: 420, margin: '0 auto' }}>
+        <div className="newsletter-form-row" style={{ display: 'flex', gap: 8, maxWidth: 420, margin: '0 auto' }}>
           <label htmlFor="newsletter-card-email" style={{ display: 'none' }}>Email address</label>
           <input
             id="newsletter-card-email"

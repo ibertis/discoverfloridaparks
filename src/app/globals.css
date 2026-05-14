@@ -161,6 +161,8 @@ a { color: inherit; text-decoration: none; }
   .grid-types      { grid-template-columns: repeat(2, 1fr); }
   .park-stats-grid { grid-template-columns: repeat(2, 1fr); }
   .park-stats-grid > *:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .newsletter-form-row { flex-direction: column !important; }
+  .newsletter-form-row button { width: 100%; }
 }
 
 /* ── Home map section ────────────────────────────────────────────────── */
