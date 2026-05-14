@@ -1,0 +1,285 @@
+/**
+ * fix-hotel-proximity.ts
+ *
+ * Finds all parks where any hotel has distance_from_park_km > 30 OR
+ * distance_from_park_km IS NULL, then re-runs the Google Places nearby
+ * lodging search for each affected park.
+ *
+ * Hotels are deleted and replaced (same logic as enrichHotels in enrich-one-park.ts).
+ *
+ * Usage:
+ *   npx tsx scripts/fix-hotel-proximity.ts
+ *   npx tsx scripts/fix-hotel-proximity.ts --dry-run   # show affected parks, no writes
+ *   npx tsx scripts/fix-hotel-proximity.ts --slug caladesi-island-state-park  # single park
+ */
+
+import * as dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+
+import { supabaseAdmin } from './lib/supabase-admin.js';
+import { haversineDistance, getSearchRadius } from './utils/geo.js';
+
+// ─── CLI Args ─────────────────────────────────────────────────────────────────
+
+const args = process.argv.slice(2);
+const dryRun = args.includes('--dry-run');
+const singleSlug = args.find(a => a.startsWith('--slug='))?.split('=')[1]
+  ?? (args.includes('--slug') ? args[args.indexOf('--slug') + 1] : null);
+
+// ─── Colors ───────────────────────────────────────────────────────────────────
+
+const c = {
+  reset: '\x1b[0m',
+  bold: '\x1b[1m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  cyan: '\x1b[36m',
+  gray: '\x1b[90m',
+  red: '\x1b[31m',
+};
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface ParkRow {
+  id: string;
+  slug: string;
+  name: string;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+interface HotelInsert {
+  park_id: string;
+  name: string;
+  url: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  distance_from_park_km: number;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildHotelDescription(place: any, park: ParkRow): string {
+  const rating = place.rating ? `Rated ${place.rating}/5` : '';
+  const reviews = place.user_ratings_total ? `(${place.user_ratings_total} reviews)` : '';
+  const vicinity = place.vicinity || '';
+  return `${place.name} — ${vicinity}. ${rating} ${reviews}. Nearby base for visiting ${park.name}.`.trim();
+}
+
+// ─── Core hotel enrichment (mirrors enrichHotels in enrich-one-park.ts) ───────
+
+async function enrichHotelsForPark(park: ParkRow, apiKey: string): Promise<{
+  replaced: number;
+  added: number;
+  skipped: boolean;
+  reason?: string;
+}> {
+  if (!park.latitude || !park.longitude) {
+    return { replaced: 0, added: 0, skipped: true, reason: 'no coordinates' };
+  }
+
+  const radius = getSearchRadius(park.city);
+
+  const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
+  url.searchParams.set('location', `${park.latitude},${park.longitude}`);
+  url.searchParams.set('radius', String(radius));
+  url.searchParams.set('type', 'lodging');
+  url.searchParams.set('key', apiKey);
+
+  const res = await fetch(url.toString());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = await res.json() as any;
+
+  if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+    return { replaced: 0, added: 0, skipped: true, reason: `Places API: ${data.status}` };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const candidates = (data.results || [])
+    .filter((p: any) => (p.rating ?? 0) >= 3.8)
+    .slice(0, 3);
+
+  if (candidates.length === 0) {
+    return { replaced: 0, added: 0, skipped: true, reason: `no lodging ≥3.8★ within ${radius / 1000}km` };
+  }
+
+  // Count existing hotels before deletion (for reporting)
+  const { count: existingCount } = await supabaseAdmin
+    .from('park_hotels')
+    .select('*', { count: 'exact', head: true })
+    .eq('park_id', park.id);
+
+  if (!dryRun) {
+    await supabaseAdmin.from('park_hotels').delete().eq('park_id', park.id);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hotels: HotelInsert[] = candidates.map((candidate: any) => {
+    const hotelLat = candidate.geometry.location.lat;
+    const hotelLng = candidate.geometry.location.lng;
+    const distanceKm = haversineDistance(
+      Number(park.latitude), Number(park.longitude),
+      hotelLat, hotelLng,
+    );
+
+    const bookingUrl = 'https://www.booking.com/search.html' +
+      `?ss=${encodeURIComponent(candidate.name + ' ' + (candidate.vicinity || ''))}` +
+      `&aid=2889331&label=dfp-${park.slug}`;
+
+    return {
+      park_id: park.id,
+      name: candidate.name,
+      url: bookingUrl,
+      description: buildHotelDescription(candidate, park),
+      latitude: hotelLat,
+      longitude: hotelLng,
+      distance_from_park_km: Math.round(distanceKm * 100) / 100,
+    };
+  });
+
+  if (!dryRun) {
+    const { error } = await supabaseAdmin.from('park_hotels').insert(hotels);
+    if (error) throw new Error(`Insert failed: ${error.message}`);
+  }
+
+  return { replaced: existingCount ?? 0, added: hotels.length, skipped: false };
+}
+
+// ─── Find affected parks ──────────────────────────────────────────────────────
+
+async function findAffectedParks(): Promise<ParkRow[]> {
+  // Fetch all park_hotels with their park data
+  const { data: hotels, error } = await supabaseAdmin
+    .from('park_hotels')
+    .select('park_id, distance_from_park_km, parks(id, slug, name, city, latitude, longitude)');
+
+  if (error) throw new Error(`Failed to fetch hotels: ${error.message}`);
+
+  // Group by park_id and identify affected parks
+  const parkMap = new Map<string, { park: ParkRow; maxDist: number | null; nullCount: number }>();
+
+  for (const h of hotels ?? []) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const park = (h as any).parks as ParkRow | null;
+    if (!park) continue;
+
+    if (!parkMap.has(park.id)) {
+      parkMap.set(park.id, { park, maxDist: null, nullCount: 0 });
+    }
+    const entry = parkMap.get(park.id)!;
+
+    if (h.distance_from_park_km === null || h.distance_from_park_km === undefined) {
+      entry.nullCount++;
+    } else {
+      entry.maxDist = Math.max(entry.maxDist ?? 0, h.distance_from_park_km);
+    }
+  }
+
+  return [...parkMap.values()]
+    .filter(e => (e.maxDist !== null && e.maxDist > 30) || e.nullCount > 0)
+    .sort((a, b) => {
+      // Null-distance parks first, then by worst distance descending
+      if (a.nullCount > 0 && b.nullCount === 0) return -1;
+      if (b.nullCount > 0 && a.nullCount === 0) return 1;
+      return (b.maxDist ?? 0) - (a.maxDist ?? 0);
+    })
+    .map(e => e.park);
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+
+async function main() {
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  if (!apiKey) {
+    console.error(`${c.red}GOOGLE_PLACES_API_KEY not set in .env.local${c.reset}`);
+    process.exit(1);
+  }
+
+  console.log(`\n${c.bold}${c.cyan}Hotel Proximity Fix${c.reset}${dryRun ? ` ${c.yellow}(DRY RUN)${c.reset}` : ''}\n`);
+
+  let parks: ParkRow[];
+
+  if (singleSlug) {
+    const { data, error } = await supabaseAdmin
+      .from('parks')
+      .select('id, slug, name, city, latitude, longitude')
+      .eq('slug', singleSlug)
+      .maybeSingle();
+    if (error || !data) {
+      console.error(`${c.red}Park not found: ${singleSlug}${c.reset}`);
+      process.exit(1);
+    }
+    parks = [data];
+    console.log(`${c.gray}Single park mode: ${data.name}${c.reset}\n`);
+  } else {
+    console.log(`${c.gray}Scanning hotels for proximity issues…${c.reset}`);
+    parks = await findAffectedParks();
+    console.log(`Found ${c.bold}${parks.length}${c.reset} parks with null or out-of-range hotel distances.\n`);
+  }
+
+  if (parks.length === 0) {
+    console.log(`${c.green}✓ All hotel distances look good — nothing to fix.${c.reset}\n`);
+    return;
+  }
+
+  // ── Summary table ──────────────────────────────────────────────────────────
+  console.log(`${'#'.padStart(3)}  ${'Slug'.padEnd(52)}  ${'Name'.padEnd(42)}`);
+  console.log('─'.repeat(100));
+  parks.forEach((p, i) => {
+    console.log(`${String(i + 1).padStart(3)}  ${p.slug.padEnd(52)}  ${p.name.padEnd(42)}`);
+  });
+  console.log();
+
+  if (dryRun) {
+    console.log(`${c.yellow}Dry run complete — no changes made.${c.reset}\n`);
+    return;
+  }
+
+  // ── Process each park ──────────────────────────────────────────────────────
+  let successCount = 0;
+  let skippedCount = 0;
+  let errorCount = 0;
+
+  for (let i = 0; i < parks.length; i++) {
+    const park = parks[i];
+    const prefix = `${c.gray}[${i + 1}/${parks.length}]${c.reset} ${park.name}`;
+
+    try {
+      const result = await enrichHotelsForPark(park, apiKey);
+
+      if (result.skipped) {
+        console.log(`${prefix} — ${c.yellow}skipped: ${result.reason}${c.reset}`);
+        skippedCount++;
+      } else {
+        console.log(`${prefix} — ${c.green}✓ replaced ${result.replaced} → added ${result.added} hotels${c.reset}`);
+        result.added > 0 && console.log(
+          `         hotels within ${getSearchRadius(park.city) / 1000}km radius`
+        );
+        successCount++;
+      }
+    } catch (e) {
+      console.error(`${prefix} — ${c.red}ERROR: ${(e as Error).message}${c.reset}`);
+      errorCount++;
+    }
+
+    // Rate-limit: ~200ms between requests to stay well within Places API quotas
+    if (i < parks.length - 1) await sleep(200);
+  }
+
+  // ── Final summary ──────────────────────────────────────────────────────────
+  console.log(`\n${c.bold}─── Results ───────────────────────────────────────────────${c.reset}`);
+  console.log(`  ${c.green}✓ Fixed:${c.reset}   ${successCount}`);
+  console.log(`  ${c.yellow}Skipped:${c.reset}  ${skippedCount}  (no coords or no nearby lodging)`);
+  if (errorCount > 0) console.log(`  ${c.red}Errors:${c.reset}   ${errorCount}`);
+  console.log();
+}
+
+main().catch(e => { console.error(e); process.exit(1); });
