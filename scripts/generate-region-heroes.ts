@@ -106,7 +106,7 @@ async function generateImage(region: Region): Promise<string> {
     console.log(`   Status: ${status}`)
 
     if (status === 'COMPLETED') {
-      const imageUrl = pollData.data.generated[0]?.url
+      const imageUrl = pollData.data.generated[0] as string | undefined
       if (!imageUrl) throw new Error('No image URL in completed task')
       console.log(`   ✅ Generated: ${imageUrl.substring(0, 60)}...`)
       return imageUrl

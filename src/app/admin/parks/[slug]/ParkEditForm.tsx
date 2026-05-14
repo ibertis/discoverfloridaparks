@@ -12,13 +12,15 @@ const PARK_TYPES = [
   'Nature Preserve', 'Wildlife Preserve', 'Wildlife Refuge', 'Sanctuary', 'State Forest', 'State Trail', 'Other',
 ];
 const PARK_REGIONS = [
-  'Northwest Florida / Panhandle',
-  'North Florida', 'North Florida, West Coast', 'North Florida, East Coast',
+  'Florida Panhandle',
+  'North Florida',
   'Northeast Florida',
-  'Central Florida', 'Central Florida, West Coast', 'Central Florida, East Coast',
-  'East Coast', 'West Coast',
-  'Southwest Florida', 'Southeast Florida',
-  'South Florida', 'South Florida, The Keys',
+  'Central Florida',
+  'Tampa Bay & West Coast',
+  'Southwest Florida',
+  'Southeast Florida',
+  'South Florida',
+  'Florida Keys',
 ];
 const PARK_STATUSES = ['Active', 'Closed', 'Seasonal', 'Under Renovation'];
 const SEASONS = [
@@ -76,6 +78,7 @@ interface Amenities {
   hunting_allowed: boolean;
   paddling_available: boolean;
   wildlife_viewing: boolean;
+  beach_access: boolean;
   boat_launch: boolean;
   picnic_areas: boolean;
   visitor_center: boolean;
@@ -245,7 +248,8 @@ const textareaCls = `${inputCls} resize-y`;
 const EMPTY_AMENITIES: Amenities = {
   dog_friendly: false, camping_available: false, swimming_allowed: false,
   fishing_allowed: false, hiking_available: false, biking_available: false,
-  horseback_riding: false, hunting_allowed: false, paddling_available: false, wildlife_viewing: false, boat_launch: false,
+  horseback_riding: false, hunting_allowed: false, paddling_available: false,
+  wildlife_viewing: false, beach_access: false, boat_launch: false,
   picnic_areas: false, visitor_center: false, wheelchair_accessible: false,
 };
 
@@ -530,6 +534,7 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
               ['hunting_allowed', 'Hunting'],
               ['paddling_available', 'Paddling'],
               ['wildlife_viewing', 'Wildlife Viewing'],
+              ['beach_access', 'Beach Access'],
               ['boat_launch', 'Boat Launch'],
               ['picnic_areas', 'Picnic Areas'],
               ['visitor_center', 'Visitor Center'],

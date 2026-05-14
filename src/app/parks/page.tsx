@@ -56,9 +56,11 @@ const PARK_TYPES = [
 ];
 
 const REGIONS = [
+  'Florida Panhandle',
   'North Florida', 'Northeast Florida', 'Central Florida',
+  'Tampa Bay & West Coast',
   'Southwest Florida', 'Southeast Florida', 'South Florida',
-  'Northwest Florida / Panhandle', 'East Coast', 'West Coast',
+  'Florida Keys',
 ];
 
 const AMENITY_OPTIONS = [
@@ -72,6 +74,7 @@ const AMENITY_OPTIONS = [
   { key: 'hunting_allowed',     label: 'Hunting' },
   { key: 'paddling_available',  label: 'Paddling' },
   { key: 'wildlife_viewing',    label: 'Wildlife Viewing' },
+  { key: 'beach_access',        label: 'Beach Access' },
   { key: 'boat_launch',         label: 'Boat Launch' },
   { key: 'picnic_areas',        label: 'Picnic Areas' },
 ];

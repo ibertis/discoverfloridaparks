@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.dfp.hermes</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <!-- UPDATE THIS PATH to match your Node.js installation -->
+    <!-- Run 'which node' in Terminal to find it -->
+    <string>/opt/homebrew/bin/node</string>
+    <!-- UPDATE THIS PATH to your hermes folder location -->
+    <string>/Users/gabrielibertis/Sites/discoverfloridaparks/hermes/index.js</string>
+  </array>
+
+<!-- Run daily at 9:00 AM -->
+<key>StartCalendarInterval</key>
+<dict>
+  <key>Hour</key>
+  <integer>9</integer>
+  <key>Minute</key>
+  <integer>0</integer>
+</dict>
+
+  <!-- Working directory — UPDATE to your hermes folder -->
+  <key>WorkingDirectory</key>
+  <string>/Users/gabrielibertis/Sites/discoverfloridaparks/hermes</string>
+
+  <!-- Log output -->
+  <key>StandardOutPath</key>
+  <string>/Users/gabrielibertis/Sites/discoverfloridaparks/hermes/logs/launchd.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/gabrielibertis/Sites/discoverfloridaparks/hermes/logs/launchd-error.log</string>
+
+  <!-- Start automatically when loaded -->
+  <key>RunAtLoad</key>
+  <false/>
+
+  <!-- Restart if it crashes -->
+  <key>KeepAlive</key>
+  <false/>
+</dict>
+</plist>

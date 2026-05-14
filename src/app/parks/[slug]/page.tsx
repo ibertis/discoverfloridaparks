@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import {
   MapPin, Phone, Globe, Clock, DollarSign, Star, Users, Calendar,
   Tent, Fish, Waves, Dog, Ship, TreePine, ParkingCircle, AlertTriangle,
-  Leaf, Footprints, ArrowLeft, Mail, Hash,
+  Leaf, Footprints, ArrowLeft, Mail, Hash, Umbrella,
   Bike, Bird, Crosshair, MountainSnow, Sailboat,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -51,7 +51,7 @@ interface Park {
     dog_friendly: boolean; camping_available: boolean; swimming_allowed: boolean;
     fishing_allowed: boolean; hiking_available: boolean; biking_available: boolean;
     horseback_riding: boolean; hunting_allowed: boolean; paddling_available: boolean;
-    wildlife_viewing: boolean; boat_launch: boolean; picnic_areas: boolean;
+    wildlife_viewing: boolean; beach_access: boolean; boat_launch: boolean; picnic_areas: boolean;
     visitor_center: boolean; wheelchair_accessible: boolean;
   };
   park_trails: Trail[];
@@ -203,6 +203,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
     { label: 'Hunting',           icon: Crosshair,     active: amenities.hunting_allowed },
     { label: 'Paddling',          icon: Sailboat,      active: amenities.paddling_available },
     { label: 'Wildlife Viewing',  icon: Bird,          active: amenities.wildlife_viewing },
+    { label: 'Beach Access',      icon: Umbrella,      active: amenities.beach_access },
     { label: 'Boat Launch',       icon: Ship,          active: amenities.boat_launch },
     { label: 'Picnic Areas',      icon: TreePine,      active: amenities.picnic_areas },
     { label: 'Visitor Center',    icon: MapPin,        active: amenities.visitor_center },

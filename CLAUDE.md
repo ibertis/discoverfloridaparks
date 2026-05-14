@@ -236,7 +236,7 @@ public/
 | Table | Description |
 |---|---|
 | `parks` | Core park records — all fields (slug, name, descriptions, types, regions, coords, etc.) |
-| `park_amenities` | Boolean flags per park (dog_friendly, camping_available, swimming_allowed, fishing_allowed, hiking_available, biking_available, horseback_riding, hunting_allowed, paddling_available, wildlife_viewing, boat_launch, picnic_areas, visitor_center, wheelchair_accessible) |
+| `park_amenities` | Boolean flags per park (dog_friendly, camping_available, swimming_allowed, fishing_allowed, hiking_available, biking_available, horseback_riding, hunting_allowed, paddling_available, wildlife_viewing, **beach_access**, boat_launch, picnic_areas, visitor_center, wheelchair_accessible) |
 | `park_trails` | Repeater — name, difficulty, length_miles, description, sort_order |
 | `park_fun_facts` | Repeater — fact text, sort_order |
 | `park_seasonal_events` | Repeater — event_name, month, description, sort_order |
@@ -254,7 +254,7 @@ There are **two separate experiences systems** — do not confuse them:
 | Per-park deals | `park_experiences` | Direct FK (`park_id`) — hand-curated per park | Park edit form → "Guided Tours & Experiences" |
 | Catalog (Viator) | `experiences` | RPC auto-match by `activity_type` + `regions` | `/admin/experiences/` |
 
-The RPC `get_park_experiences(park_activity_types text[], park_region_list text[])` returns up to 3 matching catalog experiences for a park detail page. Called in `src/app/parks/[slug]/page.tsx`. Results rendered by `ExperiencesSection` (full-bleed, outside max-width container, after main body).
+The RPC `get_park_experiences(park_activity_types text[], park_region_list text[], park_lat float8, park_lng float8)` returns up to 3 matching catalog experiences for a park detail page. When coordinates are provided, it filters by haversine distance (≤50 miles) rather than region string overlap. Called in `src/app/parks/[slug]/page.tsx`. Results rendered by `ExperiencesSection` (full-bleed, outside max-width container, after main body).
 
 Key `parks` fields: `slug` (unique), `name`, `short_description`, `full_description`, `park_types` (text[]), `park_regions` (text[]), `activity_types` (text[]), `county`, `park_status`, `featured_image_url`, `gallery_urls` (text[]), `address`, `city`, `zip_code`, `latitude`, `longitude`, `park_size_acres`, `year_established`, `managing_agency`, `best_season`, `typical_visit_duration`, `crowd_level`, `google_rating`, `website`, `phone`, `email`, `entrance_fee`, `operating_hours`, `google_maps_link`, `reservation_url`, `camping_url`, `reservation_required`, `visitor_tips`, `instagram_hashtag`, `terrain`, `wildlife_summary`, `safety_notes`, `parking_info`, `nearby_cities`, `distance_from_miami`, `distance_from_orlando`, `distance_from_tampa`, `seo_title`, `seo_description`, `is_featured`
 
@@ -265,6 +265,24 @@ Key `park_experiences` fields: `park_id` (FK), `name`, `description`, `duration`
 Key `park_hotels` fields: `park_id` (FK), `name`, `description`, `url`, `price_from` (text), `sort_order`
 
 **Important:** `park_types`, `park_regions`, and `activity_types` are `text[]` arrays. Use `.contains('park_types', [value])` for filtering, not `.eq()`. `park_regions` is already `text[]` — never call `.split(',')` on it.
+
+**`park_regions` canonical naming** — the array must use these exact strings. They are the `dbValue` fields in `REGION_MAP` in `src/app/parks/region/[slug]/page.tsx`, which is the authoritative source of truth.
+
+| Canonical `dbValue` | Hub page slug | Notes |
+|---|---|---|
+| `Florida Panhandle` | `florida-panhandle` | NOT "Northwest Florida / Panhandle" |
+| `North Florida` | `north-florida` | |
+| `Northeast Florida` | `northeast-florida` | |
+| `Central Florida` | `central-florida` | |
+| `Tampa Bay & West Coast` | `tampa-bay-west-coast` | NOT "Central Florida, West Coast" |
+| `Southwest Florida` | `southwest-florida` | |
+| `Southeast Florida` | `southeast-florida` | |
+| `South Florida` | `south-florida` | |
+| `Florida Keys` | `florida-keys` | NOT "South Florida, The Keys" |
+
+Hub pages query: `.contains('park_regions', [region.dbValue])`. A wrong label silently returns 0 parks on that hub page. The experiences catalog uses finer-grained region strings (e.g. `"Central Florida, West Coast"`) but those are stored in the `experiences.regions` column, not in `parks.park_regions`.
+
+There is also a legacy `park_region` text column (singular) populated by older import scripts. The app uses `park_regions` (array) everywhere for filtering and matching — ignore `park_region`.
 
 **Visitor tips format** — stored as a single `•`-delimited string. Split with `.split('•').map(t => t.trim()).filter(Boolean)` at render time.
 
@@ -413,6 +431,7 @@ Footer links use pre-slugified paths: `family-trips`, `travel-tips`, `our-picks`
 |---|---|
 | `supabase/rls.sql` | **Single source of truth** — all RLS policies + all storage bucket policies. Re-run to audit or reset. |
 | `supabase/schema_experiences_v2.sql` | Rename (`experiences` → `park_experiences`), new catalog `experiences` table, `get_park_experiences` RPC. No seed data. |
+| `supabase/migrate_experiences_coords.sql` | Adds `latitude`/`longitude` to `experiences`; populates coordinates for all existing experiences; updates `get_park_experiences` RPC to use haversine distance filtering. |
 | `supabase/seed_experiences.sql` | Phase 1 seed: 5 Viator affiliate experiences. Run once after `schema_experiences_v2.sql`. |
 
 **Rule:** When adding a new table — define columns in a `schema_*.sql` file, add both an RLS block **and a GRANT block** to `rls.sql` in the same task. Never split policies across both files.
@@ -433,7 +452,13 @@ The GRANT section at the bottom of `rls.sql` covers all existing tables and serv
 
 **Location:** `hermes/`
 **Schedule:** Daily at 9:00 AM via macOS launchd (`hermes/com.dfp.hermes.plist`)
-**What it monitors:** 269 park URLs (website + camping_url health) + 264 affiliate links (Booking.com `aid=`/`label=` + Viator `pid=`/`mcid=`) + entrance fee change detection
+**What it monitors:**
+- Park URLs — website + camping_url health (~270 parks)
+- Affiliate links — Booking.com `aid=`/`label=` + Viator `pid=`/`mcid=` params
+- Entrance fees — AI-powered change detection against stored `entrance_fee` values
+- Gear links — all REI + Amazon URLs from `src/lib/gear.ts` (404s only — bot-blocks ignored)
+- Hotel proximity — detects `park_hotels` rows where `distance_from_park_km` is NULL or >30km, then auto-fixes by re-running Google Places nearbysearch for those parks
+
 **Email report:** Sent to `gabriel@discoverfloridaparks.com`
 
 **Manual run:**
@@ -468,11 +493,19 @@ See [PARK-ONBOARDING.md](./PARK-ONBOARDING.md) for the complete step-by-step wor
 
 ## Scripts
 
+All scripts run with `npx tsx <script>` from the project root. They load `.env.local` via dotenv.
+
 | Script | Usage | Description |
 |---|---|---|
-| `scripts/enrich-one-park.ts` | `npx ts-node scripts/enrich-one-park.ts <slug>` | Enriches a park record with Google Places data + AI-generated content |
-| `hermes/validate-park.js` | `node validate-park.js <slug>` | Runs all 8 quality checks on a single park record before publishing |
-| `hermes/validate-park.js` | `node validate-park.js --all` | Runs quality checks across all parks and prints a grouped summary |
+| `scripts/onboard-park.ts` | `npx tsx scripts/onboard-park.ts --slug <slug>` | **One-command onboarding**: chains enrichment → validation → hotel proximity fix. Stops on blocker checks. Prints manual review list for warnings. |
+| `scripts/enrich-one-park.ts` | `npx tsx scripts/enrich-one-park.ts "Park Name" [--no-ai] [--no-photo] [--overwrite] [--auto]` | Enriches a park with Google Places + NPS API + AI content. Exports `enrichPark(slug, opts)` for programmatic use (used by onboard-park.ts). |
+| `scripts/validate-park.ts` | `npx tsx scripts/validate-park.ts <slug>` | Runs 9 correctness checks: park exists, has GPS, descriptions, featured image, park_regions, amenities row, hotels, no null distances, no hotels >30km. Exits 1 on blocker failure. Exports `validatePark(slug)`. |
+| `scripts/fix-hotel-proximity.ts` | `npx tsx scripts/fix-hotel-proximity.ts [--dry-run] [--slug <slug>]` | Finds parks where hotel `distance_from_park_km` is NULL or >30km, then re-runs Google Places nearbysearch + Booking.com link rebuild. Exports `fixHotelProximityForPark(slug)`. |
+
+**Programmatic exports** (used by `onboard-park.ts`):
+- `enrichPark(slug, { displayName?, noAi?, noPhoto?, overwrite?, autoApply? })` — `autoApply: true` skips the interactive y/n prompt
+- `validatePark(slug)` → `{ passed, checks[], blockers[], warnings[] }`
+- `fixHotelProximityForPark(slug)` → `{ fixed, skipped, reason?, error? }`
 
 ---
 
@@ -520,15 +553,19 @@ When in doubt, less is more. A page that feels editorial ranks better and conver
 
 4. **`park_types` and `park_regions` are arrays** — use `.contains('park_types', [value])` not `.eq()`.
 
-5. **Visitor tips format** — `•`-delimited string. Split at render time, never change storage format.
+5. **`park_regions` canonical values are the hub page `dbValue` strings** — use `"Florida Panhandle"`, `"Tampa Bay & West Coast"`, `"Florida Keys"` (NOT the old admin-form labels `"Northwest Florida / Panhandle"`, `"Central Florida, West Coast"`, `"South Florida, The Keys"`). Wrong labels silently return 0 parks on hub pages. See the canonical table in the Supabase Schema section.
 
-6. **JSX whitespace around expressions** — `No {category} posts` loses the space. Use template literals: `` {`No ${category} posts`} ``.
+6. **`beach_access` is a real `park_amenities` column** — it gates beach gear recommendations in `src/lib/gear.ts`. It's managed via the "Amenities & Activities" section in the park edit form (admin). Any new amenities interface or type definition for `park_amenities` must include `beach_access: boolean`.
 
-7. **RLS role checks** — always use `app_metadata`, never `user_metadata`. `user_metadata` is writable by the client.
+7. **Visitor tips format** — `•`-delimited string. Split at render time, never change storage format.
 
-8. **`/experiences` and `/experiences/featured` pages are broken** — these public pages still query old `experiences` columns (`duration`, `image_url`, `href`, `cta_label`, `placement_type`, `expires_at`) that no longer exist on the catalog table. They need to be either rebuilt for the new catalog schema or repurposed. Until fixed, they will return Supabase errors and show the empty-state UI.
+8. **JSX whitespace around expressions** — `No {category} posts` loses the space. Use template literals: `` {`No ${category} posts`} ``.
 
-9. **Two separate save-park child record patterns** — `src/app/admin/api/save-park/route.ts` uses delete+re-insert for both `park_experiences` and `park_hotels`, keyed on `park_id`. The catalog `experiences` table is NOT touched by save-park; it has its own `/admin/api/save-experience/route.ts`.
+9. **RLS role checks** — always use `app_metadata`, never `user_metadata`. `user_metadata` is writable by the client.
+
+10. **`/experiences` and `/experiences/featured` pages are broken** — these public pages still query old `experiences` columns (`duration`, `image_url`, `href`, `cta_label`, `placement_type`, `expires_at`) that no longer exist on the catalog table. They need to be either rebuilt for the new catalog schema or repurposed. Until fixed, they will return Supabase errors and show the empty-state UI.
+
+11. **Two separate save-park child record patterns** — `src/app/admin/api/save-park/route.ts` uses delete+re-insert for both `park_experiences` and `park_hotels`, keyed on `park_id`. The catalog `experiences` table is NOT touched by save-park; it has its own `/admin/api/save-experience/route.ts`.
 
 ---
 

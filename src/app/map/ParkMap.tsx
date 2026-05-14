@@ -45,6 +45,7 @@ const AMENITY_OPTIONS = [
   { key: 'hunting_allowed',    label: 'Hunting'           },
   { key: 'paddling_available', label: 'Paddling'          },
   { key: 'wildlife_viewing',   label: 'Wildlife Viewing'  },
+  { key: 'beach_access',       label: 'Beach Access'      },
   { key: 'boat_launch',        label: 'Boat Launch'       },
   { key: 'picnic_areas',       label: 'Picnic Areas'      },
 ];

@@ -2,17 +2,24 @@
  * enrich-one-park.ts
  *
  * Adds or updates a single park using Google Places, NPS API, and AI content generation.
- * Interactive — shows a preview and asks for confirmation before writing to the database.
+ * Interactive by default — shows a preview and asks for confirmation before writing.
+ * Pass --auto to skip the confirmation prompt (used by onboard-park.ts).
  *
- * Usage:
+ * Standalone usage:
  *   npx tsx scripts/enrich-one-park.ts "Blue Spring State Park"
  *   npx tsx scripts/enrich-one-park.ts "Everglades National Park" --no-ai
  *   npx tsx scripts/enrich-one-park.ts "Blue Spring State Park" --no-photo
  *   npx tsx scripts/enrich-one-park.ts "Blue Spring State Park" --overwrite
+ *   npx tsx scripts/enrich-one-park.ts "Blue Spring State Park" --auto
+ *
+ * Programmatic usage (from onboard-park.ts):
+ *   import { enrichPark } from './enrich-one-park'
+ *   await enrichPark(slug, { autoApply: true })
  */
 
 import * as dotenv from 'dotenv';
 import path from 'path';
+import { pathToFileURL } from 'url';
 import * as readline from 'readline';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
@@ -21,19 +28,6 @@ import { supabaseAdmin } from './lib/supabase-admin.js';
 import { findPark, getPlaceDetails } from './lib/google-places.js';
 import { fetchFloridaNpsParks } from './lib/nps-api.js';
 import { haversineDistance, getSearchRadius } from './utils/geo.js';
-
-// ─── CLI Args ────────────────────────────────────────────────────────────────
-
-const args = process.argv.slice(2);
-const parkName = args.find(a => !a.startsWith('--'));
-const noAi = args.includes('--no-ai');
-const noPhoto = args.includes('--no-photo');
-const overwrite = args.includes('--overwrite');
-
-if (!parkName) {
-  console.error('Usage: npx tsx scripts/enrich-one-park.ts "Park Name" [--no-ai] [--no-photo] [--overwrite]');
-  process.exit(1);
-}
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
 
@@ -96,7 +90,7 @@ async function generateParkContent(park: { name: string; park_types?: string[] |
     return null;
   }
 
-  const prompt = `You are writing concise, accurate content for a Florida parks directory website.
+  const promptText = `You are writing concise, accurate content for a Florida parks directory website.
 
 Park: ${park.name}
 Type: ${park.park_types?.join(', ') ?? 'Unknown'}
@@ -128,7 +122,7 @@ Respond ONLY with valid JSON in this exact shape:
     body: JSON.stringify({
       model: 'claude-haiku-4-5',
       max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'user', content: promptText }],
     }),
   });
 
@@ -252,11 +246,20 @@ function buildHotelDescription(place: any, park: ParkRecord): string {
   return `${place.name} — ${vicinity}. ${rating} ${reviews}. Nearby base for visiting ${park.name}.`.trim();
 }
 
-// ─── Main ────────────────────────────────────────────────────────────────────
+// ─── Exported enrichment function ────────────────────────────────────────────
 
-async function main() {
-  const slug = toSlug(parkName!);
-  console.log(`\n${c.bold}${c.cyan}Enriching: ${parkName}${c.reset}  ${c.gray}(slug: ${slug})${c.reset}\n`);
+export interface EnrichOptions {
+  /** Display name for Google Places search. Defaults to parks.name from DB. */
+  displayName?: string;
+  noAi?: boolean;
+  noPhoto?: boolean;
+  overwrite?: boolean;
+  /** Skip the y/n confirmation prompt and auto-apply all changes. */
+  autoApply?: boolean;
+}
+
+export async function enrichPark(slug: string, opts: EnrichOptions = {}): Promise<void> {
+  const { noAi = false, noPhoto = false, overwrite = false, autoApply = false } = opts;
 
   // ── Step 1: Check existing DB record ─────────────────────────────────────
   const { data: existing } = await supabaseAdmin
@@ -266,6 +269,9 @@ async function main() {
     .maybeSingle();
 
   const isNew = !existing;
+  const parkDisplayName = opts.displayName ?? existing?.name ?? slug;
+
+  console.log(`\n${c.bold}${c.cyan}Enriching: ${parkDisplayName}${c.reset}  ${c.gray}(slug: ${slug})${c.reset}\n`);
   console.log(isNew
     ? `${c.green}→ New park (not found in DB)${c.reset}`
     : `${c.yellow}→ Existing park found — will fill empty fields${overwrite ? ' + overwrite all' : ''}${c.reset}`
@@ -276,7 +282,7 @@ async function main() {
   let placeData: Record<string, unknown> = {};
 
   try {
-    const placeId = await findPark(`${parkName} Florida`);
+    const placeId = await findPark(`${parkDisplayName} Florida`);
     if (!placeId) {
       console.log(`  ${c.yellow}No Google Places result found.${c.reset}`);
     } else {
@@ -295,7 +301,6 @@ async function main() {
           longitude: details.lng,
         };
 
-        // Photo
         if (!noPhoto && details.photoUrl) {
           console.log(`  Uploading photo…`);
           const photoUrl = await uploadPhotoToStorage(details.photoUrl, slug);
@@ -321,7 +326,7 @@ async function main() {
       const npsParks = await fetchFloridaNpsParks();
       const match = npsParks.find(p =>
         toSlug(p.fullName) === slug ||
-        p.fullName.toLowerCase().includes(parkName!.toLowerCase())
+        p.fullName.toLowerCase().includes(parkDisplayName.toLowerCase())
       );
       if (!match) {
         console.log(`  ${c.gray}No NPS match found${c.reset}`);
@@ -350,7 +355,7 @@ async function main() {
     console.log(`  ${c.gray}Skipped (--no-ai)${c.reset}`);
   } else {
     const aiResult = await generateParkContent({
-      name: parkName!,
+      name: parkDisplayName,
       park_types: existing?.park_types ?? null,
       city: (placeData.city as string) ?? existing?.city ?? null,
       park_region: existing?.park_region ?? null,
@@ -364,14 +369,12 @@ async function main() {
   // ── Step 5: Merge & diff ──────────────────────────────────────────────────
   const collected: Record<string, unknown> = {
     slug,
-    name: parkName,
+    name: parkDisplayName,
     ...placeData,
-    ...npsData,  // NPS fills gaps in Google data (hours, website)
+    ...npsData,
     ...aiData,
   };
 
-  // For new parks, all collected fields are applied.
-  // For existing parks, only apply to null/empty fields (unless --overwrite).
   const toApply: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(collected)) {
@@ -385,7 +388,7 @@ async function main() {
     toApply[key] = value;
   }
 
-  // ── Step 6: Preview & write ───────────────────────────────────────────────
+  // ── Step 6: Preview & confirm ─────────────────────────────────────────────
   console.log(`\n${c.bold}─── Preview ───────────────────────────────────────────────${c.reset}`);
 
   if (Object.keys(toApply).length === 0) {
@@ -399,9 +402,17 @@ async function main() {
     }
 
     const action = isNew ? 'Create park' : `Apply ${Object.keys(toApply).length} changes`;
-    const answer = await prompt(`\n${c.bold}${action}? (y/n): ${c.reset}`);
 
-    if (answer.toLowerCase() !== 'y') {
+    let confirmed: boolean;
+    if (autoApply) {
+      console.log(`\n${c.gray}Auto-applying changes (autoApply mode)${c.reset}`);
+      confirmed = true;
+    } else {
+      const answer = await prompt(`\n${c.bold}${action}? (y/n): ${c.reset}`);
+      confirmed = answer.toLowerCase() === 'y';
+    }
+
+    if (!confirmed) {
       console.log(`${c.gray}Aborted.${c.reset}\n`);
       return;
     }
@@ -426,16 +437,38 @@ async function main() {
 
   // ── Step 8: Hotel enrichment ──────────────────────────────────────────────
   console.log(`\n${c.bold}[Hotel enrichment]${c.reset}`);
-  const { data: enrichPark } = await supabaseAdmin
+  const { data: enrichParkRecord } = await supabaseAdmin
     .from('parks')
     .select('id, name, slug, city, latitude, longitude')
     .eq('slug', slug)
     .single();
-  if (enrichPark) {
-    await enrichHotels(enrichPark);
+  if (enrichParkRecord) {
+    await enrichHotels(enrichParkRecord);
   } else {
     console.warn(`  ${c.yellow}Could not fetch park record for hotel enrichment${c.reset}`);
   }
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+// ─── CLI entry point ──────────────────────────────────────────────────────────
+
+async function main() {
+  const args = process.argv.slice(2);
+  const parkName = args.find(a => !a.startsWith('--'));
+
+  if (!parkName) {
+    console.error('Usage: npx tsx scripts/enrich-one-park.ts "Park Name" [--no-ai] [--no-photo] [--overwrite] [--auto]');
+    process.exit(1);
+  }
+
+  await enrichPark(toSlug(parkName), {
+    displayName: parkName,
+    noAi: args.includes('--no-ai'),
+    noPhoto: args.includes('--no-photo'),
+    overwrite: args.includes('--overwrite'),
+    autoApply: args.includes('--auto'),
+  });
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch(e => { console.error(e); process.exit(1); });
+}

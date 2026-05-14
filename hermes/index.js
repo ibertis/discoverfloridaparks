@@ -14,6 +14,7 @@ import { sendReport } from './modules/mailer.js'
 import { logger } from './modules/logger.js'
 import { checkGearLinks, buildGearLinksSection } from './modules/gearLinks.js'
 import { checkHotelProximity, buildHotelProximitySection } from './modules/hotelProximity.js'
+import { checkNewParks, buildNewParksSection } from './modules/newParks.js'
 
 const isDryRun = process.argv.includes('--dry-run')
 
@@ -38,16 +39,19 @@ async function run() {
     { flagged: flaggedFees, checked: checkedFees, manualReview, automatedTotal, manualTotal },
     gearResult,
     hotelResult,
+    newParksResult,
   ] = await Promise.all([
     checkAffiliateLinks(),
     checkFees(),
     checkGearLinks(),
     checkHotelProximity(),
+    checkNewParks(),
   ])
   logger.info(`Affiliate links: ${healthyAffiliates.length} healthy, ${failedAffiliates.length} failed`)
   logger.info(`Fees: ${checkedFees.length} checked, ${flaggedFees.length} flagged | ${manualTotal} need manual review`)
   logger.info(`Gear links: ${gearResult.passed} passed, ${gearResult.failed} failed`)
   logger.info(`Hotel proximity: ${hotelResult.detected} detected, ${hotelResult.fixed} fixed, ${hotelResult.skipped} skipped`)
+  logger.info(`New parks: ${newParksResult.total} added today, ${newParksResult.incomplete.length} need onboarding`)
 
   // ── Step 6 — GSC performance check ────────────────────────────────────────
   logger.info('Running GSC performance check...')
@@ -95,8 +99,10 @@ async function run() {
 
   const gearSection = buildGearLinksSection(gearResult)
   const hotelSection = buildHotelProximitySection(hotelResult)
+  const newParksSection = buildNewParksSection(newParksResult)
   if (gearSection) fullSummary += '\n\n' + gearSection
   if (hotelSection) fullSummary += '\n\n' + hotelSection
+  if (newParksSection) fullSummary += '\n\n' + newParksSection
 
   // ── Step 9 — Send report ───────────────────────────────────────────────────
   if (isDryRun) {
