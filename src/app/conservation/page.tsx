@@ -11,7 +11,7 @@ export default function ConservationPage() {
       eyebrow="We Care · Conservation"
       headline="Protect What We Love"
       subhead="Florida's ecosystems — its wetlands, coral reefs, and wildlife corridors — are among the most biodiverse in North America. We believe exploring these spaces comes with a responsibility to protect them."
-      heroBg="/hero-1.jpg"
+      heroBg={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/park-photos/page-heroes/conservation.jpg`}
       pillars={[
         {
           title: 'Wildlife Habitat',

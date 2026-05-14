@@ -11,7 +11,7 @@ export default function OurEffortsPage() {
       eyebrow="We Care · Our Efforts"
       headline="Our Commitment to Florida"
       subhead="Discover Florida Parks exists to connect people with Florida's natural spaces — and to ensure those spaces remain open, healthy, and accessible for generations to come."
-      heroBg="/plan-your-trip.jpg"
+      heroBg={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/park-photos/page-heroes/our-efforts.jpg`}
       pillars={[
         {
           title: 'Responsible Tourism',

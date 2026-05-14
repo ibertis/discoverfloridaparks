@@ -90,8 +90,9 @@ export default function TravelTrendsPage() {
       <SiteHeader />
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="trends-hero-section" style={{ background: '#362f35', padding: '80px 24px 72px' }}>
-        <div className="trends-hero-grid" style={{ maxWidth: 1278, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 420px', gap: 64, alignItems: 'center' }}>
+      <section className="trends-hero-section" style={{ position: 'relative', overflow: 'hidden', background: '#362f35', padding: '80px 24px 72px' }}>
+        <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: `url(${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/park-photos/page-heroes/travel-trends.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center 40%', opacity: 0.15 }} />
+        <div className="trends-hero-grid" style={{ position: 'relative', zIndex: 1, maxWidth: 1278, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 420px', gap: 64, alignItems: 'center' }}>
 
           {/* Left — copy */}
           <div>

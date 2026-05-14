@@ -11,7 +11,7 @@ export default function PreservationPage() {
       eyebrow="We Care · Preservation"
       headline="Honor What Came Before"
       subhead="Florida's natural and cultural landmarks carry centuries of history. Preserving these places means future generations will have the same opportunity to discover and be moved by them."
-      heroBg="/hero-3.jpg"
+      heroBg={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/park-photos/page-heroes/preservation.jpg`}
       pillars={[
         {
           title: 'Natural Landmarks',

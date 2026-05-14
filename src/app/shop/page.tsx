@@ -47,7 +47,7 @@ export default function ShopComingSoon() {
           aria-hidden
           style={{
             position: 'absolute', inset: 0,
-            backgroundImage: 'url(/hero-2.jpg)',
+            backgroundImage: `url(${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/park-photos/page-heroes/shop.jpg)`,
             backgroundSize: 'cover',
             backgroundPosition: 'center 60%',
             filter: 'blur(3px) brightness(0.45)',
