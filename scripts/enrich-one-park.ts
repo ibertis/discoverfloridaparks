@@ -240,7 +240,7 @@ async function enrichHotels(park: ParkRecord): Promise<void> {
     console.error(`  ${c.red}Failed to insert hotels: ${error.message}${c.reset}`);
   } else {
     console.log(`  ${c.green}✅ Hotels: ${hotels.length} found within ${radius / 1000}km${c.reset}`);
-    hotels.forEach(h => console.log(`     - ${h.name} (${h.distance_from_park_km}km)`));
+    hotels.forEach((h: { name: string; distance_from_park_km: number }) => console.log(`     - ${h.name} (${h.distance_from_park_km}km)`));
   }
 }
 
