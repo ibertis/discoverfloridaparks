@@ -29,7 +29,7 @@ export interface GearCategory {
 // ── Helper to build REI affiliate URL ────────────────────────────────────────
 // Replace [IMPACT_ID] with your Impact Publisher ID when confirmed
 // e.g. const IMPACT_ID = '1234567'
-const IMPACT_ID = '8390771'; // ← update this when Impact ID is confirmed
+const IMPACT_ID: string = '8390771'; // ← update this when Impact ID is confirmed
 
 function rei(path: string): string {
   if (IMPACT_ID === 'PENDING') {
