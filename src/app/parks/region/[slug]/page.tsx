@@ -232,7 +232,7 @@ export default async function RegionHubPage(
         />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%)' }} />
 
-        <div style={{ position: 'absolute', inset: 0, maxWidth: 1278, margin: '0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 24px 52px' }}>
+        <div className="region-hero-content" style={{ position: 'absolute', inset: 0, maxWidth: 1278, margin: '0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 24px 52px' }}>
           {/* Breadcrumb */}
           <nav style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: 'rgba(255,255,255,0.65)' }}>
             <Link href="/" style={{ color: 'rgba(255,255,255,0.65)', textDecoration: 'none' }} className="hover:text-white">Home</Link>
@@ -260,13 +260,13 @@ export default async function RegionHubPage(
 
       {/* ── Region Intro ──────────────────────────────────────────────────────── */}
       <section style={{ background: '#f9f7f5', borderBottom: '1px solid #eeeeee', padding: '52px 24px' }}>
-        <div style={{ maxWidth: 1278, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr auto', gap: 48, alignItems: 'start' }}>
+        <div className="region-intro-grid" style={{ maxWidth: 1278, margin: '0 auto' }}>
           <div>
             <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.7, color: '#413734', margin: 0, maxWidth: 720 }}>
               {region.description}
             </p>
           </div>
-          <div style={{ minWidth: 220 }}>
+          <div>
             <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12, marginTop: 0 }}>
               Best For
             </p>
@@ -375,7 +375,7 @@ export default async function RegionHubPage(
             </h2>
           </div>
 
-          <div className="grid-regions" style={{ gridTemplateColumns: `repeat(${Math.min(region.nearbyRegions.length, 3)}, 1fr)` }}>
+          <div className="grid-regions">
             {region.nearbyRegions.map(nearbySlug => {
               const nearby = REGION_MAP[nearbySlug];
               if (!nearby) return null;

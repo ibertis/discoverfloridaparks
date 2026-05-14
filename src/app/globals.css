@@ -89,6 +89,12 @@ a { color: inherit; text-decoration: none; }
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
+.region-intro-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 48px;
+  align-items: start;
+}
 .grid-types {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -136,8 +142,10 @@ a { color: inherit; text-decoration: none; }
 }
 
 @media (max-width: 768px) {
-  .grid-featured      { grid-template-columns: 1fr; }
-  .grid-regions       { grid-template-columns: 1fr; }
+  .grid-featured        { grid-template-columns: 1fr; }
+  .grid-regions         { grid-template-columns: 1fr; }
+  .region-intro-grid    { grid-template-columns: 1fr; gap: 28px; }
+  .region-hero-content  { padding: 0 20px 36px !important; }
   .grid-types         { grid-template-columns: repeat(3, 1fr); }
   .park-cards-grid    { grid-template-columns: 1fr; }
   .filter-bar-desktop { display: none; }
