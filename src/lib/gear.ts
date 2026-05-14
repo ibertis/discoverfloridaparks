@@ -74,6 +74,11 @@ export const UNIVERSAL_ITEMS: GearItem[] = [
     description: 'Florida afternoon storms arrive without warning',
     url: rei('c/rain-jackets'),
   },
+  {
+    name: 'Polarized Sunglasses',
+    description: 'Cut glare on water and trails — a Florida must-have',
+    url: rei('c/sunglasses'),
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -302,7 +307,7 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Beach Umbrella & Shelter',
         description: 'UPF 50+ shade — essential for Florida beach days',
-        url: rei('c/beach-gear'),
+        url: amz('beach umbrella UPF 50 sand anchor Florida'),
       },
       {
         name: 'Packable Beach Chair',
