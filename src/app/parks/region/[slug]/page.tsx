@@ -260,13 +260,13 @@ export default async function RegionHubPage(
 
       {/* ── Region Intro ──────────────────────────────────────────────────────── */}
       <section style={{ background: '#f9f7f5', borderBottom: '1px solid #eeeeee', padding: '52px 24px' }}>
-        <div className="region-intro-grid" style={{ maxWidth: 1278, margin: '0 auto' }}>
+        <div className="region-intro-grid" style={{ maxWidth: 960, margin: '0 auto' }}>
           <div>
-            <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.7, color: '#413734', margin: 0, maxWidth: 720 }}>
+            <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.7, color: '#413734', margin: 0 }}>
               {region.description}
             </p>
           </div>
-          <div>
+          <div className="region-bestfor">
             <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12, marginTop: 0 }}>
               Best For
             </p>
