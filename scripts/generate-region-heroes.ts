@@ -1,4 +1,4 @@
-import 'dotenv/config'
+import { config } from 'dotenv'; config({ path: '.env.local' });
 import { createClient } from '@supabase/supabase-js'
 
 const MAGNIFIC_API_KEY = process.env.MAGNIFIC_API_KEY!
