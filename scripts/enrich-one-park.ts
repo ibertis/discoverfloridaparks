@@ -20,6 +20,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 import { supabaseAdmin } from './lib/supabase-admin.js';
 import { findPark, getPlaceDetails } from './lib/google-places.js';
 import { fetchFloridaNpsParks } from './lib/nps-api.js';
+import { haversineDistance, getSearchRadius } from './utils/geo.js';
 
 // ─── CLI Args ────────────────────────────────────────────────────────────────
 
@@ -161,6 +162,96 @@ function printField(label: string, value: string | null | undefined, color: stri
   console.log(`  ${c.gray}${label.padEnd(20)}${c.reset}${color}${short}${c.reset}`);
 }
 
+// ─── Hotel enrichment ────────────────────────────────────────────────────────
+
+interface ParkRecord {
+  id: string
+  name: string
+  slug: string
+  city: string | null
+  latitude: number | null
+  longitude: number | null
+}
+
+async function enrichHotels(park: ParkRecord): Promise<void> {
+  if (!park.latitude || !park.longitude) {
+    console.warn(`  ${c.yellow}⚠️  No coordinates — skipping hotel enrichment${c.reset}`);
+    return;
+  }
+
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  if (!apiKey) throw new Error('GOOGLE_PLACES_API_KEY not set in .env.local');
+
+  const radius = getSearchRadius(park.city);
+
+  const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
+  url.searchParams.set('location', `${park.latitude},${park.longitude}`);
+  url.searchParams.set('radius', String(radius));
+  url.searchParams.set('type', 'lodging');
+  url.searchParams.set('key', apiKey);
+
+  const res = await fetch(url.toString());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = await res.json() as any;
+
+  if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+    console.error(`  ${c.red}Google Places API error: ${data.status}${c.reset}`);
+    return;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const candidates = (data.results || [])
+    .filter((p: any) => (p.rating ?? 0) >= 3.8)
+    .slice(0, 3);
+
+  if (candidates.length === 0) {
+    console.warn(`  ${c.yellow}No suitable hotels found within ${radius / 1000}km of ${park.name}${c.reset}`);
+    return;
+  }
+
+  await supabaseAdmin.from('park_hotels').delete().eq('park_id', park.id);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hotels = candidates.map((candidate: any) => {
+    const hotelLat = candidate.geometry.location.lat;
+    const hotelLng = candidate.geometry.location.lng;
+    const distanceKm = haversineDistance(
+      Number(park.latitude), Number(park.longitude),
+      hotelLat, hotelLng,
+    );
+
+    const bookingUrl = 'https://www.booking.com/search.html' +
+      `?ss=${encodeURIComponent(candidate.name + ' ' + (candidate.vicinity || ''))}` +
+      `&aid=2889331&label=dfp-${park.slug}`;
+
+    return {
+      park_id: park.id,
+      name: candidate.name,
+      url: bookingUrl,
+      description: buildHotelDescription(candidate, park),
+      latitude: hotelLat,
+      longitude: hotelLng,
+      distance_from_park_km: Math.round(distanceKm * 100) / 100,
+    };
+  });
+
+  const { error } = await supabaseAdmin.from('park_hotels').insert(hotels);
+  if (error) {
+    console.error(`  ${c.red}Failed to insert hotels: ${error.message}${c.reset}`);
+  } else {
+    console.log(`  ${c.green}✅ Hotels: ${hotels.length} found within ${radius / 1000}km${c.reset}`);
+    hotels.forEach(h => console.log(`     - ${h.name} (${h.distance_from_park_km}km)`));
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildHotelDescription(place: any, park: ParkRecord): string {
+  const rating = place.rating ? `Rated ${place.rating}/5` : '';
+  const reviews = place.user_ratings_total ? `(${place.user_ratings_total} reviews)` : '';
+  const vicinity = place.vicinity || '';
+  return `${place.name} — ${vicinity}. ${rating} ${reviews}. Nearby base for visiting ${park.name}.`.trim();
+}
+
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -294,44 +385,56 @@ async function main() {
     toApply[key] = value;
   }
 
-  // ── Step 6: Preview ───────────────────────────────────────────────────────
+  // ── Step 6: Preview & write ───────────────────────────────────────────────
   console.log(`\n${c.bold}─── Preview ───────────────────────────────────────────────${c.reset}`);
 
   if (Object.keys(toApply).length === 0) {
     console.log(`\n${c.green}No changes to apply — park is already fully populated.${c.reset}`);
     console.log(`${c.gray}Use --overwrite to force-update all fields.${c.reset}\n`);
-    return;
-  }
-
-  const color = isNew ? c.green : c.yellow;
-  for (const [key, value] of Object.entries(toApply)) {
-    if (key === 'slug' || key === 'name') continue;
-    printField(key, String(value), color);
-  }
-
-  const action = isNew ? 'Create park' : `Apply ${Object.keys(toApply).length} changes`;
-  const answer = await prompt(`\n${c.bold}${action}? (y/n): ${c.reset}`);
-
-  if (answer.toLowerCase() !== 'y') {
-    console.log(`${c.gray}Aborted.${c.reset}\n`);
-    return;
-  }
-
-  // ── Step 7: Write to DB ───────────────────────────────────────────────────
-  if (isNew) {
-    const { error } = await supabaseAdmin.from('parks').insert(toApply);
-    if (error) {
-      console.error(`\n${c.red}Insert failed: ${error.message}${c.reset}\n`);
-      process.exit(1);
-    }
-    console.log(`\n${c.green}✓ Park created: /admin/parks/${slug}${c.reset}\n`);
   } else {
-    const { error } = await supabaseAdmin.from('parks').update(toApply).eq('slug', slug);
-    if (error) {
-      console.error(`\n${c.red}Update failed: ${error.message}${c.reset}\n`);
-      process.exit(1);
+    const color = isNew ? c.green : c.yellow;
+    for (const [key, value] of Object.entries(toApply)) {
+      if (key === 'slug' || key === 'name') continue;
+      printField(key, String(value), color);
     }
-    console.log(`\n${c.green}✓ Park updated: /admin/parks/${slug}${c.reset}\n`);
+
+    const action = isNew ? 'Create park' : `Apply ${Object.keys(toApply).length} changes`;
+    const answer = await prompt(`\n${c.bold}${action}? (y/n): ${c.reset}`);
+
+    if (answer.toLowerCase() !== 'y') {
+      console.log(`${c.gray}Aborted.${c.reset}\n`);
+      return;
+    }
+
+    // ── Step 7: Write to DB ─────────────────────────────────────────────────
+    if (isNew) {
+      const { error } = await supabaseAdmin.from('parks').insert(toApply);
+      if (error) {
+        console.error(`\n${c.red}Insert failed: ${error.message}${c.reset}\n`);
+        process.exit(1);
+      }
+      console.log(`\n${c.green}✓ Park created: /admin/parks/${slug}${c.reset}\n`);
+    } else {
+      const { error } = await supabaseAdmin.from('parks').update(toApply).eq('slug', slug);
+      if (error) {
+        console.error(`\n${c.red}Update failed: ${error.message}${c.reset}\n`);
+        process.exit(1);
+      }
+      console.log(`\n${c.green}✓ Park updated: /admin/parks/${slug}${c.reset}\n`);
+    }
+  }
+
+  // ── Step 8: Hotel enrichment ──────────────────────────────────────────────
+  console.log(`\n${c.bold}[Hotel enrichment]${c.reset}`);
+  const { data: enrichPark } = await supabaseAdmin
+    .from('parks')
+    .select('id, name, slug, city, latitude, longitude')
+    .eq('slug', slug)
+    .single();
+  if (enrichPark) {
+    await enrichHotels(enrichPark);
+  } else {
+    console.warn(`  ${c.yellow}Could not fetch park record for hotel enrichment${c.reset}`);
   }
 }
 

@@ -196,6 +196,23 @@ async function runChecks(park, hotels = [], experiences = []) {
     }
   }
 
+  // 9. Hotel proximity
+  if (park.latitude && park.longitude) {
+    const hotelsWithDist = hotels.filter(h => h.distance_from_park_km != null)
+    if (hotelsWithDist.length > 0) {
+      const tooFar = hotelsWithDist.filter(h => h.distance_from_park_km > 30)
+      if (tooFar.length > 0) {
+        warn(`Hotels may be too far from park:`)
+        for (const h of tooFar) {
+          warn(`  ⚠️  ${h.name}: ${h.distance_from_park_km}km away`)
+        }
+      } else {
+        const maxDist = Math.max(...hotelsWithDist.map(h => h.distance_from_park_km))
+        pass(`Hotels: all within ${maxDist}km of park`)
+      }
+    }
+  }
+
   return {
     name: park.name,
     slug: park.slug,
@@ -220,7 +237,7 @@ async function validateSingle(slug) {
   }
 
   const [{ data: hotels }, { data: experiences }] = await Promise.all([
-    supabase.from('park_hotels').select('id, name, url').eq('park_id', park.id).not('url', 'is', null),
+    supabase.from('park_hotels').select('id, name, url, distance_from_park_km').eq('park_id', park.id).not('url', 'is', null),
     supabase.from('park_experiences').select('id, name, href').eq('park_id', park.id).not('href', 'is', null),
   ])
 
@@ -258,7 +275,7 @@ async function validateAll() {
   // Bulk-fetch everything upfront — 3 queries instead of N×3
   const [parksRes, hotelsRes, experiencesRes] = await Promise.all([
     supabase.from('parks').select(PARK_FIELDS).order('name'),
-    supabase.from('park_hotels').select('park_id, id, name, url').not('url', 'is', null),
+    supabase.from('park_hotels').select('park_id, id, name, url, distance_from_park_km').not('url', 'is', null),
     supabase.from('park_experiences').select('park_id, id, name, href').not('href', 'is', null),
   ])
 

@@ -61,6 +61,10 @@ These must be researched and entered manually:
 - Use Booking.com affiliate format: `https://www.booking.com/hotel/us/[hotel-id].html?aid=2889331&label=dfp-[park-slug]`
 - Every hotel URL must include `aid=2889331` and `label=dfp-[park-slug]`
 
+> Hotels are now sourced using the park's GPS coordinates via Google Places API.
+> The script finds the 3 highest-rated hotels within 12km (city parks) or 25km (rural parks).
+> Requires `GOOGLE_PLACES_API_KEY` in `.env.local`.
+
 **Experience affiliate links** — `park_experiences` or `experiences` table:
 - Use Viator affiliate format: `[viator-url]?pid=P00300517&mcid=42383&medium=link&campaign=dfp-park-pages`
 - Every experience URL must include `pid=P00300517` and `mcid=42383`
