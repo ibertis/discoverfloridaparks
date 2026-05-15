@@ -7,6 +7,10 @@ import { Search, ChevronDown, X } from 'lucide-react';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
+function esc(s: string | null | undefined): string {
+  return (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 interface Park {
   id: string;
   slug: string;
@@ -150,21 +154,21 @@ export default function ParkMap({ parks }: { parks: Park[] }) {
         .setHTML(`
           <div style="font-family:Archivo,sans-serif;padding:2px">
             ${park.featured_image_url
-              ? `<img src="${park.featured_image_url}" alt="${park.name}" style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:10px;display:block"/>`
+              ? `<img src="${esc(park.featured_image_url)}" alt="${esc(park.name)}" style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:10px;display:block"/>`
               : ''}
             <span style="background:#ff7044;color:#fff;padding:2px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;font-family:Archivo,sans-serif">
-              ${park.park_types?.[0] || 'Park'}
+              ${esc(park.park_types?.[0] || 'Park')}
             </span>
             <p style="font-family:Shrikhand,cursive;font-weight:400;font-size:1.1rem;color:#362f35;margin:8px 0 6px;line-height:1">
-              ${park.name}
+              ${esc(park.name)}
             </p>
             ${park.google_rating
-              ? `<p style="font-size:0.75rem;color:#e8a020;font-weight:700;font-family:Archivo,sans-serif;margin:0 0 8px">★ ${park.google_rating}</p>`
+              ? `<p style="font-size:0.75rem;color:#e8a020;font-weight:700;font-family:Archivo,sans-serif;margin:0 0 8px">★ ${esc(String(park.google_rating))}</p>`
               : ''}
             ${park.short_description
-              ? `<p style="font-size:0.78rem;color:#726d6b;font-family:Glegoo,serif;line-height:1.5;margin:0 0 10px">${park.short_description.substring(0, 90)}…</p>`
+              ? `<p style="font-size:0.78rem;color:#726d6b;font-family:Glegoo,serif;line-height:1.5;margin:0 0 10px">${esc(park.short_description.substring(0, 90))}…</p>`
               : ''}
-            <a href="/parks/${park.slug}"
+            <a href="/parks/${esc(park.slug)}"
               style="display:block;text-align:center;background:#ff7044;color:#fff;padding:9px;border-radius:20px;font-weight:700;font-size:0.82rem;text-decoration:none;font-family:Archivo,sans-serif">
               View Park →
             </a>

@@ -95,6 +95,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const user = await getAdminUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (getUserRole(user) !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const db = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

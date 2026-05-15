@@ -17,21 +17,31 @@ export async function POST(req: NextRequest) {
   const revalidated: string[] = [];
   const failed: { path: string; reason: string }[] = [];
 
+  const ALLOWED_PREFIXES = ['/parks/', '/parks/region/', '/map', '/parks'];
+  const MAX_ENTRIES = 100;
+
   // `paths` — revalidate arbitrary absolute paths (e.g. /parks/region/florida-keys)
   if (Array.isArray(body.paths)) {
-    for (const p of body.paths) {
+    const paths = (body.paths as unknown[]).slice(0, MAX_ENTRIES);
+    for (const p of paths) {
       if (typeof p !== 'string' || !p.trim()) { failed.push({ path: String(p), reason: 'Invalid path' }); continue; }
-      try { revalidatePath(p.trim()); revalidated.push(p.trim()); }
-      catch (err) { failed.push({ path: p.trim(), reason: err instanceof Error ? err.message : 'Unknown error' }); }
+      const trimmed = p.trim();
+      if (!ALLOWED_PREFIXES.some(pfx => trimmed.startsWith(pfx))) {
+        failed.push({ path: trimmed, reason: 'Path not allowed' }); continue;
+      }
+      try { revalidatePath(trimmed); revalidated.push(trimmed); }
+      catch (err) { failed.push({ path: trimmed, reason: err instanceof Error ? err.message : 'Unknown error' }); }
     }
   }
 
   // `slugs` — legacy: revalidate /parks/:slug pages
   if (Array.isArray(body.slugs)) {
-    for (const slug of body.slugs) {
+    const slugs = (body.slugs as unknown[]).slice(0, MAX_ENTRIES);
+    for (const slug of slugs) {
       if (typeof slug !== 'string' || !slug.trim()) { failed.push({ path: String(slug), reason: 'Invalid slug' }); continue; }
-      try { revalidatePath(`/parks/${slug.trim()}`); revalidated.push(`/parks/${slug.trim()}`); }
-      catch (err) { failed.push({ path: slug.trim(), reason: err instanceof Error ? err.message : 'Unknown error' }); }
+      const trimmed = slug.trim();
+      try { revalidatePath(`/parks/${trimmed}`); revalidated.push(`/parks/${trimmed}`); }
+      catch (err) { failed.push({ path: trimmed, reason: err instanceof Error ? err.message : 'Unknown error' }); }
     }
   }
 
