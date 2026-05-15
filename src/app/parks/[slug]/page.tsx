@@ -680,8 +680,12 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                           )}
                         </div>
                       </div>
-                      {addressLine && (
-                        <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>{addressLine}</p>
+                      {(address || distanceText) && (
+                        <p style={{ fontFamily: 'Glegoo, serif', fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>
+                          {address && <strong>{address}</strong>}
+                          {address && distanceText && <span style={{ fontWeight: 400 }}> · {distanceText}</span>}
+                          {!address && distanceText && <span style={{ fontWeight: 400 }}>{distanceText}</span>}
+                        </p>
                       )}
                     </div>
                     );
