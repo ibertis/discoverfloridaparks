@@ -4,7 +4,7 @@
 //
 // Checks (mirrors validate-park.ts blockers + key warnings):
 //   BLOCKER  — missing GPS coordinates (latitude or longitude null)
-//   BLOCKER  — missing description (short_description null / shorter than 50 chars)
+//   BLOCKER  — missing description (short_description null / shorter than 30 chars)
 //   BLOCKER  — missing featured image (featured_image_url null)
 //   WARNING  — no row in park_amenities
 //   WARNING  — no rows in park_hotels
@@ -81,7 +81,7 @@ export async function checkNewParks() {
     }
 
     const desc = park.short_description?.trim() ?? ''
-    if (!desc || desc.length < 50) {
+    if (!desc || desc.length < 30) {
       issues.push({ label: 'Missing or too-short description', blocker: true })
     }
 

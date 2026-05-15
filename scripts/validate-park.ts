@@ -84,13 +84,16 @@ export async function validatePark(slug: string): Promise<ValidationResult> {
     blocker: true,
   });
 
-  // ── Check 3: Has description ──────────────────────────────────────────────
-  const hasDesc = !!(park.short_description?.trim() || park.full_description?.trim());
+  // ── Check 3: Has description (≥ 30 chars) ───────────────────────────────
+  const descText = (park.short_description?.trim() || park.full_description?.trim()) ?? '';
+  const hasDesc = descText.length >= 30;
   checks.push({
     id: 3,
     label: 'Has description',
     passed: hasDesc,
-    detail: hasDesc ? undefined : 'short_description and full_description are both empty',
+    detail: hasDesc ? undefined : descText.length === 0
+      ? 'short_description and full_description are both empty'
+      : `description too short (${descText.length} chars, min 30)`,
     blocker: true,
   });
 
