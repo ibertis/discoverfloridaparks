@@ -52,6 +52,12 @@ function buildDescription(place: any, park: ParkRow): string {
   return `${place.name} — ${vicinity}. ${rating} ${reviews}. Nearby base for visiting ${park.name}.`.trim();
 }
 
+const NOT_A_HOTEL = /\b(airboat|canoe|kayak|outfitter|outfitters|visitor cent(?:er|re)|chamber of commerce|fish camp(?! & rv| resort)|\brides?\b|guided tour|boat tour|nature tour|wildlife tour|group camp|scout(?:s)? (lodge|camp)|bsa\b|campsite|cave dive|tcas camping|swfwmd|water management district)\b|\bcamp$/i;
+
+function isLikelyHotel(name: string): boolean {
+  return !NOT_A_HOTEL.test(name);
+}
+
 async function placesSearch(
   lat: number, lng: number, radius: number, apiKey: string
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,7 +73,8 @@ async function placesSearch(
   if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
     throw new Error(`Places API: ${data.status}`);
   }
-  return (data.results || []).filter((p: any) => (p.rating ?? 0) >= 3.8); // eslint-disable-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data.results || []).filter((p: any) => (p.rating ?? 0) >= 3.8 && isLikelyHotel(p.name));
 }
 
 async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promise<{
