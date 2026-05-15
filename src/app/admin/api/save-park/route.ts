@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getAdminUser } from '@/lib/supabase-server';
+import { getAdminUser, getUserRole } from '@/lib/supabase-server';
 
 export async function POST(req: NextRequest) {
   const user = await getAdminUser();
