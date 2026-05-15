@@ -262,7 +262,7 @@ Key `experiences` (catalog) fields: `name`, `provider`, `description`, `activity
 
 Key `park_experiences` fields: `park_id` (FK), `name`, `description`, `duration`, `price_from` (text), `href`, `source` (`'viator'` | `'direct'` | `'partner'`), `business_name`, `sort_order`, `is_active`
 
-Key `park_hotels` fields: `park_id` (FK), `name`, `description`, `url`, `price_from` (text), `sort_order`
+Key `park_hotels` fields: `park_id` (FK), `name`, `description`, `url`, `price_from` (text), `sort_order`, `latitude`, `longitude`, `distance_from_park_km` (float8)
 
 **Important:** `park_types`, `park_regions`, and `activity_types` are `text[]` arrays. Use `.contains('park_types', [value])` for filtering, not `.eq()`. `park_regions` is already `text[]` — never call `.split(',')` on it.
 
@@ -457,7 +457,10 @@ The GRANT section at the bottom of `rls.sql` covers all existing tables and serv
 - Affiliate links — Booking.com `aid=`/`label=` + Viator `pid=`/`mcid=` params
 - Entrance fees — AI-powered change detection against stored `entrance_fee` values
 - Gear links — all REI + Amazon URLs from `src/lib/gear.ts` (404s only — bot-blocks ignored)
-- Hotel proximity — detects `park_hotels` rows where `distance_from_park_km` is NULL or >30km, then auto-fixes by re-running Google Places nearbysearch for those parks
+- Hotel proximity — detects `park_hotels` rows where `distance_from_park_km` is NULL or >50km (cap matches `fix-hotels-bulk.ts` max search radius), then auto-fixes by re-running Google Places nearbysearch for those parks
+- **Pending additions** (not yet implemented):
+  - Zero-hotel parks — flag parks that have had 0 `park_hotels` rows for >3 days (indicates enrichment failed or all entries were deleted); prompt for re-enrichment via `fix-hotels-bulk.ts`
+  - Hotel quality check — run `audit-hotels.ts` REMOVE-bucket patterns daily; flag any new junk entries (airboat tours, visitor centres, government camps) that slipped through enrichment
 
 **Email report:** Sent to `gabriel@discoverfloridaparks.com`
 
@@ -501,11 +504,50 @@ All scripts run with `npx tsx <script>` from the project root. They load `.env.l
 | `scripts/enrich-one-park.ts` | `npx tsx scripts/enrich-one-park.ts "Park Name" [--no-ai] [--no-photo] [--overwrite] [--auto]` | Enriches a park with Google Places + NPS API + AI content. Exports `enrichPark(slug, opts)` for programmatic use (used by onboard-park.ts). |
 | `scripts/validate-park.ts` | `npx tsx scripts/validate-park.ts <slug>` | Runs 9 correctness checks: park exists, has GPS, descriptions, featured image, park_regions, amenities row, hotels, no null distances, no hotels >30km. Exits 1 on blocker failure. Exports `validatePark(slug)`. |
 | `scripts/fix-hotel-proximity.ts` | `npx tsx scripts/fix-hotel-proximity.ts [--dry-run] [--slug <slug>]` | Finds parks where hotel `distance_from_park_km` is NULL or >30km, then re-runs Google Places nearbysearch + Booking.com link rebuild. Exports `fixHotelProximityForPark(slug)`. |
+| `scripts/fix-hotels-bulk.ts` | `npx tsx scripts/fix-hotels-bulk.ts [--dry-run]` | Finds all parks with 0 `park_hotels` rows and runs the hotel enrichment pipeline for each. Uses multi-step radius expansion (12 → 25 → 50km) and the `isLikelyHotel()` quality filter. |
+| `scripts/audit-hotels.ts` | `npx tsx scripts/audit-hotels.ts [--delete-remove] [--delete-all]` | Scans all `park_hotels` rows and categorises them: **REMOVE** (clearly not lodging), **REVIEW** (outdoor accommodation — RV parks, campgrounds), **KEEP** (hotels). Dry-run by default; writes `scripts/data/hotel-audit.json`. |
 
 **Programmatic exports** (used by `onboard-park.ts`):
 - `enrichPark(slug, { displayName?, noAi?, noPhoto?, overwrite?, autoApply? })` — `autoApply: true` skips the interactive y/n prompt
 - `validatePark(slug)` → `{ passed, checks[], blockers[], warnings[] }`
 - `fixHotelProximityForPark(slug)` → `{ fixed, skipped, reason?, error? }`
+
+---
+
+## Hotel Enrichment Quality Rules
+
+These rules are enforced in `scripts/fix-hotels-bulk.ts` and must be preserved in any future rewrite of hotel enrichment logic.
+
+### Candidate filtering (applied before insert)
+
+A Google Places result is accepted as a hotel only if **all** of the following pass:
+
+1. **Rating ≥ 3.8★** — low-rated places excluded
+2. **`isLikelyHotel(name)`** — name must not match the `NOT_A_HOTEL` pattern (airboat rides, canoe outfitters, visitor centres, group camps, scout lodges, primitive campsites, cave dive camps, government facilities, etc.)
+3. **Not a campground type** — Google Places tags campgrounds with `"campground"` in their `types` array; these are excluded **unless** they have a full street address (vicinity contains a digit — e.g. "1234 Park Rd, Oviedo" passes; "Christmas" or "Mims" alone does not)
+
+### Radius expansion (multi-step)
+
+Search expands in three steps, stopping at the first step that returns ≥1 qualifying result:
+
+| Step | Radius |
+|---|---|
+| 1 (base) | 12km (25km for cities in `RURAL_CITIES` set in `scripts/utils/geo.ts`) |
+| 2 | 25km |
+| 3 (cap) | 50km |
+
+This ensures remote parks (WMAs, state forests, wilderness areas) still get hotel coverage from nearby towns, while urban parks stop at the closest results.
+
+### Display rules (park detail page)
+
+- Section heading: **"Where to Stay Nearby"** when closest hotel ≤32km (~20 miles); **"Where to Stay"** when all hotels are >32km
+- Description shows: **bold street address** · regular-weight distance (e.g. "4735 Helen Hauser Blvd, Titusville · About 11 miles from [Park Name]")
+- Distance text: "Less than a mile" when <1 mile; "About X miles" otherwise (rounded to 1 decimal, drops `.0`)
+- If a park has 0 qualifying hotels after all three radius steps, the section is hidden entirely — do not show empty state
+
+### Audit tool
+
+`scripts/audit-hotels.ts` classifies all `park_hotels` rows into REMOVE / REVIEW / KEEP. Run after any bulk enrichment pass. The REMOVE bucket (clearly non-lodging) should always be empty in production.
 
 ---
 

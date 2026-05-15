@@ -74,11 +74,14 @@ async function placesSearch(
     throw new Error(`Places API: ${data.status}`);
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data.results || []).filter((p: any) =>
-    (p.rating ?? 0) >= 3.8 &&
-    !p.types?.includes('campground') &&  // Google explicitly tags campgrounds; hotels never have this type
-    isLikelyHotel(p.name),
-  );
+  return (data.results || []).filter((p: any) => {
+    if ((p.rating ?? 0) < 3.8) return false;
+    if (!isLikelyHotel(p.name)) return false;
+    // Allow campgrounds only when Google has a full street address (contains a digit + comma)
+    // e.g. "1234 Park Rd, Oviedo" passes; "Christmas" or "Mims" does not
+    if (p.types?.includes('campground') && !/\d/.test(p.vicinity ?? '')) return false;
+    return true;
+  });
 }
 
 async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promise<{
