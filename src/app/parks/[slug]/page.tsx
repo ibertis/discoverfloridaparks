@@ -73,6 +73,38 @@ function fmtTime(t: string): string {
   return m === 0 ? `${hour} ${period}` : `${hour}:${m.toString().padStart(2, '0')} ${period}`;
 }
 
+// ─── Hotel rating helpers ─────────────────────────────────────────────────────
+
+function parseHotelRating(description: string | null): {
+  rating: number; reviewCount: number; cleanDesc: string;
+} | null {
+  if (!description) return null;
+  const match = description.match(/Rated (\d+(?:\.\d+)?)\/5 \((\d[\d,]*) reviews?\)/i);
+  if (!match) return null;
+  return {
+    rating: parseFloat(match[1]),
+    reviewCount: parseInt(match[2].replace(/,/g, ''), 10),
+    cleanDesc: description.replace(/\s*Rated \d+(?:\.\d+)?\/5 \(\d[\d,]* reviews?\)\.\s*/i, ' ').trim(),
+  };
+}
+
+function HotelStars({ rating }: { rating: number }) {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+      {/* CSS overlay: gold stars clipped to exact decimal width */}
+      <span style={{ position: 'relative', display: 'inline-block', fontSize: '0.88rem', color: '#ddd8d0', lineHeight: 1, letterSpacing: '0.05em', userSelect: 'none' }}>
+        {'★★★★★'}
+        <span style={{ position: 'absolute', left: 0, top: 0, overflow: 'hidden', width: `${(rating / 5) * 100}%`, whiteSpace: 'nowrap', color: '#e8a020' }}>
+          {'★★★★★'}
+        </span>
+      </span>
+      <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700, color: '#362f35' }}>
+        {rating}
+      </span>
+    </span>
+  );
+}
+
 // ─── Data fetching ────────────────────────────────────────────────────────────
 
 async function getPark(slug: string): Promise<Park | null> {
@@ -600,14 +632,25 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                   </p>
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {hotels.map((hotel: any) => (
+                  {hotels.map((hotel: any) => {
+                    const hotelRating = parseHotelRating(hotel.description);
+                    const displayDesc = hotelRating ? hotelRating.cleanDesc : hotel.description;
+                    return (
                     <div key={hotel.id} style={{ borderRadius: 16, padding: '20px 24px', border: '1px solid #eeeeee', background: '#fff' }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: hotel.description ? 8 : 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: displayDesc ? 8 : 0 }}>
                         <a href={hotel.url} target="_blank" rel="nofollow sponsored noopener noreferrer"
                           style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', textDecoration: 'none' }}>
                           {hotel.name}
                         </a>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+                          {hotelRating && (
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                              <HotelStars rating={hotelRating.rating} />
+                              <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', color: '#a6967c' }}>
+                                ({hotelRating.reviewCount.toLocaleString()} reviews)
+                              </span>
+                            </span>
+                          )}
                           {/pet.friendly|dog.friendly|pets welcome/i.test(hotel.name + ' ' + (hotel.description ?? '')) && (
                             <span style={{ background: '#e6f2ea', color: '#3d7a52', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>🐾 Pet-friendly</span>
                           )}
@@ -616,11 +659,12 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                           )}
                         </div>
                       </div>
-                      {hotel.description && (
-                        <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>{hotel.description}</p>
+                      {displayDesc && (
+                        <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>{displayDesc}</p>
                       )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#c4bab3', marginTop: 12, lineHeight: 1.6 }}>
                   Hotel links are Booking.com affiliate links. We earn a small commission at no extra cost to you.
