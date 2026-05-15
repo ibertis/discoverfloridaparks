@@ -88,6 +88,25 @@ function parseHotelRating(description: string | null): {
   };
 }
 
+function parseHotelAddress(description: string | null, hotelName: string): string {
+  if (!description) return '';
+  let addr = description;
+  const prefix = hotelName + ' — ';
+  if (addr.startsWith(prefix)) addr = addr.slice(prefix.length);
+  addr = addr.replace(/\s*Rated \d+(?:\.\d+)?\/5 \(\d[\d,]* reviews?\)\.\s*/i, ' ');
+  addr = addr.replace(/\s*Nearby base for visiting.*?\.?\s*$/i, '');
+  return addr.replace(/\.\s*$/, '').trim();
+}
+
+function formatHotelDistance(km: number | null, parkName: string): string {
+  if (!km) return '';
+  const miles = km * 0.621371;
+  if (miles < 1) return `Less than a mile from ${parkName}`;
+  const rounded = Math.round(miles * 10) / 10;
+  const display = rounded % 1 === 0 ? String(Math.round(rounded)) : rounded.toFixed(1);
+  return `About ${display} ${rounded === 1 ? 'mile' : 'miles'} from ${parkName}`;
+}
+
 function HotelStars({ rating }: { rating: number }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
@@ -110,7 +129,7 @@ function HotelStars({ rating }: { rating: number }) {
 async function getPark(slug: string): Promise<Park | null> {
   const { data, error } = await supabase
     .from('parks')
-    .select(`*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*), park_experiences(id, name, description, duration, price_from, href, source, business_name, sort_order), park_hotels(id, name, description, url, price_from, sort_order)`)
+    .select(`*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*), park_experiences(id, name, description, duration, price_from, href, source, business_name, sort_order), park_hotels(id, name, description, url, price_from, sort_order, distance_from_park_km)`)
     .eq('slug', slug)
     .single();
   if (error || !data) return null;
@@ -634,10 +653,12 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   {hotels.map((hotel: any) => {
                     const hotelRating = parseHotelRating(hotel.description);
-                    const displayDesc = hotelRating ? hotelRating.cleanDesc : hotel.description;
+                    const address = parseHotelAddress(hotel.description, hotel.name);
+                    const distanceText = formatHotelDistance(hotel.distance_from_park_km, park.name);
+                    const addressLine = [address, distanceText].filter(Boolean).join(' · ');
                     return (
                     <div key={hotel.id} style={{ borderRadius: 16, padding: '20px 24px', border: '1px solid #eeeeee', background: '#fff' }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: displayDesc ? 8 : 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: addressLine ? 8 : 0 }}>
                         <a href={hotel.url} target="_blank" rel="nofollow sponsored noopener noreferrer"
                           style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', textDecoration: 'none' }}>
                           {hotel.name}
@@ -659,8 +680,8 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                           )}
                         </div>
                       </div>
-                      {displayDesc && (
-                        <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>{displayDesc}</p>
+                      {addressLine && (
+                        <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>{addressLine}</p>
                       )}
                     </div>
                     );
