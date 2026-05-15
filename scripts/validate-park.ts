@@ -57,7 +57,7 @@ export async function validatePark(slug: string): Promise<ValidationResult> {
   // ── Check 1: Park exists ──────────────────────────────────────────────────
   const { data: park, error: parkError } = await supabaseAdmin
     .from('parks')
-    .select('id, slug, name, latitude, longitude, short_description, full_description, featured_image_url, park_regions')
+    .select('id, slug, name, latitude, longitude, short_description, full_description, featured_image_url, park_regions, gateway_note')
     .eq('slug', slug)
     .maybeSingle();
 
@@ -157,13 +157,16 @@ export async function validatePark(slug: string): Promise<ValidationResult> {
   });
 
   // ── Check 9: No hotels with distance > 30km ───────────────────────────────
+  const gatewayNote = (park as any).gateway_note as string | null;
   const farHotels = (hotels ?? []).filter(h => h.distance_from_park_km != null && h.distance_from_park_km > 30);
-  const noFarHotels = farHotels.length === 0;
+  const noFarHotels = gatewayNote != null || farHotels.length === 0;
   checks.push({
     id: 9,
     label: 'No hotels further than 30km',
     passed: noFarHotels,
-    detail: noFarHotels ? undefined : `${farHotels.length} hotel(s) beyond 30km`,
+    detail: gatewayNote != null
+      ? 'Skipped — gateway park, hotels at departure point'
+      : (noFarHotels ? undefined : `${farHotels.length} hotel(s) beyond 30km`),
     blocker: false,
   });
 
@@ -191,7 +194,7 @@ function printResult(result: ValidationResult) {
   for (const check of result.checks) {
     const icon = check.passed ? `${c.green}✓${c.reset}` : check.blocker ? `${c.red}✗${c.reset}` : `${c.yellow}⚠${c.reset}`;
     const label = check.passed ? check.label : `${c.bold}${check.label}${c.reset}`;
-    const detail = check.detail && !check.passed ? `  ${c.gray}${check.detail}${c.reset}` : '';
+    const detail = check.detail ? `  ${c.gray}${check.detail}${c.reset}` : '';
     console.log(`  ${icon}  ${label}${detail}`);
   }
 
