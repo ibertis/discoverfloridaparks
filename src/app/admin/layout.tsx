@@ -1,7 +1,10 @@
 import { getAdminUser, getUserRole } from '@/lib/supabase-server';
 import AdminNav from './AdminNav';
 
-export const metadata = { title: { default: 'Admin', template: '%s — DFP Admin' } };
+export const metadata = {
+  title: { default: 'Admin', template: '%s — DFP Admin' },
+  robots: { index: false, follow: false },
+};
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getAdminUser();
