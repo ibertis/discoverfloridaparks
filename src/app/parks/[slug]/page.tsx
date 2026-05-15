@@ -43,6 +43,7 @@ interface Park {
   visitor_tips: string; safety_notes: string; parking_info: string;
   wildlife_summary: string; terrain: string; instagram_hashtag: string;
   nearby_cities: string; is_featured: boolean;
+  gateway_note: string | null;
   distance_from_miami: number; distance_from_orlando: number; distance_from_tampa: number;
   seo_title: string; seo_description: string;
   reservation_required: boolean; camping_url: string; reservation_url: string;
@@ -593,6 +594,11 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
             {hotels.length > 0 && (
               <section>
                 <SectionHeading>Where to Stay Nearby</SectionHeading>
+                {park.gateway_note && (
+                  <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 600, color: '#a6967c', background: '#f9f7f5', borderRadius: 10, padding: '9px 14px', marginBottom: 16, marginTop: 0 }}>
+                    🚢 {park.gateway_note}
+                  </p>
+                )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   {hotels.map((hotel: any) => (
                     <div key={hotel.id} style={{ borderRadius: 16, padding: '20px 24px', border: '1px solid #eeeeee', background: '#fff' }}>
