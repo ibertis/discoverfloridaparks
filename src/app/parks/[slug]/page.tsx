@@ -644,7 +644,11 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
             {/* Where to Stay */}
             {hotels.length > 0 && (
               <section>
-                <SectionHeading>Where to Stay Nearby</SectionHeading>
+                {(() => {
+                  const closestKm = Math.min(...hotels.map((h: any) => h.distance_from_park_km ?? Infinity));
+                  const heading = closestKm > 32 ? 'Where to Stay' : 'Where to Stay Nearby';
+                  return <SectionHeading>{heading}</SectionHeading>;
+                })()}
                 {park.gateway_note && (
                   <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 600, color: '#a6967c', background: '#f9f7f5', borderRadius: 10, padding: '9px 14px', marginBottom: 16, marginTop: 0 }}>
                     🚢 {park.gateway_note}

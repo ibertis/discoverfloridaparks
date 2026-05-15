@@ -74,7 +74,11 @@ async function placesSearch(
     throw new Error(`Places API: ${data.status}`);
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data.results || []).filter((p: any) => (p.rating ?? 0) >= 3.8 && isLikelyHotel(p.name));
+  return (data.results || []).filter((p: any) =>
+    (p.rating ?? 0) >= 3.8 &&
+    !p.types?.includes('campground') &&  // Google explicitly tags campgrounds; hotels never have this type
+    isLikelyHotel(p.name),
+  );
 }
 
 async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promise<{
@@ -93,13 +97,14 @@ async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promi
   let candidates: any[] = [];
   let usedRadius = baseRadius;
 
+  // Expand search in steps until hotels are found or the 50km cap is reached
+  const searchRadii = [...new Set([baseRadius, 25000, 50000])].filter(r => r >= baseRadius);
+
   try {
-    candidates = await placesSearch(searchLat, searchLng, baseRadius, apiKey);
-    // Retry at 2× radius (capped) when initial search finds nothing
-    if (candidates.length === 0 && baseRadius < MAX_FALLBACK_RADIUS) {
-      const fallback = Math.min(baseRadius * 2, MAX_FALLBACK_RADIUS);
-      candidates = await placesSearch(searchLat, searchLng, fallback, apiKey);
-      usedRadius = fallback;
+    for (const radius of searchRadii) {
+      candidates = await placesSearch(searchLat, searchLng, radius, apiKey);
+      usedRadius = radius;
+      if (candidates.length > 0) break;
     }
   } catch (e) {
     return { added: 0, skipped: true, reason: (e as Error).message };
