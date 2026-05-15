@@ -14,6 +14,9 @@
 //   SUPABASE_SERVICE_ROLE_KEY (already present)
 
 import { createClient } from '@supabase/supabase-js'
+import { spawnSync } from 'child_process'
+import { fileURLToPath } from 'url'
+import path from 'path'
 import { logger } from './logger.js'
 
 const supabase = createClient(
@@ -21,7 +24,34 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY,
 )
 
-// ── Core check ────────────────────────────────────────────────────────────────
+// Project root is two levels up from hermes/modules/
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const PROJECT_ROOT = path.resolve(__dirname, '../..')
+
+// ── Onboarding subprocess ─────────────────────────────────────────────────────
+
+function onboardPark(slug) {
+  const result = spawnSync(
+    'npx',
+    ['tsx', 'scripts/onboard-park.ts', '--slug', slug],
+    {
+      cwd: PROJECT_ROOT,
+      encoding: 'utf8',
+      timeout: 5 * 60 * 1000, // 5 min — enrichment can be slow
+      env: { ...process.env },
+    }
+  )
+
+  return {
+    slug,
+    success: result.status === 0,
+    output: (result.stdout || '').trim(),
+    error: (result.stderr || '').trim(),
+    timedOut: result.error?.code === 'ETIMEDOUT',
+  }
+}
+
+// ── Core check (detection only — stays in parallel block) ─────────────────────
 
 export async function checkNewParks() {
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
@@ -80,28 +110,71 @@ export async function checkNewParks() {
   return { total: parks.length, incomplete }
 }
 
+// ── Sequential onboarding (runs after parallel block — spawnSync blocks event loop) ──
+
+export async function runOnboarding(parks) {
+  const results = []
+  for (let i = 0; i < parks.length; i++) {
+    const park = parks[i]
+    logger.info(`Auto-onboarding [${i + 1}/${parks.length}]: ${park.slug}`)
+    const result = onboardPark(park.slug)
+    results.push({ ...result, parkName: park.name })
+    if (i < parks.length - 1) {
+      await new Promise(r => setTimeout(r, 1000))
+    }
+  }
+  return results
+}
+
 // ── Email section builder ─────────────────────────────────────────────────────
 
-export function buildNewParksSection(result) {
+export function buildNewParksSection(result, onboardResults, dryRun) {
   if (result.incomplete.length === 0) return ''
 
   const count = result.incomplete.length
   const noun = count === 1 ? 'park' : 'parks'
 
   const lines = [
-    `🌴 New Parks Need Onboarding`,
-    `  ${count} ${noun} added in the last 24 hours ${count === 1 ? 'is' : 'are'} not fully onboarded:`,
+    `🌴 New Parks — ${count} ${noun} added in the last 24 hours`,
     '',
   ]
 
-  for (const park of result.incomplete) {
-    lines.push(`  • ${park.name} (${park.slug})`)
-    for (const issue of park.issues) {
-      const icon = issue.blocker ? '✗' : '⚠'
-      lines.push(`    ${icon} ${issue.label}`)
-    }
-    lines.push(`    Run: npx tsx scripts/onboard-park.ts --slug ${park.slug}`)
+  if (dryRun) {
+    result.incomplete.forEach(p => {
+      lines.push(`  • ${p.name} (${p.slug})`)
+      for (const issue of p.issues) {
+        const icon = issue.blocker ? '✗' : '⚠'
+        lines.push(`    ${icon} ${issue.label}`)
+      }
+    })
     lines.push('')
+    lines.push('  Dry run — no onboarding attempted.')
+    lines.push('  Run manually: npx tsx scripts/onboard-park.ts --slug [slug]')
+  } else {
+    const succeeded = onboardResults.filter(r => r.success)
+    const failed = onboardResults.filter(r => !r.success)
+
+    if (succeeded.length > 0) {
+      lines.push(`  ✅ Auto-onboarded (${succeeded.length}):`)
+      succeeded.forEach(r => lines.push(`    • ${r.parkName} (${r.slug})`))
+      lines.push('')
+      lines.push('  ⚠️  Still needs your review for each park above:')
+      lines.push('    1. Amenities — verify in Supabase match reality')
+      lines.push('    2. Live page — check hero, badges, gear, hotels')
+      lines.push('    3. Hermes dry-run — confirm detected: 0')
+    }
+
+    if (failed.length > 0) {
+      lines.push('')
+      lines.push(`  ❌ Failed to onboard (${failed.length}):`)
+      failed.forEach(r => {
+        const reason = r.timedOut
+          ? 'Timed out after 5 minutes'
+          : (r.error || r.output || 'Unknown error').split('\n')[0].substring(0, 120)
+        lines.push(`    • ${r.parkName} (${r.slug}): ${reason}`)
+        lines.push(`      Run manually: npx tsx scripts/onboard-park.ts --slug ${r.slug}`)
+      })
+    }
   }
 
   return lines.join('\n').trimEnd()

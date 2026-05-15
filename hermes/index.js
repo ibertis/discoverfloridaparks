@@ -14,7 +14,7 @@ import { sendReport } from './modules/mailer.js'
 import { logger } from './modules/logger.js'
 import { checkGearLinks, buildGearLinksSection } from './modules/gearLinks.js'
 import { checkHotelProximity, buildHotelProximitySection } from './modules/hotelProximity.js'
-import { checkNewParks, buildNewParksSection } from './modules/newParks.js'
+import { checkNewParks, buildNewParksSection, runOnboarding } from './modules/newParks.js'
 
 const isDryRun = process.argv.includes('--dry-run')
 
@@ -53,7 +53,17 @@ async function run() {
   logger.info(`Hotel proximity: ${hotelResult.detected} detected, ${hotelResult.fixed} fixed, ${hotelResult.skipped} skipped`)
   logger.info(`New parks: ${newParksResult.total} added today, ${newParksResult.incomplete.length} need onboarding`)
 
-  // ── Step 6 — GSC performance check ────────────────────────────────────────
+  // ── Step 6 — Auto-onboard new parks (sequential — spawnSync would block parallel) ─
+  let onboardResults = []
+  if (!isDryRun && newParksResult.incomplete.length > 0) {
+    logger.info(`Auto-onboarding ${newParksResult.incomplete.length} park(s)...`)
+    onboardResults = await runOnboarding(newParksResult.incomplete)
+    const succeeded = onboardResults.filter(r => r.success).length
+    const failed = onboardResults.filter(r => !r.success).length
+    logger.info(`Auto-onboarding complete: ${succeeded} succeeded, ${failed} failed`)
+  }
+
+  // ── Step 7 — GSC performance check ────────────────────────────────────────
   logger.info('Running GSC performance check...')
   const gscResult = await checkGSC()
   if (gscResult.available) {
@@ -62,7 +72,7 @@ async function run() {
     logger.warn(`GSC: ${gscResult.message}`)
   }
 
-  // ── Step 7 — Combine all failures ──────────────────────────────────────────
+  // ── Step 8 — Combine all failures ──────────────────────────────────────────
   const allFailed = [
     ...failedURLs,
     ...failedAffiliates.map(f => ({
@@ -89,7 +99,7 @@ async function run() {
 
   const totalChecked = urls.length + totalAffiliates + automatedTotal
 
-  // ── Step 8 — AI analysis ───────────────────────────────────────────────────
+  // ── Step 9 — AI analysis ───────────────────────────────────────────────────
   logger.info('Sending results to LM Studio for analysis...')
   const { summary, aiGenerated } = await analyzeFailures(allFailed, totalChecked)
   logger.info(`Analysis complete (AI generated: ${aiGenerated})`)
@@ -99,12 +109,12 @@ async function run() {
 
   const gearSection = buildGearLinksSection(gearResult)
   const hotelSection = buildHotelProximitySection(hotelResult)
-  const newParksSection = buildNewParksSection(newParksResult)
+  const newParksSection = buildNewParksSection(newParksResult, onboardResults, isDryRun)
   if (gearSection) fullSummary += '\n\n' + gearSection
   if (hotelSection) fullSummary += '\n\n' + hotelSection
   if (newParksSection) fullSummary += '\n\n' + newParksSection
 
-  // ── Step 9 — Send report ───────────────────────────────────────────────────
+  // ── Step 10 — Send report ──────────────────────────────────────────────────
   if (isDryRun) {
     logger.info('[DRY RUN] Skipping email. Report preview:')
     logger.info(fullSummary)
