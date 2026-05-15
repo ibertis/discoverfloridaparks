@@ -14,6 +14,8 @@ import { sendReport } from './modules/mailer.js'
 import { logger } from './modules/logger.js'
 import { checkGearLinks, buildGearLinksSection } from './modules/gearLinks.js'
 import { checkHotelProximity, buildHotelProximitySection } from './modules/hotelProximity.js'
+import { checkHotelCoverage, buildHotelCoverageSection } from './modules/hotelCoverage.js'
+import { checkHotelQuality, buildHotelQualitySection } from './modules/hotelQuality.js'
 import { checkNewParks, buildNewParksSection, runOnboarding } from './modules/newParks.js'
 
 const isDryRun = process.argv.includes('--dry-run')
@@ -46,19 +48,25 @@ async function run() {
     { healthy: healthyAffiliates, failed: failedAffiliates, total: totalAffiliates },
     { flagged: flaggedFees, checked: checkedFees, manualReview, suppressedCount, nextReview, automatedTotal, manualTotal },
     gearResult,
-    hotelResult,
+    hotelProximityResult,
+    hotelCoverageResult,
+    hotelQualityResult,
     newParksResult,
   ] = await Promise.all([
     checkAffiliateLinks(),
     checkFees({ force: isForce }),
     checkGearLinks(),
     checkHotelProximity(),
+    checkHotelCoverage(),
+    checkHotelQuality(),
     checkNewParks(),
   ])
   logger.info(`Affiliate links: ${healthyAffiliates.length} healthy, ${failedAffiliates.length} failed`)
   logger.info(`Fees: ${checkedFees.length} checked, ${flaggedFees.length} flagged | ${manualTotal} need manual review`)
   logger.info(`Gear links: ${gearResult.passed} passed, ${gearResult.failed} failed`)
-  logger.info(`Hotel proximity: ${hotelResult.detected} detected, ${hotelResult.fixed} fixed, ${hotelResult.skipped} skipped`)
+  logger.info(`Hotel proximity: ${hotelProximityResult.detected} detected, ${hotelProximityResult.fixed} fixed, ${hotelProximityResult.skipped} skipped`)
+  logger.info(`Hotel coverage: ${hotelCoverageResult.detected} uncovered, ${hotelCoverageResult.fixed} enriched`)
+  logger.info(`Hotel quality: ${hotelQualityResult.detected} junk entries detected`)
   logger.info(`New parks: ${newParksResult.total} added today, ${newParksResult.incomplete.length} need onboarding`)
 
   // ── Step 6 — Auto-onboard new parks (sequential — spawnSync would block parallel) ─
@@ -115,12 +123,16 @@ async function run() {
   // Build full report — GSC and manual review appended as text sections
   let fullSummary = summary + buildGSCSummary(gscResult) + buildManualReviewList(manualReview, suppressedCount, nextReview)
 
-  const gearSection = buildGearLinksSection(gearResult)
-  const hotelSection = buildHotelProximitySection(hotelResult)
-  const newParksSection = buildNewParksSection(newParksResult, onboardResults, isDryRun)
-  if (gearSection) fullSummary += '\n\n' + gearSection
-  if (hotelSection) fullSummary += '\n\n' + hotelSection
-  if (newParksSection) fullSummary += '\n\n' + newParksSection
+  const gearSection         = buildGearLinksSection(gearResult)
+  const hotelProxSection    = buildHotelProximitySection(hotelProximityResult)
+  const hotelCoverSection   = buildHotelCoverageSection(hotelCoverageResult)
+  const hotelQualitySection = buildHotelQualitySection(hotelQualityResult)
+  const newParksSection     = buildNewParksSection(newParksResult, onboardResults, isDryRun)
+  if (gearSection)         fullSummary += '\n\n' + gearSection
+  if (hotelProxSection)    fullSummary += '\n\n' + hotelProxSection
+  if (hotelCoverSection)   fullSummary += '\n\n' + hotelCoverSection
+  if (hotelQualitySection) fullSummary += '\n\n' + hotelQualitySection
+  if (newParksSection)     fullSummary += '\n\n' + newParksSection
 
   // ── Step 10 — Send report ──────────────────────────────────────────────────
   if (isDryRun) {
