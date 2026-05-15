@@ -19,7 +19,7 @@ import { pathToFileURL } from 'url';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 import { supabaseAdmin } from './lib/supabase-admin.js';
-import { haversineDistance, getSearchRadius } from './utils/geo.js';
+import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
 
@@ -42,6 +42,9 @@ interface ParkRow {
   city: string | null;
   latitude: number | null;
   longitude: number | null;
+  gateway_lat: number | null;
+  gateway_lng: number | null;
+  gateway_note: string | null;
 }
 
 interface HotelInsert {
@@ -70,6 +73,24 @@ function buildHotelDescription(place: any, park: ParkRow): string {
 
 // ─── Core hotel enrichment (mirrors enrichHotels in enrich-one-park.ts) ───────
 
+async function placesSearch(
+  lat: number, lng: number, radius: number, apiKey: string
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any[]> {
+  const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
+  url.searchParams.set('location', `${lat},${lng}`);
+  url.searchParams.set('radius', String(radius));
+  url.searchParams.set('type', 'lodging');
+  url.searchParams.set('key', apiKey);
+  const res = await fetch(url.toString());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = await res.json() as any;
+  if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+    throw new Error(`Places API: ${data.status}`);
+  }
+  return (data.results || []).filter((p: any) => (p.rating ?? 0) >= 3.8);
+}
+
 async function enrichHotelsForPark(park: ParkRow, apiKey: string, dryRun = false): Promise<{
   replaced: number;
   added: number;
@@ -80,29 +101,37 @@ async function enrichHotelsForPark(park: ParkRow, apiKey: string, dryRun = false
     return { replaced: 0, added: 0, skipped: true, reason: 'no coordinates' };
   }
 
-  const radius = getSearchRadius(park.city);
+  // Use gateway coords (departure point) when the park is boat-access / island
+  const searchLat = park.gateway_lat ?? park.latitude;
+  const searchLng = park.gateway_lng ?? park.longitude;
+  const usingGateway = park.gateway_lat != null;
 
-  const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
-  url.searchParams.set('location', `${park.latitude},${park.longitude}`);
-  url.searchParams.set('radius', String(radius));
-  url.searchParams.set('type', 'lodging');
-  url.searchParams.set('key', apiKey);
+  const baseRadius = getSearchRadius(park.city);
+  let candidates: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
+  let usedRadius = baseRadius;
 
-  const res = await fetch(url.toString());
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = await res.json() as any;
+  try {
+    candidates = await placesSearch(searchLat, searchLng, baseRadius, apiKey);
 
-  if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-    return { replaced: 0, added: 0, skipped: true, reason: `Places API: ${data.status}` };
+    // Auto-retry at double the radius (capped at MAX_FALLBACK_RADIUS) when
+    // initial search returns nothing — handles truly remote parks
+    if (candidates.length === 0 && baseRadius < MAX_FALLBACK_RADIUS) {
+      const fallbackRadius = Math.min(baseRadius * 2, MAX_FALLBACK_RADIUS);
+      candidates = await placesSearch(searchLat, searchLng, fallbackRadius, apiKey);
+      usedRadius = fallbackRadius;
+    }
+  } catch (e) {
+    return { replaced: 0, added: 0, skipped: true, reason: (e as Error).message };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const candidates = (data.results || [])
-    .filter((p: any) => (p.rating ?? 0) >= 3.8)
-    .slice(0, 3);
+  candidates = candidates.slice(0, 3);
+
+  const searchDesc = usingGateway
+    ? `gateway (${park.gateway_note ?? 'departure point'})`
+    : `park coords`;
 
   if (candidates.length === 0) {
-    return { replaced: 0, added: 0, skipped: true, reason: `no lodging ≥3.8★ within ${radius / 1000}km` };
+    return { replaced: 0, added: 0, skipped: true, reason: `no lodging ≥3.8★ within ${usedRadius / 1000}km of ${searchDesc}` };
   }
 
   // Count existing hotels before deletion (for reporting)
@@ -198,7 +227,7 @@ export async function fixHotelProximityForPark(slug: string): Promise<{
 
   const { data: park, error } = await supabaseAdmin
     .from('parks')
-    .select('id, slug, name, city, latitude, longitude')
+    .select('id, slug, name, city, latitude, longitude, gateway_lat, gateway_lng, gateway_note')
     .eq('slug', slug)
     .maybeSingle();
 
@@ -237,7 +266,7 @@ async function main() {
   if (singleSlug) {
     const { data, error } = await supabaseAdmin
       .from('parks')
-      .select('id, slug, name, city, latitude, longitude')
+      .select('id, slug, name, city, latitude, longitude, gateway_lat, gateway_lng, gateway_note')
       .eq('slug', singleSlug)
       .maybeSingle();
     if (error || !data) {

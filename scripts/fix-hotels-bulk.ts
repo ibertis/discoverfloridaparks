@@ -14,7 +14,7 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 import { supabaseAdmin } from './lib/supabase-admin.js';
-import { haversineDistance, getSearchRadius } from './utils/geo.js';
+import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
 
 const DELAY_MS = 300;
 
@@ -35,6 +35,9 @@ interface ParkRow {
   city: string | null;
   latitude: number | null;
   longitude: number | null;
+  gateway_lat: number | null;
+  gateway_lng: number | null;
+  gateway_note: string | null;
 }
 
 function sleep(ms: number) {
@@ -49,6 +52,24 @@ function buildDescription(place: any, park: ParkRow): string {
   return `${place.name} — ${vicinity}. ${rating} ${reviews}. Nearby base for visiting ${park.name}.`.trim();
 }
 
+async function placesSearch(
+  lat: number, lng: number, radius: number, apiKey: string
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any[]> {
+  const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
+  url.searchParams.set('location', `${lat},${lng}`);
+  url.searchParams.set('radius', String(radius));
+  url.searchParams.set('type', 'lodging');
+  url.searchParams.set('key', apiKey);
+  const res = await fetch(url.toString());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = await res.json() as any;
+  if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+    throw new Error(`Places API: ${data.status}`);
+  }
+  return (data.results || []).filter((p: any) => (p.rating ?? 0) >= 3.8); // eslint-disable-line @typescript-eslint/no-explicit-any
+}
+
 async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promise<{
   added: number; skipped: boolean; reason?: string;
 }> {
@@ -56,28 +77,31 @@ async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promi
     return { added: 0, skipped: true, reason: 'no coordinates' };
   }
 
-  const radius = getSearchRadius(park.city);
-  const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
-  url.searchParams.set('location', `${park.latitude},${park.longitude}`);
-  url.searchParams.set('radius', String(radius));
-  url.searchParams.set('type', 'lodging');
-  url.searchParams.set('key', apiKey);
+  // Use gateway coords when the park is boat-access / island
+  const searchLat = park.gateway_lat ?? park.latitude;
+  const searchLng = park.gateway_lng ?? park.longitude;
 
-  const res = await fetch(url.toString());
+  const baseRadius = getSearchRadius(park.city);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = await res.json() as any;
+  let candidates: any[] = [];
+  let usedRadius = baseRadius;
 
-  if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-    return { added: 0, skipped: true, reason: `Places API: ${data.status}` };
+  try {
+    candidates = await placesSearch(searchLat, searchLng, baseRadius, apiKey);
+    // Retry at 2× radius (capped) when initial search finds nothing
+    if (candidates.length === 0 && baseRadius < MAX_FALLBACK_RADIUS) {
+      const fallback = Math.min(baseRadius * 2, MAX_FALLBACK_RADIUS);
+      candidates = await placesSearch(searchLat, searchLng, fallback, apiKey);
+      usedRadius = fallback;
+    }
+  } catch (e) {
+    return { added: 0, skipped: true, reason: (e as Error).message };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const candidates = (data.results || [])
-    .filter((p: any) => (p.rating ?? 0) >= 3.8)
-    .slice(0, 3);
+  candidates = candidates.slice(0, 3);
 
   if (candidates.length === 0) {
-    return { added: 0, skipped: true, reason: `no lodging ≥3.8★ within ${radius / 1000}km` };
+    return { added: 0, skipped: true, reason: `no lodging ≥3.8★ within ${usedRadius / 1000}km` };
   }
 
   if (dryRun) return { added: candidates.length, skipped: false };
@@ -86,6 +110,7 @@ async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promi
   const hotels = candidates.map((p: any) => {
     const lat = p.geometry.location.lat;
     const lng = p.geometry.location.lng;
+    // Distance is always measured from the park itself, not the gateway
     const distKm = haversineDistance(Number(park.latitude), Number(park.longitude), lat, lng);
     return {
       park_id: park.id,
@@ -126,7 +151,7 @@ async function main() {
   // Fetch all parks, filter to those without hotels
   const { data: allParks, error: parksErr } = await supabaseAdmin
     .from('parks')
-    .select('id, slug, name, city, latitude, longitude')
+    .select('id, slug, name, city, latitude, longitude, gateway_lat, gateway_lng, gateway_note')
     .order('name');
   if (parksErr) throw new Error(parksErr.message);
 

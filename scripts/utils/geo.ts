@@ -5,6 +5,8 @@ const RURAL_CITIES = new Set([
   'Ponce De Leon', 'Live Oak', 'White Springs',
 ])
 
+export const MAX_FALLBACK_RADIUS = 50000  // 50km cap for radius-expansion retries
+
 export function getSearchRadius(city: string | null): number {
   if (city && RURAL_CITIES.has(city)) return 25000
   return 12000

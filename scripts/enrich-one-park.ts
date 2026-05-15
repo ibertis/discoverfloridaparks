@@ -27,7 +27,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 import { supabaseAdmin } from './lib/supabase-admin.js';
 import { findPark, getPlaceDetails } from './lib/google-places.js';
 import { fetchFloridaNpsParks } from './lib/nps-api.js';
-import { haversineDistance, getSearchRadius } from './utils/geo.js';
+import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
 
@@ -165,6 +165,9 @@ interface ParkRecord {
   city: string | null
   latitude: number | null
   longitude: number | null
+  gateway_lat: number | null
+  gateway_lng: number | null
+  gateway_note: string | null
 }
 
 async function enrichHotels(park: ParkRecord): Promise<void> {
@@ -176,30 +179,43 @@ async function enrichHotels(park: ParkRecord): Promise<void> {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   if (!apiKey) throw new Error('GOOGLE_PLACES_API_KEY not set in .env.local');
 
-  const radius = getSearchRadius(park.city);
+  // Use gateway coords (departure point) when the park is boat-access / island
+  const searchLat = park.gateway_lat ?? park.latitude;
+  const searchLng = park.gateway_lng ?? park.longitude;
+  const usingGateway = park.gateway_lat != null;
 
-  const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
-  url.searchParams.set('location', `${park.latitude},${park.longitude}`);
-  url.searchParams.set('radius', String(radius));
-  url.searchParams.set('type', 'lodging');
-  url.searchParams.set('key', apiKey);
+  const baseRadius = getSearchRadius(park.city);
 
-  const res = await fetch(url.toString());
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = await res.json() as any;
-
-  if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-    console.error(`  ${c.red}Google Places API error: ${data.status}${c.reset}`);
-    return;
+  async function query(lat: number, lng: number, radius: number) {
+    const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
+    url.searchParams.set('location', `${lat},${lng}`);
+    url.searchParams.set('radius', String(radius));
+    url.searchParams.set('type', 'lodging');
+    url.searchParams.set('key', apiKey!);
+    const res = await fetch(url.toString());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = await res.json() as any;
+    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') throw new Error(`Places API: ${data.status}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (data.results || []).filter((p: any) => (p.rating ?? 0) >= 3.8);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const candidates = (data.results || [])
-    .filter((p: any) => (p.rating ?? 0) >= 3.8)
-    .slice(0, 3);
+  let candidates: any[] = await query(searchLat, searchLng, baseRadius);
+  let usedRadius = baseRadius;
+
+  // Retry at 2× radius (capped) when initial search finds nothing
+  if (candidates.length === 0 && baseRadius < MAX_FALLBACK_RADIUS) {
+    const fallback = Math.min(baseRadius * 2, MAX_FALLBACK_RADIUS);
+    candidates = await query(searchLat, searchLng, fallback);
+    usedRadius = fallback;
+  }
+
+  candidates = candidates.slice(0, 3);
 
   if (candidates.length === 0) {
-    console.warn(`  ${c.yellow}No suitable hotels found within ${radius / 1000}km of ${park.name}${c.reset}`);
+    const searchDesc = usingGateway ? `${park.gateway_note ?? 'gateway'}` : park.name;
+    console.warn(`  ${c.yellow}No suitable hotels found within ${usedRadius / 1000}km of ${searchDesc}${c.reset}`);
     return;
   }
 
@@ -209,6 +225,7 @@ async function enrichHotels(park: ParkRecord): Promise<void> {
   const hotels = candidates.map((candidate: any) => {
     const hotelLat = candidate.geometry.location.lat;
     const hotelLng = candidate.geometry.location.lng;
+    // Distance is always from the park itself, not the gateway
     const distanceKm = haversineDistance(
       Number(park.latitude), Number(park.longitude),
       hotelLat, hotelLng,
@@ -233,8 +250,9 @@ async function enrichHotels(park: ParkRecord): Promise<void> {
   if (error) {
     console.error(`  ${c.red}Failed to insert hotels: ${error.message}${c.reset}`);
   } else {
-    console.log(`  ${c.green}✅ Hotels: ${hotels.length} found within ${radius / 1000}km${c.reset}`);
-    hotels.forEach((h: { name: string; distance_from_park_km: number }) => console.log(`     - ${h.name} (${h.distance_from_park_km}km)`));
+    const searchLabel = usingGateway ? `gateway (${usedRadius / 1000}km)` : `${usedRadius / 1000}km`;
+    console.log(`  ${c.green}✅ Hotels: ${hotels.length} found within ${searchLabel}${c.reset}`);
+    hotels.forEach((h: { name: string; distance_from_park_km: number }) => console.log(`     - ${h.name} (${h.distance_from_park_km}km from park)`));
   }
 }
 
@@ -439,7 +457,7 @@ export async function enrichPark(slug: string, opts: EnrichOptions = {}): Promis
   console.log(`\n${c.bold}[Hotel enrichment]${c.reset}`);
   const { data: enrichParkRecord } = await supabaseAdmin
     .from('parks')
-    .select('id, name, slug, city, latitude, longitude')
+    .select('id, name, slug, city, latitude, longitude, gateway_lat, gateway_lng, gateway_note')
     .eq('slug', slug)
     .single();
   if (enrichParkRecord) {
