@@ -36,11 +36,11 @@ export function isLikelyHotel(name) {
 }
 
 // ── Places search with multi-step radius expansion ────────────────────────────
-// Tries base → 25km → 50km, stops at first step that returns ≥1 result.
+// Tries base → 25km → 50km, accumulating unique results by place_id until 3 slots filled.
 
 export async function placesSearchWithFallback(lat, lng, baseRadius, apiKey) {
   const radii = [...new Set([baseRadius, 25000, 50000])].filter(r => r >= baseRadius)
-  let candidates = []
+  const seen = new Map() // keyed by place_id to avoid duplicates across radii
   let usedRadius = baseRadius
 
   for (const radius of radii) {
@@ -54,7 +54,7 @@ export async function placesSearchWithFallback(lat, lng, baseRadius, apiKey) {
       throw new Error(`Places API: ${data.status}`)
     }
 
-    candidates = (data.results || []).filter(p => {
+    const filtered = (data.results || []).filter(p => {
       if ((p.rating || 0) < 3.8) return false
       if (!isLikelyHotel(p.name)) return false
       // Allow campgrounds only when Google has a full street address
@@ -62,11 +62,12 @@ export async function placesSearchWithFallback(lat, lng, baseRadius, apiKey) {
       return true
     })
 
+    for (const p of filtered) if (!seen.has(p.place_id)) seen.set(p.place_id, p)
     usedRadius = radius
-    if (candidates.length > 0) break
+    if (seen.size >= 3) break
   }
 
-  return { candidates: candidates.slice(0, 3), usedRadius }
+  return { candidates: [...seen.values()].slice(0, 3), usedRadius }
 }
 
 // ── Description + URL builders ────────────────────────────────────────────────

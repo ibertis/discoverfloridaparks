@@ -100,20 +100,23 @@ async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promi
   let candidates: any[] = [];
   let usedRadius = baseRadius;
 
-  // Expand search in steps until hotels are found or the 50km cap is reached
+  // Expand search in steps, accumulating unique results by place_id until 3 slots filled
   const searchRadii = [...new Set([baseRadius, 25000, 50000])].filter(r => r >= baseRadius);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const seen = new Map<string, any>();
 
   try {
     for (const radius of searchRadii) {
-      candidates = await placesSearch(searchLat, searchLng, radius, apiKey);
+      const found = await placesSearch(searchLat, searchLng, radius, apiKey);
       usedRadius = radius;
-      if (candidates.length > 0) break;
+      for (const p of found) if (!seen.has(p.place_id)) seen.set(p.place_id, p);
+      if (seen.size >= 3) break;
     }
   } catch (e) {
     return { added: 0, skipped: true, reason: (e as Error).message };
   }
 
-  candidates = candidates.slice(0, 3);
+  candidates = [...seen.values()].slice(0, 3);
 
   if (candidates.length === 0) {
     return { added: 0, skipped: true, reason: `no lodging ≥3.8★ within ${usedRadius / 1000}km` };

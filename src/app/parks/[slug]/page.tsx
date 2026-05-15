@@ -696,7 +696,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                   })}
                 </div>
                 <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#c4bab3', marginTop: 12, lineHeight: 1.6 }}>
-                  Hotel links are Booking.com affiliate links. We earn a small commission at no extra cost to you.
+                  Hotel links are affiliate links. We earn a small commission at no extra cost to you.
                 </p>
               </section>
             )}
