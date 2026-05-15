@@ -1,0 +1,5 @@
+node_modules/
+logs/
+data/fee-verified.json
+oauth-credentials.json
+.env

@@ -7,6 +7,7 @@ import fetch from 'node-fetch'
 import { createClient } from '@supabase/supabase-js'
 import { config } from '../config.js'
 import { logger } from './logger.js'
+import { loadStore, isSuppressed, verifyParks, earliestExpiry } from './feeVerified.js'
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -154,14 +155,24 @@ Based on the webpage content, respond with this exact JSON format:
 
 // ── Main fee check function ───────────────────────────────────────────────────
 
-export async function checkFees() {
+export async function checkFees({ force = false } = {}) {
   const parks = await fetchParksWithFees()
   logger.info(`Found ${parks.length} parks with entrance fees`)
 
   const automatable = parks.filter(p => !isBotProtected(p.website))
-  const manualReview = parks.filter(p => isBotProtected(p.website))
+  const allManual   = parks.filter(p => isBotProtected(p.website))
 
-  logger.info(`Automated check: ${automatable.length} parks | Manual review: ${manualReview.length} parks`)
+  // Filter manual review list against verification store
+  const store = loadStore()
+  const manualReview = allManual.filter(p => !isSuppressed(store, p.slug, p.entrance_fee, force))
+  const suppressedCount = allManual.length - manualReview.length
+  const nextReview = suppressedCount > 0 ? earliestExpiry(store, allManual) : null
+
+  if (suppressedCount > 0) {
+    logger.info(`Fee verification: ${suppressedCount} park(s) suppressed (verified within TTL)${nextReview ? ` — next review ${nextReview.toDateString()}` : ''}`)
+  }
+
+  logger.info(`Automated check: ${automatable.length} parks | Manual review: ${manualReview.length} active (${suppressedCount} suppressed)`)
 
   // ── Automated checks ────────────────────────────────────────────────────────
   const flagged = []
@@ -198,19 +209,46 @@ export async function checkFees() {
     flagged,
     checked,
     manualReview,
+    suppressedCount,
+    nextReview,
     automatedTotal: automatable.length,
-    manualTotal: manualReview.length,
+    manualTotal: allManual.length,
   }
+}
+
+// ── Mark all bot-protected parks as verified (called by --verify-fees) ────────
+
+export async function verifyAllFees() {
+  const parks = await fetchParksWithFees()
+  const allManual = parks.filter(p => isBotProtected(p.website))
+  verifyParks(allManual)
+  return allManual.length
 }
 
 // ── Build manual review section for email ────────────────────────────────────
 
-export function buildManualReviewList(manualReview) {
-  if (manualReview.length === 0) return ''
+export function buildManualReviewList(manualReview, suppressedCount = 0, nextReview = null) {
+  const hasSuppressed = suppressedCount > 0
+  const hasActive = manualReview.length > 0
 
-  const lines = manualReview.map(p =>
-    `${p.name}: ${p.entrance_fee}`
-  ).join('\n')
+  if (!hasActive && !hasSuppressed) return ''
 
-  return `\n\nMANUAL REVIEW REQUIRED (${manualReview.length} bot-protected parks):\n${lines}`
+  const sections = []
+
+  if (hasActive) {
+    const lines = manualReview.map(p => `  ${p.name}: ${p.entrance_fee}`).join('\n')
+    sections.push(
+      `MANUAL REVIEW REQUIRED (${manualReview.length} parks — fees unverified or TTL expired):\n${lines}`,
+      `  Once confirmed correct, run: node hermes/index.js --verify-fees`
+    )
+  }
+
+  if (hasSuppressed) {
+    const nextStr = nextReview
+      ? `next re-check ${nextReview.toDateString()}`
+      : `90-day TTL active`
+    sections.push(`  ✓ ${suppressedCount} park(s) suppressed — verified within TTL (${nextStr})`)
+  }
+
+  return '\n\n' + sections.join('\n')
 }

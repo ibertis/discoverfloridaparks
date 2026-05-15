@@ -26,7 +26,9 @@ export default function SiteFooter() {
         <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', color: '#726d6b', margin: 0, textAlign: 'center', lineHeight: 1.6 }}>
           Copyright © {new Date().getFullYear()} by{' '}
           <Link href="/" style={{ color: '#ff7044', fontWeight: 600 }}>Discover Florida Parks</Link>.{' '}
-          All Rights Reserved.
+          All Rights Reserved.{' '}
+          <span style={{ color: '#ddd8d0' }}>·</span>{' '}
+          <Link href="/privacy" style={{ color: '#a6967c', textDecoration: 'none' }} className="hover:text-[#ff7044] transition-colors">Privacy Policy</Link>
         </p>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
