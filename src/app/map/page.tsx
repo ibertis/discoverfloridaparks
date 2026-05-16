@@ -52,7 +52,7 @@ export default async function MapPage() {
       <SiteHeader />
 
       {/* Map — fills viewport below header */}
-      <div style={{ minHeight: 400 }} className="map-viewport">
+      <div className="map-viewport">
         <MapLoader parks={parks ?? []} />
       </div>
 
