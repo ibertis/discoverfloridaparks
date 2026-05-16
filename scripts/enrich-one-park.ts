@@ -96,6 +96,17 @@ interface AiParkContent {
   crowd_level: 'Low' | 'Moderate' | 'High';
   terrain: string;
   activity_types: string[];
+  // Core info fields
+  park_types: string[] | null;
+  park_size_acres: number | null;
+  year_established: number | null;
+  entrance_fee: string | null;
+  parking_info: string | null;
+  nearby_cities: string[] | null;
+  instagram_hashtag: string | null;
+  reservation_url: string | null;
+  camping_url: string | null;
+  safety_notes: string | null;
   amenities: {
     dog_friendly: boolean;
     camping_available: boolean;
@@ -143,7 +154,7 @@ Type: ${park.park_types?.join(', ') ?? 'Unknown'}
 City/Area: ${park.city ?? 'Florida'}
 Region: ${park.park_regions?.join(', ') ?? 'Florida'}
 
-Write ALL of the following fields. Be factual, specific, and engaging. Do not invent statistics.
+Write ALL of the following fields. Be factual, specific, and engaging. Do not invent statistics you are unsure of — use null for unknown numeric fields.
 
 Fields:
 - short_description: One sentence max 160 chars. Captures the park's defining character for a card subtitle.
@@ -152,11 +163,21 @@ Fields:
 - wildlife_summary: One paragraph on typical wildlife, ecosystems, and natural features.
 - seo_title: Max 60 chars. Format: "[Park Name] — [Key Feature] | Florida Parks". No | Discover Florida Parks suffix.
 - seo_description: 140–155 chars. Enticing summary for Google search results. Include 1–2 activities and location.
-- best_season: One of: "Year-Round" | "Spring" | "Fall & Winter" | "Winter" | "Summer" | "Spring & Fall"
-- typical_visit_duration: One of: "1–2 hours" | "Half day" | "Full day" | "Multiple days"
-- crowd_level: One of: "Low" | "Moderate" | "High"
+- best_season: One of these exact values (lowercase): "year_round" | "spring" | "fall_winter" | "winter" | "summer" | "spring_fall" | "fall"
+- typical_visit_duration: One of these exact values (lowercase): "quick_stop" | "half_day" | "full_day" | "weekend" | "multi_day"
+- crowd_level: One of these exact values (lowercase): "low" | "moderate" | "high" | "very_high"
 - terrain: Brief description of terrain type (e.g. "Flat pine flatwoods and cypress swamps", "Sandy beaches and coastal dunes")
 - activity_types: Array of relevant activities from this list ONLY: ${VALID_ACTIVITY_TYPES.join(', ')}
+- park_types: Array of applicable categories from this list ONLY: "National Parks", "State Parks", "National Wildlife Refuge", "County Parks", "Community Parks", "Theme Parks", "Water Parks", "National Estuarine Research Reserve", "Preserve", "Sanctuary", "State Forest"
+- park_size_acres: Integer. Approximate total acreage of the park. Use null if unknown.
+- year_established: Integer. Year the park was officially established or dedicated. Use null if unknown.
+- entrance_fee: String. E.g. "$6/vehicle", "$4/person (walk-in/bike-in)", "Free". Use null if unknown.
+- parking_info: String. Parking availability, cost, overflow lots, or special notes. 1–2 sentences.
+- nearby_cities: Array of 3–5 nearest significant cities/towns (closest first).
+- instagram_hashtag: The most common/official hashtag for this park without the # symbol (e.g. "HoneymoonIslandSP"). Use null if unsure.
+- reservation_url: Full URL for online reservations (camping, cabins, etc.) — typically reserveamerica.com or floridastateparks.reserveamerica.com. Use null if no reservations needed or unknown.
+- camping_url: Full URL specifically for camping reservations. Often same as reservation_url for state parks. Use null if no camping.
+- safety_notes: 1–2 sentences on park-specific safety (wildlife, water conditions, weather). Be specific to this park.
 - amenities: Object with boolean values for each amenity based on what this park realistically offers:
   dog_friendly, camping_available, swimming_allowed, fishing_allowed, boat_launch,
   picnic_areas, visitor_center, wheelchair_accessible, hiking_available, biking_available,
@@ -170,27 +191,37 @@ Respond ONLY with valid JSON matching this exact shape (no markdown, no extra ke
   "wildlife_summary": "...",
   "seo_title": "...",
   "seo_description": "...",
-  "best_season": "...",
-  "typical_visit_duration": "...",
-  "crowd_level": "...",
+  "best_season": "year_round",
+  "typical_visit_duration": "full_day",
+  "crowd_level": "moderate",
   "terrain": "...",
   "activity_types": [...],
+  "park_types": ["State Parks"],
+  "park_size_acres": 1234,
+  "year_established": 1985,
+  "entrance_fee": "$6/vehicle",
+  "parking_info": "...",
+  "nearby_cities": ["City1", "City2", "City3"],
+  "instagram_hashtag": "ParkNameSP",
+  "reservation_url": "https://...",
+  "camping_url": "https://...",
+  "safety_notes": "...",
   "amenities": {
-    "dog_friendly": true/false,
-    "camping_available": true/false,
-    "swimming_allowed": true/false,
-    "fishing_allowed": true/false,
-    "boat_launch": true/false,
-    "picnic_areas": true/false,
-    "visitor_center": true/false,
-    "wheelchair_accessible": true/false,
-    "hiking_available": true/false,
-    "biking_available": true/false,
-    "horseback_riding": true/false,
-    "hunting_allowed": true/false,
-    "paddling_available": true/false,
-    "wildlife_viewing": true/false,
-    "beach_access": true/false
+    "dog_friendly": true,
+    "camping_available": true,
+    "swimming_allowed": true,
+    "fishing_allowed": true,
+    "boat_launch": true,
+    "picnic_areas": true,
+    "visitor_center": true,
+    "wheelchair_accessible": true,
+    "hiking_available": true,
+    "biking_available": true,
+    "horseback_riding": true,
+    "hunting_allowed": true,
+    "paddling_available": true,
+    "wildlife_viewing": true,
+    "beach_access": true
   }
 }`;
 
@@ -389,6 +420,7 @@ export async function enrichPark(slug: string, opts: EnrichOptions = {}): Promis
         placeData = {
           address: details.address || null,
           city: details.city || null,
+          county: details.county || null,
           zip_code: details.zipCode || null,
           phone: details.phone,
           website: details.website,
@@ -445,11 +477,29 @@ export async function enrichPark(slug: string, opts: EnrichOptions = {}): Promis
     }
   }
 
-  // ── Step 4a: Auto-assign regions from coordinates ────────────────────────
+  // ── Step 4a: Auto-assign regions and calculate distances from coordinates ─
   const resolvedLat = (placeData.latitude as number | null) ?? existing?.latitude ?? null;
   const resolvedLng = (placeData.longitude as number | null) ?? existing?.longitude ?? null;
   const autoRegions = (resolvedLat && resolvedLng) ? getRegionsForCoords(resolvedLat, resolvedLng) : [];
   const autoAgency = getManagingAgency(existing?.park_types ?? null, slug);
+
+  // Auto-calculate distances to major Florida cities (miles) and google_maps_link
+  const MIAMI    = { lat: 25.7617, lng: -80.1918 };
+  const ORLANDO  = { lat: 28.5383, lng: -81.3792 };
+  const TAMPA    = { lat: 27.9506, lng: -82.4572 };
+
+  let autoDistMiami: number | null = null;
+  let autoDistOrlando: number | null = null;
+  let autoDistTampa: number | null = null;
+  let autoGoogleMapsLink: string | null = null;
+
+  if (resolvedLat && resolvedLng) {
+    autoDistMiami   = Math.round(haversineDistance(resolvedLat, resolvedLng, MIAMI.lat,   MIAMI.lng)   * 0.621371);
+    autoDistOrlando = Math.round(haversineDistance(resolvedLat, resolvedLng, ORLANDO.lat, ORLANDO.lng) * 0.621371);
+    autoDistTampa   = Math.round(haversineDistance(resolvedLat, resolvedLng, TAMPA.lat,   TAMPA.lng)   * 0.621371);
+    autoGoogleMapsLink = `https://www.google.com/maps/search/?api=1&query=${resolvedLat},${resolvedLng}`;
+    console.log(`  ${c.green}Distances — Miami: ${autoDistMiami}mi, Orlando: ${autoDistOrlando}mi, Tampa: ${autoDistTampa}mi${c.reset}`);
+  }
 
   if (autoRegions.length) {
     console.log(`  ${c.green}Auto-regions: ${autoRegions.join(', ')}${c.reset}`);
@@ -475,34 +525,56 @@ export async function enrichPark(slug: string, opts: EnrichOptions = {}): Promis
       slug,
     });
     if (aiResult) {
-      const { amenities, activity_types, ...rest } = aiResult;
+      const { amenities, activity_types, park_types: parkTypesFromAi, ...rest } = aiResult;
       aiData = rest;
       amenitiesFromAi = amenities ?? null;
       activityTypesFromAi = activity_types ?? null;
+      if (parkTypesFromAi?.length) aiData.park_types = parkTypesFromAi;
       console.log(`  ${c.green}AI content generated${c.reset}`);
       if (activity_types?.length) {
         console.log(`  ${c.gray}Activity types: ${activity_types.join(', ')}${c.reset}`);
+      }
+      if (parkTypesFromAi?.length) {
+        console.log(`  ${c.gray}Park types: ${parkTypesFromAi.join(', ')}${c.reset}`);
+      }
+      const restAny = rest as Record<string, unknown>;
+      const coreInfoFilled = ['park_size_acres','year_established','entrance_fee','nearby_cities','instagram_hashtag']
+        .filter(k => restAny[k] !== null && restAny[k] !== undefined && restAny[k] !== '');
+      if (coreInfoFilled.length) {
+        console.log(`  ${c.gray}Core info: ${coreInfoFilled.join(', ')}${c.reset}`);
       }
     }
   }
 
   // ── Step 5: Merge & diff ──────────────────────────────────────────────────
+  // NPS and Google Places are authoritative over AI for overlapping fields
+  const mergedAiData = { ...aiData };
+  if (npsData.entrance_fee) delete mergedAiData.entrance_fee;
+  if (npsData.operating_hours || placeData.operating_hours) delete mergedAiData.operating_hours;
+
   const collected: Record<string, unknown> = {
     slug,
     name: parkDisplayName,
+    ...mergedAiData,
     ...placeData,
     ...npsData,
-    ...aiData,
     ...(autoRegions.length ? { park_regions: autoRegions } : {}),
     ...(autoAgency ? { managing_agency: autoAgency } : {}),
     ...(activityTypesFromAi?.length ? { activity_types: activityTypesFromAi } : {}),
+    ...(autoDistMiami   !== null ? { distance_from_miami:   autoDistMiami }   : {}),
+    ...(autoDistOrlando !== null ? { distance_from_orlando: autoDistOrlando } : {}),
+    ...(autoDistTampa   !== null ? { distance_from_tampa:   autoDistTampa }   : {}),
+    ...(autoGoogleMapsLink      ? { google_maps_link: autoGoogleMapsLink }    : {}),
   };
 
   const toApply: Record<string, unknown> = {};
 
+  // Always recalculate these deterministic fields from coordinates
+  const alwaysOverwrite = new Set(['distance_from_miami', 'distance_from_orlando', 'distance_from_tampa', 'google_maps_link']);
+
   for (const [key, value] of Object.entries(collected)) {
     if (value === null || value === undefined || value === '') continue;
-    if (!isNew) {
+    if (!isNew && !alwaysOverwrite.has(key)) {
       const currentVal = existing[key];
       const isEmpty = currentVal === null || currentVal === undefined || currentVal === '' ||
         (['latitude', 'longitude'].includes(key) && currentVal === 0);

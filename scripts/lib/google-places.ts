@@ -12,6 +12,7 @@ export interface PlaceResult {
   formattedAddress: string;
   address: string;
   city: string;
+  county: string | null;
   zipCode: string;
   phone: string | null;
   website: string | null;
@@ -60,6 +61,8 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceResult | nu
   const city = addrComponents.find((c: any) => c.types.includes('locality'))?.long_name
     ?? addrComponents.find((c: any) => c.types.includes('administrative_area_level_2'))?.long_name
     ?? '';
+  const countyRaw = addrComponents.find((c: any) => c.types.includes('administrative_area_level_2'))?.long_name ?? null;
+  const county = countyRaw ? countyRaw.replace(/ County$/i, '') : null;
   const zip = addrComponents.find((c: any) => c.types.includes('postal_code'))?.long_name ?? '';
 
   // Build a street address (street number + route)
@@ -81,6 +84,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceResult | nu
     formattedAddress: r.formatted_address ?? '',
     address,
     city,
+    county,
     zipCode: zip,
     phone: r.formatted_phone_number ?? null,
     website: r.website ?? null,

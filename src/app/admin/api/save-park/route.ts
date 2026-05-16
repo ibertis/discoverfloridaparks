@@ -23,11 +23,11 @@ export async function POST(req: NextRequest) {
 
   if (park.id) {
     const { error } = await db.from('parks').update(payload).eq('id', park.id);
-    if (error) { console.error('save-park update:', error.message); return NextResponse.json({ error: 'Failed to save park.' }, { status: 500 }); }
+    if (error) { console.error('save-park update:', error.message, error.details, error.hint); return NextResponse.json({ error: error.message }, { status: 500 }); }
     parkId = park.id;
   } else {
     const { data, error } = await db.from('parks').insert(payload).select('id').single();
-    if (error) { console.error('save-park insert:', error.message); return NextResponse.json({ error: 'Failed to save park.' }, { status: 500 }); }
+    if (error) { console.error('save-park insert:', error.message, error.details, error.hint); return NextResponse.json({ error: error.message }, { status: 500 }); }
     parkId = data.id;
   }
 

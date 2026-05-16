@@ -3,9 +3,12 @@
  *
  * Runs enrichPark() on a list of slugs sequentially.
  * Usage:
- *   npx tsx scripts/batch-enrich.ts                     # enriches parks with missing data
- *   npx tsx scripts/batch-enrich.ts --overwrite         # re-enriches all fields
- *   npx tsx scripts/batch-enrich.ts --slugs a,b,c       # explicit slug list
+ *   npx tsx scripts/batch-enrich.ts                          # parks missing core data (regions, activities, SEO)
+ *   npx tsx scripts/batch-enrich.ts --core-info              # parks missing core info (county, size, distances, etc.)
+ *   npx tsx scripts/batch-enrich.ts --all                    # all 300 parks (overwrite mode)
+ *   npx tsx scripts/batch-enrich.ts --overwrite              # re-enriches all fields for default target set
+ *   npx tsx scripts/batch-enrich.ts --slugs a,b,c            # explicit slug list
+ *   npx tsx scripts/batch-enrich.ts --no-photo               # skip photo uploads
  */
 
 import * as dotenv from 'dotenv';
@@ -16,9 +19,11 @@ import { supabaseAdmin } from './lib/supabase-admin.js';
 import { enrichPark } from './enrich-one-park.js';
 
 const args = process.argv.slice(2);
-const overwrite = args.includes('--overwrite');
-const slugsArg = args.find(a => a.startsWith('--slugs='))?.replace('--slugs=', '');
-const noPhoto = args.includes('--no-photo');
+const overwrite = args.includes('--overwrite') || args.includes('--all');
+const allParks  = args.includes('--all');
+const coreInfo  = args.includes('--core-info');
+const slugsArg  = args.find(a => a.startsWith('--slugs='))?.replace('--slugs=', '');
+const noPhoto   = args.includes('--no-photo');
 
 async function getIncompleteParks(): Promise<string[]> {
   const since = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
@@ -34,12 +39,50 @@ async function getIncompleteParks(): Promise<string[]> {
     .map(p => p.slug);
 }
 
+async function getCoreInfoParks(): Promise<string[]> {
+  // Parks missing any of the key core info fields
+  const { data, error } = await supabaseAdmin
+    .from('parks')
+    .select('slug, county, park_size_acres, year_established, google_maps_link, distance_from_miami, nearby_cities, instagram_hashtag')
+    .order('name', { ascending: true });
+
+  if (error) throw new Error(`DB query failed: ${error.message}`);
+  return (data ?? [])
+    .filter(p =>
+      !p.county ||
+      !p.park_size_acres ||
+      !p.year_established ||
+      !p.google_maps_link ||
+      !p.distance_from_miami ||
+      !p.nearby_cities?.length ||
+      !p.instagram_hashtag
+    )
+    .map(p => p.slug);
+}
+
+async function getAllParks(): Promise<string[]> {
+  const { data, error } = await supabaseAdmin
+    .from('parks')
+    .select('slug')
+    .order('name', { ascending: true });
+  if (error) throw new Error(`DB query failed: ${error.message}`);
+  return (data ?? []).map(p => p.slug);
+}
+
 async function main() {
   let slugs: string[];
 
   if (slugsArg) {
     slugs = slugsArg.split(',').map(s => s.trim()).filter(Boolean);
     console.log(`Running on ${slugs.length} explicit slug(s)…\n`);
+  } else if (allParks) {
+    console.log('Fetching all 300 parks (--all mode, overwrite enabled)…');
+    slugs = await getAllParks();
+    console.log(`Found ${slugs.length} parks.\n`);
+  } else if (coreInfo) {
+    console.log('Fetching parks missing core info (county, size, distances, etc.)…');
+    slugs = await getCoreInfoParks();
+    console.log(`Found ${slugs.length} parks needing core info enrichment.\n`);
   } else {
     console.log('Fetching incomplete parks from last 10 days…');
     slugs = await getIncompleteParks();
