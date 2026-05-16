@@ -19,6 +19,12 @@ export const config = {
       'miramarparks.com',
       'booking.com',
       'viator.com',
+      // Government sites that block automated requests (confirmed valid for human visitors)
+      'fortlauderdale.gov',
+      'westonfl.org',
+      'plantation.org',
+      'sarasotacountyparks.com',
+      'sunrisefl.gov',
     ],
   },
 
