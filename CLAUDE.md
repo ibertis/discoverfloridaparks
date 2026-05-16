@@ -217,7 +217,15 @@ supabase/
 docs/
 └── experiences-system-as-built.md        # Reference doc: divergences from original design, actual schemas, full region list, RPC signature
 scripts/
-└── enrich-one-park.ts                     # CLI: enrich a park with Google Places + AI content
+├── enrich-one-park.ts                     # CLI: enrich a park with Google Places + NPS + Claude Sonnet AI
+├── batch-enrich.ts                        # Bulk enrichment runner for multiple parks
+├── lib/
+│   ├── google-places.ts                   # findPark() + getPlaceDetails() — returns PlaceResult incl. reviewCount, types
+│   ├── nps-api.ts                         # fetchFloridaNpsParks() — NPS entrance fees + hours
+│   └── supabase-admin.ts                  # Service-role Supabase client for scripts
+└── utils/
+    ├── florida-regions.ts                 # getRegionsForCoords(lat,lng) + getManagingAgency(types,slug)
+    └── geo.ts                             # haversineDistance(), getSearchRadius(), MAX_FALLBACK_RADIUS
 
 public/
 ├── downloads/                             # Gated PDF assets (e.g. 2026-florida-travel-trends.pdf)
@@ -457,34 +465,29 @@ The GRANT section at the bottom of `rls.sql` covers all existing tables and serv
 - Affiliate links — Booking.com `aid=`/`label=` + Viator `pid=`/`mcid=` params
 - Entrance fees — AI-powered change detection against stored `entrance_fee` values
 - Gear links — all REI + Amazon URLs from `src/lib/gear.ts` (404s only — bot-blocks ignored)
-- Hotel proximity — detects `park_hotels` rows where `distance_from_park_km` is NULL or >50km (cap matches `fix-hotels-bulk.ts` max search radius), then auto-fixes by re-running Google Places nearbysearch for those parks
-- **Pending additions** (not yet implemented):
-  - Zero-hotel parks — flag parks that have had 0 `park_hotels` rows for >3 days (indicates enrichment failed or all entries were deleted); prompt for re-enrichment via `fix-hotels-bulk.ts`
-  - Hotel quality check — run `audit-hotels.ts` REMOVE-bucket patterns daily; flag any new junk entries (airboat tours, visitor centres, government camps) that slipped through enrichment
+- Hotel proximity — detects `park_hotels` rows where `distance_from_park_km` is NULL or >50km, then auto-fixes via Google Places nearbysearch
+- Hotel coverage — finds parks with 0 hotel rows and auto-enriches them
+- Hotel quality — flags junk entries (airboat tours, visitor centres, gov camps) that slipped through enrichment
+- New parks — detects parks added in the last 24 hours with missing enrichment; auto-runs `onboard-park.ts` for each
 
-**Email report:** Sent to `gabriel@discoverfloridaparks.com`
+**AI analysis:** Claude Haiku 4.5 via Anthropic API (`ANTHROPIC_API_KEY` in `hermes/.env`). No local model required — Hermes runs fully unattended.
+
+**Email delivery:** Resend SDK — sends from `hermes@discoverfloridaparks.com` to `gabriel@discoverfloridaparks.com`. Configured via `RESEND_API_KEY` in `hermes/.env`. No Gmail/SMTP credentials needed.
 
 **Manual run:**
 ```bash
 cd /Users/gabrielibertis/Sites/discoverfloridaparks/hermes
-node index.js --dry-run   # test run, no email sent
+node index.js --dry-run   # check only, no email sent
 node index.js             # full run, sends email report
+node index.js --force     # force re-check all fees (ignores TTL cache)
 ```
 
-**Requires LM Studio running** at `http://localhost:1234` before execution.
-
----
-
-## LM Studio
-
-**Model:** `meta-llama-3.1-8b-instruct` (Q4_K_M, 4.92 GB)
-**API endpoint:** `http://localhost:1234`
-**Purpose:** Powers Hermes alert analysis and fee change detection
-
-Start before running Hermes:
-1. Open LM Studio
-2. Developer → Start Server
-3. Confirm status shows Running at `http://127.0.0.1:1234`
+**`hermes/.env` keys** (never use Read tool on this file — grep for key names only):
+- `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- `RESEND_API_KEY`
+- `ANTHROPIC_API_KEY`
+- `GOOGLE_PLACES_API_KEY`
+- `ALERT_EMAIL`
 
 ---
 
@@ -501,11 +504,13 @@ All scripts run with `npx tsx <script>` from the project root. They load `.env.l
 | Script | Usage | Description |
 |---|---|---|
 | `scripts/onboard-park.ts` | `npx tsx scripts/onboard-park.ts --slug <slug>` | **One-command onboarding**: chains enrichment → validation → hotel proximity fix. Stops on blocker checks. Prints manual review list for warnings. |
-| `scripts/enrich-one-park.ts` | `npx tsx scripts/enrich-one-park.ts "Park Name" [--no-ai] [--no-photo] [--overwrite] [--auto]` | Enriches a park with Google Places + NPS API + AI content. Exports `enrichPark(slug, opts)` for programmatic use (used by onboard-park.ts). |
+| `scripts/enrich-one-park.ts` | `npx tsx scripts/enrich-one-park.ts "Park Name" [--no-ai] [--no-photo] [--overwrite] [--auto]` | Enriches a park with Google Places + NPS API + Claude Sonnet AI. Auto-assigns `park_regions` from lat/lng, `managing_agency` from park type/slug, `activity_types` and full amenities via AI. Upserts `park_amenities` row. Exports `enrichPark(slug, opts)`. |
+| `scripts/batch-enrich.ts` | `npx tsx scripts/batch-enrich.ts [--overwrite] [--slugs=a,b,c]` | Runs `enrichPark()` on all recently added parks with missing data, or on an explicit comma-separated slug list. Reports successes/failures with re-run command. |
 | `scripts/validate-park.ts` | `npx tsx scripts/validate-park.ts <slug>` | Runs 9 correctness checks: park exists, has GPS, descriptions, featured image, park_regions, amenities row, hotels, no null distances, no hotels >30km. Exits 1 on blocker failure. Exports `validatePark(slug)`. |
 | `scripts/fix-hotel-proximity.ts` | `npx tsx scripts/fix-hotel-proximity.ts [--dry-run] [--slug <slug>]` | Finds parks where hotel `distance_from_park_km` is NULL or >30km, then re-runs Google Places nearbysearch + Booking.com link rebuild. Exports `fixHotelProximityForPark(slug)`. |
 | `scripts/fix-hotels-bulk.ts` | `npx tsx scripts/fix-hotels-bulk.ts [--dry-run]` | Finds all parks with 0 `park_hotels` rows and runs the hotel enrichment pipeline for each. Uses multi-step radius expansion (12 → 25 → 50km) and the `isLikelyHotel()` quality filter. |
 | `scripts/audit-hotels.ts` | `npx tsx scripts/audit-hotels.ts [--delete-remove] [--delete-all]` | Scans all `park_hotels` rows and categorises them: **REMOVE** (clearly not lodging), **REVIEW** (outdoor accommodation — RV parks, campgrounds), **KEEP** (hotels). Dry-run by default; writes `scripts/data/hotel-audit.json`. |
+| `scripts/utils/florida-regions.ts` | (imported by `enrich-one-park.ts`) | `getRegionsForCoords(lat, lng)` — maps coordinates to `park_regions` canonical strings via bounding boxes. `getManagingAgency(parkTypes, slug)` — infers managing agency from park type / slug pattern. |
 
 **Programmatic exports** (used by `onboard-park.ts`):
 - `enrichPark(slug, { displayName?, noAi?, noPhoto?, overwrite?, autoApply? })` — `autoApply: true` skips the interactive y/n prompt
@@ -632,7 +637,20 @@ When in doubt, less is more. A page that feels editorial ranks better and conver
 
 ### Admin API Routes
 - Every admin API route must call `getAdminUser()` and return 401 before any DB work
+- DELETE handlers must also verify `getUserRole(user) === 'admin'` — editors cannot delete
 - Never expose service-role keys to the browser
+
+### Public API Routes — Rate Limiting
+All public-facing POST endpoints have in-memory IP-based rate limiting. Maintain this on any new routes:
+- `/api/contact` — 5 requests/hour/IP
+- `/api/download-signup` — 3 requests/hour/IP
+- `/api/subscribe` — 3 requests/hour/IP
+- `/api/revalidate-parks` — 30 requests/minute/IP (also requires `x-revalidate-secret` header)
+
+### Environment Variable Rules
+- **Never prefix secrets with `NEXT_PUBLIC_`** — anything with that prefix is bundled into client-side JavaScript. Only truly public values (Supabase URL, anon key, Mapbox token, GA ID, AdSense IDs) belong there.
+- `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_PLACES_API_KEY`, `REVALIDATE_SECRET`, `SANITY_PREVIEW_SECRET`, `SANITY_API_READ_TOKEN` — server-side only, never `NEXT_PUBLIC_`.
+- `.env.local` and `hermes/.env` are both gitignored. **Never use the Read tool or `cat` on env files** — this exposes secrets in conversation context. To inspect: `grep -o '^[^=]*' .env` (key names only) or `grep '^SPECIFIC_VAR_NAME=' .env` for a known non-secret value.
 
 ### Ongoing Audits
 - Check Supabase **Security Advisor** periodically — at minimum when adding new tables
