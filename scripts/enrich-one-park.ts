@@ -28,6 +28,7 @@ import { supabaseAdmin } from './lib/supabase-admin.js';
 import { findPark, getPlaceDetails } from './lib/google-places.js';
 import { fetchFloridaNpsParks } from './lib/nps-api.js';
 import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
+import { getRegionsForCoords, getManagingAgency } from './utils/florida-regions.js';
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
 
@@ -83,33 +84,114 @@ async function uploadPhotoToStorage(photoUrl: string, slug: string): Promise<str
   }
 }
 
-async function generateParkContent(park: { name: string; park_types?: string[] | null; city?: string | null; park_region?: string | null }) {
+interface AiParkContent {
+  short_description: string;
+  full_description: string;
+  visitor_tips: string;
+  wildlife_summary: string;
+  seo_title: string;
+  seo_description: string;
+  best_season: string;
+  typical_visit_duration: string;
+  crowd_level: 'Low' | 'Moderate' | 'High';
+  terrain: string;
+  activity_types: string[];
+  amenities: {
+    dog_friendly: boolean;
+    camping_available: boolean;
+    swimming_allowed: boolean;
+    fishing_allowed: boolean;
+    boat_launch: boolean;
+    picnic_areas: boolean;
+    visitor_center: boolean;
+    wheelchair_accessible: boolean;
+    hiking_available: boolean;
+    biking_available: boolean;
+    horseback_riding: boolean;
+    hunting_allowed: boolean;
+    paddling_available: boolean;
+    wildlife_viewing: boolean;
+    beach_access: boolean;
+  };
+}
+
+async function generateParkContent(park: {
+  name: string;
+  park_types?: string[] | null;
+  city?: string | null;
+  park_regions?: string[] | null;
+  slug?: string;
+}): Promise<AiParkContent | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     console.warn(`  ${c.yellow}Skipping AI content — ANTHROPIC_API_KEY not set${c.reset}`);
     return null;
   }
 
-  const promptText = `You are writing concise, accurate content for a Florida parks directory website.
+  const VALID_ACTIVITY_TYPES = [
+    'Hiking & Walking', 'Camping', 'Swimming', 'Fishing', 'Paddling & Kayaking',
+    'Boating', 'Wildlife & Eco Tours', 'Birding', 'Photography & Birding Tours',
+    'Snorkeling & Diving', 'Biking', 'Horseback Riding', 'Hunting',
+    'Beach & Water Recreation', 'Picnicking & Day Use', 'Visitor Center & Education',
+    'Manatee Encounters', 'Sunset & Scenic Cruises',
+  ];
+
+  const promptText = `You are a Florida parks expert writing rich, accurate content for discoverfloridaparks.com.
 
 Park: ${park.name}
 Type: ${park.park_types?.join(', ') ?? 'Unknown'}
 City/Area: ${park.city ?? 'Florida'}
-Region: ${park.park_region ?? 'Florida'}
+Region: ${park.park_regions?.join(', ') ?? 'Florida'}
 
-Write the following. Be factual, engaging, and specific to this park. Do not invent specific statistics.
+Write ALL of the following fields. Be factual, specific, and engaging. Do not invent statistics.
 
-1. short_description: One sentence, max 160 characters, suitable for a card subtitle.
-2. full_description: 3–4 paragraphs covering the park's character, highlights, what visitors can do, and why it's worth visiting. Plain text, no markdown.
-3. visitor_tips: 3–5 practical tips for visiting (best time, parking, what to bring, etc.). Plain text bullet points starting with "•".
-4. wildlife_summary: One paragraph describing typical wildlife and natural features. Plain text.
+Fields:
+- short_description: One sentence max 160 chars. Captures the park's defining character for a card subtitle.
+- full_description: 3–4 paragraphs. Cover the park's character, standout features, activities, and why it's worth visiting. Plain text, no markdown.
+- visitor_tips: 3–5 practical tips (best time, parking, what to bring, hidden gems). Bullet points starting with "•".
+- wildlife_summary: One paragraph on typical wildlife, ecosystems, and natural features.
+- seo_title: Max 60 chars. Format: "[Park Name] — [Key Feature] | Florida Parks". No | Discover Florida Parks suffix.
+- seo_description: 140–155 chars. Enticing summary for Google search results. Include 1–2 activities and location.
+- best_season: One of: "Year-Round" | "Spring" | "Fall & Winter" | "Winter" | "Summer" | "Spring & Fall"
+- typical_visit_duration: One of: "1–2 hours" | "Half day" | "Full day" | "Multiple days"
+- crowd_level: One of: "Low" | "Moderate" | "High"
+- terrain: Brief description of terrain type (e.g. "Flat pine flatwoods and cypress swamps", "Sandy beaches and coastal dunes")
+- activity_types: Array of relevant activities from this list ONLY: ${VALID_ACTIVITY_TYPES.join(', ')}
+- amenities: Object with boolean values for each amenity based on what this park realistically offers:
+  dog_friendly, camping_available, swimming_allowed, fishing_allowed, boat_launch,
+  picnic_areas, visitor_center, wheelchair_accessible, hiking_available, biking_available,
+  horseback_riding, hunting_allowed, paddling_available, wildlife_viewing, beach_access
 
-Respond ONLY with valid JSON in this exact shape:
+Respond ONLY with valid JSON matching this exact shape (no markdown, no extra keys):
 {
   "short_description": "...",
   "full_description": "...",
   "visitor_tips": "...",
-  "wildlife_summary": "..."
+  "wildlife_summary": "...",
+  "seo_title": "...",
+  "seo_description": "...",
+  "best_season": "...",
+  "typical_visit_duration": "...",
+  "crowd_level": "...",
+  "terrain": "...",
+  "activity_types": [...],
+  "amenities": {
+    "dog_friendly": true/false,
+    "camping_available": true/false,
+    "swimming_allowed": true/false,
+    "fishing_allowed": true/false,
+    "boat_launch": true/false,
+    "picnic_areas": true/false,
+    "visitor_center": true/false,
+    "wheelchair_accessible": true/false,
+    "hiking_available": true/false,
+    "biking_available": true/false,
+    "horseback_riding": true/false,
+    "hunting_allowed": true/false,
+    "paddling_available": true/false,
+    "wildlife_viewing": true/false,
+    "beach_access": true/false
+  }
 }`;
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -120,8 +202,8 @@ Respond ONLY with valid JSON in this exact shape:
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5',
-      max_tokens: 1024,
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2048,
       messages: [{ role: 'user', content: promptText }],
     }),
   });
@@ -138,14 +220,9 @@ Respond ONLY with valid JSON in this exact shape:
 
   try {
     const clean = text.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim();
-    return JSON.parse(clean) as {
-      short_description: string;
-      full_description: string;
-      visitor_tips: string;
-      wildlife_summary: string;
-    };
+    return JSON.parse(clean) as AiParkContent;
   } catch {
-    console.warn(`  ${c.yellow}Failed to parse AI response: ${text.slice(0, 120)}${c.reset}`);
+    console.warn(`  ${c.yellow}Failed to parse AI response: ${text.slice(0, 200)}${c.reset}`);
     return null;
   }
 }
@@ -314,6 +391,7 @@ export async function enrichPark(slug: string, opts: EnrichOptions = {}): Promis
           phone: details.phone,
           website: details.website,
           google_rating: details.rating,
+          google_review_count: details.reviewCount,
           operating_hours: details.operatingHours,
           latitude: details.lat,
           longitude: details.lng,
@@ -365,9 +443,24 @@ export async function enrichPark(slug: string, opts: EnrichOptions = {}): Promis
     }
   }
 
-  // ── Step 4: AI content ────────────────────────────────────────────────────
-  console.log(`\n${c.bold}[3/3] AI content generation…${c.reset}`);
+  // ── Step 4a: Auto-assign regions from coordinates ────────────────────────
+  const resolvedLat = (placeData.latitude as number | null) ?? existing?.latitude ?? null;
+  const resolvedLng = (placeData.longitude as number | null) ?? existing?.longitude ?? null;
+  const autoRegions = (resolvedLat && resolvedLng) ? getRegionsForCoords(resolvedLat, resolvedLng) : [];
+  const autoAgency = getManagingAgency(existing?.park_types ?? null, slug);
+
+  if (autoRegions.length) {
+    console.log(`  ${c.green}Auto-regions: ${autoRegions.join(', ')}${c.reset}`);
+  }
+  if (autoAgency) {
+    console.log(`  ${c.green}Managing agency: ${autoAgency}${c.reset}`);
+  }
+
+  // ── Step 4b: AI content ───────────────────────────────────────────────────
+  console.log(`\n${c.bold}[3/3] AI content generation (Claude Sonnet)…${c.reset}`);
   let aiData: Record<string, unknown> = {};
+  let amenitiesFromAi: AiParkContent['amenities'] | null = null;
+  let activityTypesFromAi: string[] | null = null;
 
   if (noAi) {
     console.log(`  ${c.gray}Skipped (--no-ai)${c.reset}`);
@@ -376,11 +469,18 @@ export async function enrichPark(slug: string, opts: EnrichOptions = {}): Promis
       name: parkDisplayName,
       park_types: existing?.park_types ?? null,
       city: (placeData.city as string) ?? existing?.city ?? null,
-      park_region: existing?.park_region ?? null,
+      park_regions: autoRegions.length ? autoRegions : (existing?.park_regions ?? null),
+      slug,
     });
     if (aiResult) {
-      aiData = aiResult;
+      const { amenities, activity_types, ...rest } = aiResult;
+      aiData = rest;
+      amenitiesFromAi = amenities ?? null;
+      activityTypesFromAi = activity_types ?? null;
       console.log(`  ${c.green}AI content generated${c.reset}`);
+      if (activity_types?.length) {
+        console.log(`  ${c.gray}Activity types: ${activity_types.join(', ')}${c.reset}`);
+      }
     }
   }
 
@@ -391,6 +491,9 @@ export async function enrichPark(slug: string, opts: EnrichOptions = {}): Promis
     ...placeData,
     ...npsData,
     ...aiData,
+    ...(autoRegions.length ? { park_regions: autoRegions } : {}),
+    ...(autoAgency ? { managing_agency: autoAgency } : {}),
+    ...(activityTypesFromAi?.length ? { activity_types: activityTypesFromAi } : {}),
   };
 
   const toApply: Record<string, unknown> = {};
@@ -453,7 +556,27 @@ export async function enrichPark(slug: string, opts: EnrichOptions = {}): Promis
     }
   }
 
-  // ── Step 8: Hotel enrichment ──────────────────────────────────────────────
+  // ── Step 8: Amenities row ─────────────────────────────────────────────────
+  if (amenitiesFromAi) {
+    console.log(`\n${c.bold}[Amenities]${c.reset}`);
+    const { data: parkRecord } = await supabaseAdmin
+      .from('parks').select('id').eq('slug', slug).single();
+    if (parkRecord) {
+      const amenityRow = { park_id: parkRecord.id, ...amenitiesFromAi };
+      const { error: upsertErr } = await supabaseAdmin
+        .from('park_amenities')
+        .upsert(amenityRow, { onConflict: 'park_id' });
+      if (upsertErr) {
+        console.warn(`  ${c.yellow}Amenities upsert failed: ${upsertErr.message}${c.reset}`);
+      } else {
+        const trueKeys = Object.entries(amenitiesFromAi)
+          .filter(([, v]) => v).map(([k]) => k);
+        console.log(`  ${c.green}Amenities saved — ${trueKeys.length} features: ${trueKeys.join(', ')}${c.reset}`);
+      }
+    }
+  }
+
+  // ── Step 9: Hotel enrichment ──────────────────────────────────────────────
   console.log(`\n${c.bold}[Hotel enrichment]${c.reset}`);
   const { data: enrichParkRecord } = await supabaseAdmin
     .from('parks')

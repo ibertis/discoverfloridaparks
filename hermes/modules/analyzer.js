@@ -1,14 +1,13 @@
-// modules/analyzer.js — Send failed URLs to LM Studio for AI analysis
+// modules/analyzer.js — Send failed URLs to Claude for AI analysis
 import fetch from 'node-fetch'
 import { config } from '../config.js'
 import { logger } from './logger.js'
 
 /**
- * Send failed URLs to LM Studio and get a formatted alert summary back.
- * Falls back to a plain summary if LM Studio is unavailable.
+ * Send failed URLs to Claude Haiku and get a formatted alert summary back.
+ * Falls back to a plain summary if the API is unavailable.
  */
 export async function analyzeFailures(failed, totalChecked) {
-  // If nothing failed, return clean bill of health
   if (failed.length === 0) {
     return {
       summary: `✅ All ${totalChecked} URLs are healthy. No action required.`,
@@ -18,44 +17,42 @@ export async function analyzeFailures(failed, totalChecked) {
 
   const prompt = buildPrompt(failed, totalChecked)
 
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) {
+    logger.warn('ANTHROPIC_API_KEY not set — using fallback summary')
+    return { summary: buildFallbackSummary(failed, totalChecked), aiGenerated: false }
+  }
+
   try {
-    const response = await fetch(`${process.env.LM_STUDIO_URL}/v1/chat/completions`, {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
       body: JSON.stringify({
-        model: process.env.LM_STUDIO_MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: `You are Hermes, a URL monitoring assistant for Discover Florida Parks (discoverfloridaparks.com). 
-You analyze broken URLs and produce clear, actionable alert reports.
+        model: 'claude-haiku-4-5',
+        max_tokens: config.ai.maxTokens,
+        system: `You are Hermes, a site-health monitoring assistant for Discover Florida Parks (discoverfloridaparks.com).
+You analyze broken URLs, fee changes, and affiliate issues and produce clear, actionable alert reports.
 Always respond in plain text — no markdown, no bullet symbols, just clean readable text.
 Be concise and direct. Prioritize by severity.`,
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        max_tokens: config.ai.maxTokens,
-        temperature: config.ai.temperature,
+        messages: [{ role: 'user', content: prompt }],
       }),
     })
 
     const data = await response.json()
-    const summary = data.choices?.[0]?.message?.content?.trim()
+    const summary = data.content?.[0]?.text?.trim()
 
-    if (!summary) throw new Error('Empty response from LM Studio')
+    if (!summary) throw new Error(`Empty response — ${JSON.stringify(data).slice(0, 120)}`)
 
-    logger.info('AI analysis complete')
+    logger.info('Claude analysis complete')
     return { summary, aiGenerated: true }
 
   } catch (err) {
-    logger.warn(`LM Studio unavailable, using fallback summary: ${err.message}`)
-    return {
-      summary: buildFallbackSummary(failed, totalChecked),
-      aiGenerated: false,
-    }
+    logger.warn(`Claude API unavailable, using fallback summary: ${err.message}`)
+    return { summary: buildFallbackSummary(failed, totalChecked), aiGenerated: false }
   }
 }
 

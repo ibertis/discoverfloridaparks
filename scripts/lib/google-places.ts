@@ -16,10 +16,12 @@ export interface PlaceResult {
   phone: string | null;
   website: string | null;
   rating: number | null;
+  reviewCount: number | null;
   operatingHours: string | null;
   photoUrl: string | null;
   lat: number | null;
   lng: number | null;
+  types: string[];
 }
 
 function sleep(ms: number) {
@@ -44,8 +46,8 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceResult | nu
   await sleep(200);
   const fields = [
     'name', 'formatted_address', 'formatted_phone_number',
-    'website', 'rating', 'opening_hours', 'photos', 'geometry',
-    'address_components',
+    'website', 'rating', 'user_ratings_total', 'opening_hours', 'photos', 'geometry',
+    'address_components', 'types',
   ].join(',');
   const url = `${BASE}/details/json?place_id=${placeId}&fields=${fields}&key=${API_KEY}`;
   const res = await fetch(url);
@@ -83,9 +85,11 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceResult | nu
     phone: r.formatted_phone_number ?? null,
     website: r.website ?? null,
     rating: r.rating ?? null,
+    reviewCount: r.user_ratings_total ?? null,
     operatingHours: hours,
     photoUrl,
     lat: r.geometry?.location?.lat ?? null,
     lng: r.geometry?.location?.lng ?? null,
+    types: r.types ?? [],
   };
 }
