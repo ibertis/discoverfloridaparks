@@ -219,7 +219,9 @@ Respond ONLY with valid JSON matching this exact shape (no markdown, no extra ke
   const text: string = data.content?.[0]?.text ?? '';
 
   try {
-    const clean = text.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim();
+    // Extract the JSON object from anywhere in the response (handles code fences and preamble)
+    const jsonMatch = text.match(/(\{[\s\S]*\})/);
+    const clean = jsonMatch ? jsonMatch[1] : text.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim();
     return JSON.parse(clean) as AiParkContent;
   } catch {
     console.warn(`  ${c.yellow}Failed to parse AI response: ${text.slice(0, 200)}${c.reset}`);
