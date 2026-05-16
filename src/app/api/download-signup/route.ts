@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
+// In-memory rate limiter: max 3 downloads per IP per hour.
+const rateLimitMap = new Map<string, number[]>();
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const window = 60 * 60 * 1000;
+  const attempts = (rateLimitMap.get(ip) ?? []).filter(t => now - t < window);
+  if (attempts.length >= 3) return false;
+  rateLimitMap.set(ip, [...attempts, now]);
+  return true;
+}
+
 function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
@@ -13,6 +24,11 @@ function escapeHtml(str: string): string {
 const PDF_URL = 'https://discoverfloridaparks.com/downloads/2026-florida-travel-trends.pdf';
 
 export async function POST(req: Request) {
+  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || '127.0.0.1';
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+  }
+
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   try {

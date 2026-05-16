@@ -1,10 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 
+// Rate limiter: max 30 revalidations per minute per IP (protects against secret compromise)
+const rateLimitMap = new Map<string, number[]>();
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const window = 60 * 1000;
+  const attempts = (rateLimitMap.get(ip) ?? []).filter(t => now - t < window);
+  if (attempts.length >= 30) return false;
+  rateLimitMap.set(ip, [...attempts, now]);
+  return true;
+}
+
 export async function POST(req: NextRequest) {
   const secret = process.env.REVALIDATE_SECRET;
   if (!secret || req.headers.get('x-revalidate-secret') !== secret) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || '127.0.0.1';
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
   }
 
   let body: { slugs?: unknown; paths?: unknown };

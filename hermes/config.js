@@ -34,7 +34,7 @@ export const config = {
     website: 'website',
   },
 
-  // LM Studio AI analysis
+  // Claude API (Haiku) AI analysis
   ai: {
     maxTokens: 800,
     temperature: 0.2,
