@@ -884,7 +884,12 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                   Nearby Cities
                 </p>
                 <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>
-                  {Array.isArray(park.nearby_cities) ? park.nearby_cities.join(', ') : park.nearby_cities}
+                  {(() => {
+                    const v = park.nearby_cities;
+                    if (!v) return null;
+                    if (Array.isArray(v)) return v.join(', ');
+                    try { const p = JSON.parse(v as string); return Array.isArray(p) ? p.join(', ') : v; } catch { return v; }
+                  })()}
                 </p>
               </div>
             )}
