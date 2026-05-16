@@ -10,10 +10,9 @@ interface Props {
 }
 
 const PARK_TYPES = [
-  'State Parks', 'National Parks', 'National Wildlife Refuge',
+  'National Parks', 'State Parks', 'National Wildlife Refuge',
   'County Parks', 'Community Parks', 'Theme Parks', 'Water Parks',
-  'Seasonal Attractions', 'National Estuarine Research Reserve',
-  'Nature Preserve', 'Wildlife Preserve', 'Wildlife Refuge', 'State Forest', 'State Trail', 'Other',
+  'National Estuarine Research Reserve', 'Preserve', 'Sanctuary', 'State Forest',
 ];
 
 export default async function AdminParksPage({ searchParams }: Props) {

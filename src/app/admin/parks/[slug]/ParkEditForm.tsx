@@ -6,10 +6,9 @@ import Image from 'next/image';
 import { Upload, Trash2, Save, Plus, X } from 'lucide-react';
 
 const PARK_TYPES = [
-  'State Parks', 'National Parks', 'National Wildlife Refuge',
+  'National Parks', 'State Parks', 'National Wildlife Refuge',
   'County Parks', 'Community Parks', 'Theme Parks', 'Water Parks',
-  'Seasonal Attractions', 'National Estuarine Research Reserve',
-  'Nature Preserve', 'Wildlife Preserve', 'Wildlife Refuge', 'Sanctuary', 'State Forest', 'State Trail', 'Other',
+  'National Estuarine Research Reserve', 'Preserve', 'Sanctuary', 'State Forest',
 ];
 const PARK_REGIONS = [
   'Florida Panhandle',
