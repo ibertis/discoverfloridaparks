@@ -7,8 +7,9 @@ import { Upload, Trash2, Save, Plus, X } from 'lucide-react';
 
 const PARK_TYPES = [
   'National Parks', 'State Parks', 'National Wildlife Refuge',
-  'County Parks', 'Community Parks', 'Theme Parks', 'Water Parks',
-  'National Estuarine Research Reserve', 'Preserve', 'Sanctuary', 'State Forest',
+  'Wildlife Management Area', 'County Parks', 'Community Parks',
+  'Theme Parks', 'Water Parks', 'National Estuarine Research Reserve',
+  'Preserve', 'Sanctuary', 'State Forest',
 ];
 const PARK_REGIONS = [
   'Florida Panhandle',
@@ -42,23 +43,29 @@ const CROWD_LEVELS = [
   { value: 'low', label: 'Low' },
   { value: 'moderate', label: 'Moderate' },
   { value: 'high', label: 'High' },
+  { value: 'very_high', label: 'Very High' },
 ];
 const AGENCIES = [
-  { value: 'nps', label: 'National Park Service' },
-  { value: 'fws', label: 'U.S. Fish & Wildlife Service' },
-  { value: 'usfs', label: 'U.S. Forest Service' },
-  { value: 'fdep', label: 'Florida Dept. of Environmental Protection' },
-  { value: 'city', label: 'City / Municipal' },
-  { value: 'county', label: 'County' },
-  { value: 'private', label: 'Private' },
+  { value: 'National Park Service (NPS)', label: 'National Park Service (NPS)' },
+  { value: 'U.S. Fish & Wildlife Service (USFWS)', label: 'U.S. Fish & Wildlife Service (USFWS)' },
+  { value: 'U.S. Forest Service (USFS)', label: 'U.S. Forest Service (USFS)' },
+  { value: 'Florida State Parks (DEP)', label: 'Florida State Parks (DEP)' },
+  { value: 'Florida Fish and Wildlife Conservation Commission (FWC)', label: 'Florida FWC' },
+  { value: 'Florida Forest Service', label: 'Florida Forest Service' },
+  { value: 'Water Management District', label: 'Water Management District' },
+  { value: 'NOAA / Florida DEP', label: 'NOAA / Florida DEP' },
+  { value: 'NOAA', label: 'NOAA' },
+  { value: 'City / Municipal', label: 'City / Municipal' },
+  { value: 'County Parks & Recreation', label: 'County Parks & Recreation' },
+  { value: 'Private', label: 'Private' },
 ];
 const ACTIVITY_TYPES = [
-  'Airboat Tours', 'Biking & Cycling', 'Boat Tours & Rentals',
-  'Camping Experiences', 'Fishing', 'Guided Hiking & Nature Walks',
-  'Horseback Riding', 'Kayaking & Canoeing', 'Manatee Encounters',
-  'Paddleboarding & Water Sports', 'Photography & Birding Tours',
-  'Snorkeling & Diving', 'Sunset & Scenic Cruises', 'Swimming',
-  'Theme Park Experiences', 'Water Park Experiences', 'Wildlife & Eco Tours',
+  'Hiking & Walking', 'Camping', 'Swimming', 'Fishing',
+  'Paddling & Kayaking', 'Boating', 'Biking', 'Horseback Riding',
+  'Hunting', 'Airboat Tours', 'Wildlife & Eco Tours', 'Birding',
+  'Photography & Birding Tours', 'Snorkeling & Diving', 'Manatee Encounters',
+  'Beach & Water Recreation', 'Picnicking & Day Use', 'Visitor Center & Education',
+  'Sunset & Scenic Cruises', 'Theme Park Experiences', 'Water Park Experiences',
 ];
 
 const TRAIL_DIFFICULTIES = ['Easy', 'Moderate', 'Hard', 'Strenuous'];

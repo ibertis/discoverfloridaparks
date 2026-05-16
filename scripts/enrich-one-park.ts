@@ -141,10 +141,10 @@ async function generateParkContent(park: {
 
   const VALID_ACTIVITY_TYPES = [
     'Hiking & Walking', 'Camping', 'Swimming', 'Fishing', 'Paddling & Kayaking',
-    'Boating', 'Wildlife & Eco Tours', 'Birding', 'Photography & Birding Tours',
+    'Boating', 'Airboat Tours', 'Wildlife & Eco Tours', 'Birding', 'Photography & Birding Tours',
     'Snorkeling & Diving', 'Biking', 'Horseback Riding', 'Hunting',
     'Beach & Water Recreation', 'Picnicking & Day Use', 'Visitor Center & Education',
-    'Manatee Encounters', 'Sunset & Scenic Cruises',
+    'Manatee Encounters', 'Sunset & Scenic Cruises', 'Theme Park Experiences', 'Water Park Experiences',
   ];
 
   const promptText = `You are a Florida parks expert writing rich, accurate content for discoverfloridaparks.com.
@@ -168,7 +168,7 @@ Fields:
 - crowd_level: One of these exact values (lowercase): "low" | "moderate" | "high" | "very_high"
 - terrain: Brief description of terrain type (e.g. "Flat pine flatwoods and cypress swamps", "Sandy beaches and coastal dunes")
 - activity_types: Array of relevant activities from this list ONLY: ${VALID_ACTIVITY_TYPES.join(', ')}
-- park_types: Array of applicable categories from this list ONLY: "National Parks", "State Parks", "National Wildlife Refuge", "County Parks", "Community Parks", "Theme Parks", "Water Parks", "National Estuarine Research Reserve", "Preserve", "Sanctuary", "State Forest"
+- park_types: Array of applicable categories from this list ONLY: "National Parks", "State Parks", "National Wildlife Refuge", "Wildlife Management Area", "County Parks", "Community Parks", "Theme Parks", "Water Parks", "National Estuarine Research Reserve", "Preserve", "Sanctuary", "State Forest"
 - park_size_acres: Integer. Approximate total acreage of the park. Use null if unknown.
 - year_established: Integer. Year the park was officially established or dedicated. Use null if unknown.
 - entrance_fee: String. E.g. "$6/vehicle", "$4/person (walk-in/bike-in)", "Free". Use null if unknown.
