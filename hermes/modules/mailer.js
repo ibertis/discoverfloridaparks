@@ -1,18 +1,12 @@
-// modules/mailer.js — Send alert emails via nodemailer
-import nodemailer from 'nodemailer'
+// modules/mailer.js — Send alert emails via Resend
+import { Resend } from 'resend'
 import { logger } from './logger.js'
 
 /**
  * Send the Hermes report email.
  */
 export async function sendReport({ subject, body, failed, totalChecked }) {
-  const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-})
+  const resend = new Resend(process.env.RESEND_API_KEY)
 
   const hasFailures = failed.length > 0
   const emoji = hasFailures ? '🚨' : '✅'
@@ -20,15 +14,15 @@ export async function sendReport({ subject, body, failed, totalChecked }) {
     ? `${emoji} Hermes Alert — ${failed.length} broken URL${failed.length > 1 ? 's' : ''} on DFP`
     : `${emoji} Hermes — All ${totalChecked} URLs healthy`
 
-  const htmlBody = buildHTML({ body, failed, totalChecked, hasFailures })
-
-  await transporter.sendMail({
-    from: `"Hermes — DFP Monitor" <${process.env.SMTP_USER}>`,
+  const { error } = await resend.emails.send({
+    from: 'Hermes — DFP Monitor <hermes@discoverfloridaparks.com>',
     to: process.env.ALERT_EMAIL,
     subject: emailSubject,
     text: body,
-    html: htmlBody,
+    html: buildHTML({ body, failed, totalChecked, hasFailures }),
   })
+
+  if (error) throw new Error(`Resend error: ${error.message}`)
 
   logger.info(`Report email sent to ${process.env.ALERT_EMAIL}`)
 }
@@ -55,7 +49,7 @@ function buildHTML({ body, failed, totalChecked, hasFailures }) {
 <head><meta charset="UTF-8" /></head>
 <body style="margin:0; padding:0; background:#f0ece8; font-family:Arial,sans-serif;">
   <table width="600" align="center" cellpadding="0" cellspacing="0" style="background:#fff; margin:32px auto; border-radius:12px; overflow:hidden;">
-    
+
     <!-- Header -->
     <tr>
       <td style="background:#362f35; padding:24px 32px;">
