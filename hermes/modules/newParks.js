@@ -28,25 +28,37 @@ const supabase = createClient(
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PROJECT_ROOT = path.resolve(__dirname, '../..')
 
+// Resolve npx absolute path so launchd/cron jobs (minimal PATH) can find it.
+// Homebrew installs to /opt/homebrew/bin on Apple Silicon, /usr/local/bin on Intel.
+const NPX_CANDIDATES = ['/opt/homebrew/bin/npx', '/usr/local/bin/npx', 'npx']
+const NPX = NPX_CANDIDATES.find(p => {
+  try { spawnSync(p, ['--version'], { timeout: 3000 }); return true } catch { return false }
+}) ?? 'npx'
+
 // ── Onboarding subprocess ─────────────────────────────────────────────────────
 
 function onboardPark(slug) {
   const result = spawnSync(
-    'npx',
+    NPX,
     ['tsx', 'scripts/onboard-park.ts', '--slug', slug],
     {
       cwd: PROJECT_ROOT,
       encoding: 'utf8',
       timeout: 5 * 60 * 1000, // 5 min — enrichment can be slow
-      env: { ...process.env },
+      env: {
+        ...process.env,
+        // Ensure Homebrew bin is in PATH for subprocesses (launchd strips this)
+        PATH: ['/opt/homebrew/bin', '/usr/local/bin', process.env.PATH].filter(Boolean).join(':'),
+      },
     }
   )
 
+  const spawnErr = result.error ? `spawn: ${result.error.message}` : ''
   return {
     slug,
     success: result.status === 0,
     output: (result.stdout || '').trim(),
-    error: (result.stderr || '').trim(),
+    error: (result.stderr || spawnErr || '').trim(),
     timedOut: result.error?.code === 'ETIMEDOUT',
   }
 }
