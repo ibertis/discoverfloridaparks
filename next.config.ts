@@ -21,7 +21,7 @@ const securityHeaders = [
       "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self' https://dteajahghspuqrczutgp.supabase.co https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com",
       "worker-src blob:",
-      "frame-src https://www.openstreetmap.org https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com",
+      "frame-src https://www.openstreetmap.org https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://www.youtube-nocookie.com https://www.youtube.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
