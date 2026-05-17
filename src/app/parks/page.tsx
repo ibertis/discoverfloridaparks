@@ -52,6 +52,7 @@ const PARK_TYPES = [
   'National Parks', 'State Parks', 'National Wildlife Refuge',
   'County Parks', 'Community Parks', 'Theme Parks', 'Water Parks',
   'National Estuarine Research Reserve', 'Preserve', 'Sanctuary', 'State Forest',
+  'Wildlife Management Area',
 ];
 
 const REGIONS = [
@@ -76,6 +77,8 @@ const AMENITY_OPTIONS = [
   { key: 'beach_access',        label: 'Beach Access' },
   { key: 'boat_launch',         label: 'Boat Launch' },
   { key: 'picnic_areas',        label: 'Picnic Areas' },
+  { key: 'visitor_center',      label: 'Visitor Center' },
+  { key: 'wheelchair_accessible', label: 'Wheelchair Accessible' },
 ];
 
 interface SearchParams {
