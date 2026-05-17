@@ -56,7 +56,7 @@ const PARK_TYPES = [
 
 const TYPE_HEADING: Record<string, string> = {
   'National Wildlife Refuge': 'National Wildlife Refuges',
-  'Wildlife Management Area': 'Wildlife Mgmt Areas',
+  'Wildlife Management Area': 'Wildlife Management Areas',
   'Preserve':                 'Preserves',
   'State Forest':             'State Forests',
 };
