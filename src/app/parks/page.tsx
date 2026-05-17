@@ -54,6 +54,13 @@ const PARK_TYPES = [
   'Preserve', 'State Forest', 'Wildlife Management Area',
 ];
 
+const TYPE_HEADING: Record<string, string> = {
+  'National Wildlife Refuge': 'National Wildlife Refuges',
+  'Wildlife Management Area': 'Wildlife Mgmt Areas',
+  'Preserve':                 'Preserves',
+  'State Forest':             'State Forests',
+};
+
 const REGIONS = [
   'Florida Panhandle',
   'North Florida', 'Northeast Florida', 'Central Florida',
@@ -125,7 +132,7 @@ export default async function ParksPage({ searchParams }: { searchParams: Promis
             Find Your Next Adventure
           </p>
           <h1 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: 'clamp(2.5rem, 5vw, 4.14rem)', lineHeight: 0.98, color: '#362f35', margin: '0 0 12px', letterSpacing: '-0.04em' }}>
-            {type ? `Explore Our ${type}` : 'Explore Our Parks'}
+            {type ? `Explore Our ${TYPE_HEADING[type] ?? type}` : 'Explore Our Parks'}
           </h1>
           <p style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.95rem', color: '#726d6b', margin: 0 }}>
             {filtered.length} park{filtered.length !== 1 ? 's' : ''}{' '}
