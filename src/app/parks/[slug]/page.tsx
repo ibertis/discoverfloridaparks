@@ -276,7 +276,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
 
   const touristAttractionSchema = {
     '@context': 'https://schema.org',
-    '@type': 'TouristAttraction',
+    '@type': ['TouristAttraction', 'LocalBusiness'],
     '@id': parkUrl,
     additionalType: 'https://schema.org/Park',
     name: park.name,
