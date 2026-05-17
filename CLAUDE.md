@@ -274,6 +274,31 @@ Key `park_hotels` fields: `park_id` (FK), `name`, `description`, `url`, `price_f
 
 **Important:** `park_types`, `park_regions`, and `activity_types` are `text[]` arrays. Use `.contains('park_types', [value])` for filtering, not `.eq()`. `park_regions` is already `text[]` — never call `.split(',')` on it.
 
+### Canonical Park Types
+
+The `park_types` column accepts **exactly these 10 values** — no others. Use this exact list in every UI filter, admin form, AI prompt, and enrichment script:
+
+```
+"National Parks"
+"State Parks"
+"National Wildlife Refuge"
+"Wildlife Management Area"
+"County Parks"
+"Community Parks"
+"Theme Parks"
+"Water Parks"
+"Preserve"
+"State Forest"
+```
+
+**Retired types (do not re-introduce):** `"Sanctuary"` and `"National Estuarine Research Reserve"` were consolidated into `"Preserve"` in May 2026. Any park previously tagged with those types is now tagged `"Preserve"`.
+
+**Display labels:** The `/parks` H1 uses a `TYPE_HEADING` map (`src/app/parks/page.tsx`) to show plural, SEO-friendly labels (e.g. "Explore Our Wildlife Management Areas") without changing stored DB values or filter chip labels. Always use the full phrase — never abbreviate (e.g. "Mgmt") in rendered headings; H1 is a strong SEO signal.
+
+**Managing agency inference:** `getManagingAgency(types, slug)` in `scripts/utils/florida-regions.ts` maps type → agency. `"Preserve"` parks are managed by a mix of agencies, so the function returns `null` for them and falls through to slug-based inference.
+
+---
+
 **`park_regions` canonical naming** — the array must use these exact strings. They are the `dbValue` fields in `REGION_MAP` in `src/app/parks/region/[slug]/page.tsx`, which is the authoritative source of truth.
 
 | Canonical `dbValue` | Hub page slug | Notes |
@@ -612,7 +637,11 @@ When in doubt, less is more. A page that feels editorial ranks better and conver
 
 10. **`/experiences` and `/experiences/featured` pages are broken** — these public pages still query old `experiences` columns (`duration`, `image_url`, `href`, `cta_label`, `placement_type`, `expires_at`) that no longer exist on the catalog table. They need to be either rebuilt for the new catalog schema or repurposed. Until fixed, they will return Supabase errors and show the empty-state UI.
 
-11. **Two separate save-park child record patterns** — `src/app/admin/api/save-park/route.ts` uses delete+re-insert for both `park_experiences` and `park_hotels`, keyed on `park_id`. The catalog `experiences` table is NOT touched by save-park; it has its own `/admin/api/save-experience/route.ts`.
+11. **`nearby_cities` is a `text[]` array** — Supabase returns it as a JS array, not a string. At render time: `Array.isArray(v) ? v.join(', ') : v`. Never call `.split(',')` on it. Some records may still hold a JSON-encoded string from older enrichment runs — guard with a `JSON.parse` try/catch fallback.
+
+12. **`instagram_hashtag` is stored without the `#` prefix** — the enrichment script omits it. Always prepend `#` at render time: `#{park.instagram_hashtag}`.
+
+13. **Two separate save-park child record patterns** — `src/app/admin/api/save-park/route.ts` uses delete+re-insert for both `park_experiences` and `park_hotels`, keyed on `park_id`. The catalog `experiences` table is NOT touched by save-park; it has its own `/admin/api/save-experience/route.ts`.
 
 ---
 

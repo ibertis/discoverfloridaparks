@@ -59,10 +59,8 @@ export function getManagingAgency(parkTypes: string[] | null, slug: string): str
 
   if (types.includes('National Parks'))              return 'National Park Service (NPS)'
   if (types.includes('National Wildlife Refuge'))    return 'U.S. Fish & Wildlife Service (USFWS)'
-  if (types.includes('National Estuarine Research Reserve')) return 'NOAA / Florida DEP'
   if (types.includes('State Parks'))                return 'Florida State Parks (DEP)'
   if (types.includes('State Forest'))               return 'Florida Forest Service'
-  if (types.includes('Sanctuary'))                  return 'NOAA'
   if (types.includes('Wildlife Management Area'))   return 'Florida Fish and Wildlife Conservation Commission (FWC)'
   if (types.includes('County Parks'))               return 'County Parks & Recreation'
   if (types.includes('Community Parks'))            return 'City / Municipal'
