@@ -51,8 +51,7 @@ export async function generateMetadata(
 const PARK_TYPES = [
   'National Parks', 'State Parks', 'National Wildlife Refuge',
   'County Parks', 'Community Parks', 'Theme Parks', 'Water Parks',
-  'National Estuarine Research Reserve', 'Preserve', 'Sanctuary', 'State Forest',
-  'Wildlife Management Area',
+  'Preserve', 'State Forest', 'Wildlife Management Area',
 ];
 
 const REGIONS = [
