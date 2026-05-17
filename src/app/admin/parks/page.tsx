@@ -12,7 +12,7 @@ interface Props {
 const PARK_TYPES = [
   'National Parks', 'State Parks', 'National Wildlife Refuge',
   'County Parks', 'Community Parks', 'Theme Parks', 'Water Parks',
-  'National Estuarine Research Reserve', 'Preserve', 'Sanctuary', 'State Forest',
+  'Preserve', 'State Forest', 'Wildlife Management Area',
 ];
 
 export default async function AdminParksPage({ searchParams }: Props) {

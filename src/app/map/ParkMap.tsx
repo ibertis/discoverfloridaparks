@@ -29,13 +29,12 @@ const TYPE_FILTERS = [
   'State Parks',
   'State Forest',
   'National Wildlife Refuge',
+  'Wildlife Management Area',
   'Theme Parks',
   'Water Parks',
   'County Parks',
   'Community Parks',
-  'National Estuarine Research Reserve',
   'Preserve',
-  'Sanctuary',
 ];
 
 const AMENITY_OPTIONS = [
