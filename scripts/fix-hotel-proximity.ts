@@ -20,6 +20,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 import { supabaseAdmin } from './lib/supabase-admin.js';
 import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
+import { buildExpediaHotelUrl } from './utils/expedia.js';
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
 
@@ -153,14 +154,10 @@ async function enrichHotelsForPark(park: ParkRow, apiKey: string, dryRun = false
       hotelLat, hotelLng,
     );
 
-    const bookingUrl = 'https://www.booking.com/search.html' +
-      `?ss=${encodeURIComponent(candidate.name + ' ' + (candidate.vicinity || ''))}` +
-      `&aid=2889331&label=dfp-${park.slug}`;
-
     return {
       park_id: park.id,
       name: candidate.name,
-      url: bookingUrl,
+      url: buildExpediaHotelUrl(candidate.name, candidate.vicinity || ''),
       description: buildHotelDescription(candidate, park),
       latitude: hotelLat,
       longitude: hotelLng,

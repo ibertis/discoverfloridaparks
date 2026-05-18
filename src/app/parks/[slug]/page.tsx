@@ -88,6 +88,13 @@ function parseHotelRating(description: string | null): {
   };
 }
 
+function buildExpediaCityUrl(city: string): string {
+  const cjBase = process.env.EXPEDIA_CJ_BASE_URL;
+  const destination = encodeURIComponent(`${city} FL`);
+  const expediaUrl = `https://www.expedia.com/Hotel-Search?destination=${destination}`;
+  return cjBase ? `${cjBase}?url=${encodeURIComponent(expediaUrl)}` : expediaUrl;
+}
+
 function parseHotelAddress(description: string | null, hotelName: string): string {
   if (!description) return '';
   let addr = description;
@@ -638,6 +645,29 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
             )}
 
             {/* Where to Stay */}
+            {hotels.length === 0 && park.city && (
+              <section>
+                <SectionHeading>Where to Stay</SectionHeading>
+                <a
+                  href={buildExpediaCityUrl(park.city)}
+                  target="_blank"
+                  rel="nofollow sponsored noopener noreferrer"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 16, padding: '20px 24px', border: '1px solid #eeeeee', background: '#fff', textDecoration: 'none', gap: 12 }}
+                >
+                  <span>
+                    <span style={{ display: 'block', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', marginBottom: 4 }}>
+                      Search hotels near {park.name}
+                    </span>
+                    <span style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.82rem', color: '#a6967c' }}>
+                      Find available rooms on Expedia →
+                    </span>
+                  </span>
+                </a>
+                <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#c4bab3', marginTop: 12, lineHeight: 1.6 }}>
+                  Hotel links are affiliate links. We earn a small commission at no extra cost to you.
+                </p>
+              </section>
+            )}
             {hotels.length > 0 && (
               <section>
                 {(() => {

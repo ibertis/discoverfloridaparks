@@ -29,6 +29,7 @@ import { findPark, getPlaceDetails } from './lib/google-places.js';
 import { fetchFloridaNpsParks } from './lib/nps-api.js';
 import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
 import { getRegionsForCoords, getManagingAgency } from './utils/florida-regions.js';
+import { buildExpediaHotelUrl } from './utils/expedia.js';
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
 
@@ -341,14 +342,10 @@ async function enrichHotels(park: ParkRecord): Promise<void> {
       hotelLat, hotelLng,
     );
 
-    const bookingUrl = 'https://www.booking.com/search.html' +
-      `?ss=${encodeURIComponent(candidate.name + ' ' + (candidate.vicinity || ''))}` +
-      `&aid=2889331&label=dfp-${park.slug}`;
-
     return {
       park_id: park.id,
       name: candidate.name,
-      url: bookingUrl,
+      url: buildExpediaHotelUrl(candidate.name, candidate.vicinity || ''),
       description: buildHotelDescription(candidate, park),
       latitude: hotelLat,
       longitude: hotelLng,

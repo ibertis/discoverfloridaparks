@@ -250,7 +250,7 @@ public/
 | `park_seasonal_events` | Repeater — event_name, month, description, sort_order |
 | `park_nearby` | Junction — park_id ↔ nearby_park_id. Public read-only. |
 | `park_experiences` | Per-park direct/partner deals — managed via park edit form in admin. Renamed from old `experiences` table. |
-| `park_hotels` | Per-park Booking.com affiliate hotel picks — managed via park edit form in admin. |
+| `park_hotels` | Per-park Expedia affiliate hotel picks — managed via park edit form in admin. |
 | `experiences` | **Catalog** of Viator affiliate experiences — auto-matched to park pages by `activity_type` + `regions`. Managed via `/admin/experiences/`. |
 
 ### Hybrid Experiences Model
@@ -487,7 +487,7 @@ The GRANT section at the bottom of `rls.sql` covers all existing tables and serv
 **Schedule:** Daily at 9:00 AM via macOS launchd (`hermes/com.dfp.hermes.plist`)
 **What it monitors:**
 - Park URLs — website + camping_url health (~270 parks)
-- Affiliate links — Booking.com `aid=`/`label=` + Viator `pid=`/`mcid=` params
+- Affiliate links — Expedia CJ deeplinks (`dpbolvw.net/click-...`) + Viator `pid=`/`mcid=` params
 - Entrance fees — AI-powered change detection against stored `entrance_fee` values
 - Gear links — all REI + Amazon URLs from `src/lib/gear.ts` (404s only — bot-blocks ignored)
 - Hotel proximity — detects `park_hotels` rows where `distance_from_park_km` is NULL or >50km, then auto-fixes via Google Places nearbysearch
@@ -532,8 +532,9 @@ All scripts run with `npx tsx <script>` from the project root. They load `.env.l
 | `scripts/enrich-one-park.ts` | `npx tsx scripts/enrich-one-park.ts "Park Name" [--no-ai] [--no-photo] [--overwrite] [--auto]` | Enriches a park with Google Places + NPS API + Claude Sonnet AI. Auto-assigns `park_regions` from lat/lng, `managing_agency` from park type/slug, `activity_types` and full amenities via AI. Upserts `park_amenities` row. Exports `enrichPark(slug, opts)`. |
 | `scripts/batch-enrich.ts` | `npx tsx scripts/batch-enrich.ts [--overwrite] [--slugs=a,b,c]` | Runs `enrichPark()` on all recently added parks with missing data, or on an explicit comma-separated slug list. Reports successes/failures with re-run command. |
 | `scripts/validate-park.ts` | `npx tsx scripts/validate-park.ts <slug>` | Runs 9 correctness checks: park exists, has GPS, descriptions, featured image, park_regions, amenities row, hotels, no null distances, no hotels >30km. Exits 1 on blocker failure. Exports `validatePark(slug)`. |
-| `scripts/fix-hotel-proximity.ts` | `npx tsx scripts/fix-hotel-proximity.ts [--dry-run] [--slug <slug>]` | Finds parks where hotel `distance_from_park_km` is NULL or >30km, then re-runs Google Places nearbysearch + Booking.com link rebuild. Exports `fixHotelProximityForPark(slug)`. |
+| `scripts/fix-hotel-proximity.ts` | `npx tsx scripts/fix-hotel-proximity.ts [--dry-run] [--slug <slug>]` | Finds parks where hotel `distance_from_park_km` is NULL or >30km, then re-runs Google Places nearbysearch + Expedia link rebuild. Exports `fixHotelProximityForPark(slug)`. |
 | `scripts/fix-hotels-bulk.ts` | `npx tsx scripts/fix-hotels-bulk.ts [--dry-run]` | Finds all parks with 0 `park_hotels` rows and runs the hotel enrichment pipeline for each. Uses multi-step radius expansion (12 → 25 → 50km) and the `isLikelyHotel()` quality filter. |
+| `scripts/migrate-hotels-to-expedia.ts` | `npx tsx scripts/migrate-hotels-to-expedia.ts [--dry-run]` | One-time migration: re-builds all existing `park_hotels.url` values from old Booking.com format to Expedia CJ deeplinks. Safe to re-run (skips rows already on Expedia). |
 | `scripts/audit-hotels.ts` | `npx tsx scripts/audit-hotels.ts [--delete-remove] [--delete-all]` | Scans all `park_hotels` rows and categorises them: **REMOVE** (clearly not lodging), **REVIEW** (outdoor accommodation — RV parks, campgrounds), **KEEP** (hotels). Dry-run by default; writes `scripts/data/hotel-audit.json`. |
 | `scripts/utils/florida-regions.ts` | (imported by `enrich-one-park.ts`) | `getRegionsForCoords(lat, lng)` — maps coordinates to `park_regions` canonical strings via bounding boxes. `getManagingAgency(parkTypes, slug)` — infers managing agency from park type / slug pattern. |
 
@@ -573,7 +574,7 @@ This ensures remote parks (WMAs, state forests, wilderness areas) still get hote
 - Section heading: **"Where to Stay Nearby"** when closest hotel ≤32km (~20 miles); **"Where to Stay"** when all hotels are >32km
 - Description shows: **bold street address** · regular-weight distance (e.g. "4735 Helen Hauser Blvd, Titusville · About 11 miles from [Park Name]")
 - Distance text: "Less than a mile" when <1 mile; "About X miles" otherwise (rounded to 1 decimal, drops `.0`)
-- If a park has 0 qualifying hotels after all three radius steps, the section is hidden entirely — do not show empty state
+- If a park has 0 qualifying hotels after all three radius steps, the `park_hotels` section is omitted, but a fallback "Where to Stay" Expedia city-search CTA is shown instead (uses `buildExpediaCityUrl(park.city)` — see `src/app/parks/[slug]/page.tsx`)
 
 ### Audit tool
 
@@ -589,7 +590,7 @@ This ensures remote parks (WMAs, state forests, wilderness areas) still get hote
 
 1. **Park information** (about, amenities, facts, tips, safety) — always dominant
 2. **Experiences** (Viator / GetYourGuide) — enhances the visit
-3. **Where to stay** (Booking.com / Hotels.com) — practical necessity
+3. **Where to stay** (Expedia via CJ) — practical necessity
 4. **Gear** (REI via Impact) — supporting context, park-specific only
 5. **Everything else** — contextual, not on every page
 
@@ -602,14 +603,29 @@ This ensures remote parks (WMAs, state forests, wilderness areas) still get hote
 - Never add affiliate content before park information content
 - Affiliate disclosures must remain clear and present
 
-### Affiliate program tracking params
+### Affiliate Programs
 
-| Program | Required params |
-|---|---|
-| Booking.com | `aid=2889331&label=dfp-[park-slug]` |
-| Viator | `pid=P00300517&mcid=42383&medium=link&campaign=dfp-park-pages` |
-| REI (Impact) | TBD — verify in Impact dashboard before adding links |
-| GetYourGuide | TBD — only use when experience not already on Viator |
+| Program | Status | Network | Commission | Notes |
+|---|---|---|---|---|
+| Expedia | ✅ Approved | CJ (CID 7957937) | 4% hotels | Primary hotel affiliate. All hotel URLs built via `buildExpediaHotelUrl()` in `scripts/utils/expedia.ts`. Env var: `EXPEDIA_CJ_BASE_URL=https://www.dpbolvw.net/click-101752120-14078545` |
+| Hotels.com | ✅ Approved | CJ (CID 7957937) | TBD | Product Feed requested — pending. Fold in when Feed arrives to provide structured property data (IDs, images, prices). Use Expedia in the meantime. |
+| Viator | ✅ Active | Direct | ~8% | Experiences only. `pid=P00300517&mcid=42383&medium=link&campaign=dfp-park-pages`. Links in `experiences.affiliate_url`. |
+| Booking.com | ❌ Not approved | — | N/A | `aid=2889331` in old DB records is **INVALID** — earns nothing. Do not use. Add `booking_url` column if/when formally approved. |
+| REI (Impact) | ⏳ Pending | Impact | ~5% | Gear links in `src/lib/gear.ts`. Replace `PENDING` with Impact ID when approved. |
+| Amazon Associates | ✅ Active | Direct | ~3% | Gear fallback. Tag: `discoverflo00-20`. Used for fishing/hunting/equestrian gear. |
+
+### CJ deeplink format
+
+Expedia hotel links are tracked via CJ. The utility at `scripts/utils/expedia.ts` handles building these:
+
+```
+{EXPEDIA_CJ_BASE_URL}?url={encoded_expedia_destination_url}
+```
+
+- `dpbolvw.net/click-...` → **click tracking URL** (used in all `<a href>` links)
+- `awltovhc.com/image-...` / `lduhtrp.net/image-...` → **impression pixel** (1×1 img tag, never used by DFP)
+
+The env var stores the full click URL so code survives CJ domain rotation without changes.
 
 When in doubt, less is more. A page that feels editorial ranks better and converts better than one that feels commercial.
 

@@ -15,6 +15,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 import { supabaseAdmin } from './lib/supabase-admin.js';
 import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
+import { buildExpediaHotelUrl } from './utils/expedia.js';
 
 const DELAY_MS = 300;
 
@@ -133,7 +134,7 @@ async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promi
     return {
       park_id: park.id,
       name: p.name,
-      url: `https://www.booking.com/search.html?ss=${encodeURIComponent(p.name + ' ' + (p.vicinity || ''))}&aid=2889331&label=dfp-${park.slug}`,
+      url: buildExpediaHotelUrl(p.name, p.vicinity || ''),
       description: buildDescription(p, park),
       latitude: lat,
       longitude: lng,
