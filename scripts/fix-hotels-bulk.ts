@@ -16,7 +16,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 import { supabaseAdmin } from './lib/supabase-admin.js';
 import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
 import { buildExpediaHotelUrl } from './utils/expedia.js';
-import { getHotelWebsite } from './lib/google-places.js';
+import { getHotelInfo } from './lib/google-places.js';
 
 const DELAY_MS = 300;
 
@@ -132,7 +132,7 @@ async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promi
     const lng = p.geometry.location.lng;
     // Distance is always measured from the park itself, not the gateway
     const distKm = haversineDistance(Number(park.latitude), Number(park.longitude), lat, lng);
-    const website = await getHotelWebsite(p.place_id);
+    const { website, petFriendly } = await getHotelInfo(p.place_id);
     return {
       park_id: park.id,
       name: p.name,
@@ -141,6 +141,7 @@ async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promi
       latitude: lat,
       longitude: lng,
       distance_from_park_km: Math.round(distKm * 100) / 100,
+      pet_friendly: petFriendly,
     };
   }));
 

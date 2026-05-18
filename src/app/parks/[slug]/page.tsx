@@ -136,7 +136,7 @@ function HotelStars({ rating }: { rating: number }) {
 async function getPark(slug: string): Promise<Park | null> {
   const { data, error } = await supabase
     .from('parks')
-    .select(`*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*), park_experiences(id, name, description, duration, price_from, href, source, business_name, sort_order), park_hotels(id, name, description, url, price_from, sort_order, distance_from_park_km)`)
+    .select(`*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*), park_experiences(id, name, description, duration, price_from, href, source, business_name, sort_order), park_hotels(id, name, description, url, price_from, sort_order, distance_from_park_km, pet_friendly)`)
     .eq('slug', slug)
     .single();
   if (error || !data) return null;
@@ -702,7 +702,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                               </span>
                             </span>
                           )}
-                          {/pet.friendly|dog.friendly|pets welcome/i.test(hotel.name + ' ' + (hotel.description ?? '')) && (
+                          {hotel.pet_friendly === true && (
                             <span style={{ background: '#e6f2ea', color: '#3d7a52', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>🐾 Pet-friendly</span>
                           )}
                           {hotel.price_from && (

@@ -21,7 +21,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 import { supabaseAdmin } from './lib/supabase-admin.js';
 import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
 import { buildExpediaHotelUrl } from './utils/expedia.js';
-import { getHotelWebsite } from './lib/google-places.js';
+import { getHotelInfo } from './lib/google-places.js';
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
 
@@ -57,6 +57,7 @@ interface HotelInsert {
   latitude: number;
   longitude: number;
   distance_from_park_km: number;
+  pet_friendly: boolean | null;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -160,7 +161,7 @@ async function enrichHotelsForPark(park: ParkRow, apiKey: string, dryRun = false
       Number(park.latitude), Number(park.longitude),
       hotelLat, hotelLng,
     );
-    const website = await getHotelWebsite(candidate.place_id);
+    const { website, petFriendly } = await getHotelInfo(candidate.place_id);
 
     return {
       park_id: park.id,
@@ -170,6 +171,7 @@ async function enrichHotelsForPark(park: ParkRow, apiKey: string, dryRun = false
       latitude: hotelLat,
       longitude: hotelLng,
       distance_from_park_km: Math.round(distanceKm * 100) / 100,
+      pet_friendly: petFriendly,
     };
   }));
 

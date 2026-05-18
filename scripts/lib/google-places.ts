@@ -44,13 +44,35 @@ export async function findPark(query: string): Promise<string | null> {
 
 /** Fetches only the website field for a place — minimal cost Details call. */
 export async function getHotelWebsite(placeId: string): Promise<string | null> {
+  const info = await getHotelInfo(placeId);
+  return info.website;
+}
+
+export interface HotelInfo {
+  website: string | null;
+  petFriendly: boolean | null;
+}
+
+/**
+ * Fetches website + pet-friendly status using the new Places API v1.
+ * `petFriendly` is true/false when Google knows, null when unknown.
+ */
+export async function getHotelInfo(placeId: string): Promise<HotelInfo> {
   if (!API_KEY) throw new Error('Missing GOOGLE_PLACES_API_KEY in .env.local');
   await sleep(200);
-  const url = `${BASE}/details/json?place_id=${placeId}&fields=website&key=${API_KEY}`;
-  const res = await fetch(url);
+  const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=en`;
+  const res = await fetch(url, {
+    headers: {
+      'X-Goog-Api-Key': API_KEY,
+      'X-Goog-FieldMask': 'allowsDogs,websiteUri',
+    },
+  });
+  if (!res.ok) return { website: null, petFriendly: null };
   const data = await res.json() as any;
-  if (data.status !== 'OK' || !data.result) return null;
-  return data.result.website ?? null;
+  return {
+    website: data.websiteUri ?? null,
+    petFriendly: typeof data.allowsDogs === 'boolean' ? data.allowsDogs : null,
+  };
 }
 
 export async function getPlaceDetails(placeId: string): Promise<PlaceResult | null> {
