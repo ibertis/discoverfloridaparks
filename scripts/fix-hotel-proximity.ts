@@ -21,6 +21,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 import { supabaseAdmin } from './lib/supabase-admin.js';
 import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
 import { buildExpediaHotelUrl } from './utils/expedia.js';
+import { getHotelWebsite } from './lib/google-places.js';
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
 
@@ -146,24 +147,25 @@ async function enrichHotelsForPark(park: ParkRow, apiKey: string, dryRun = false
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const hotels: HotelInsert[] = candidates.map((candidate: any) => {
+  const hotels: HotelInsert[] = await Promise.all(candidates.map(async (candidate: any) => {
     const hotelLat = candidate.geometry.location.lat;
     const hotelLng = candidate.geometry.location.lng;
     const distanceKm = haversineDistance(
       Number(park.latitude), Number(park.longitude),
       hotelLat, hotelLng,
     );
+    const website = await getHotelWebsite(candidate.place_id);
 
     return {
       park_id: park.id,
       name: candidate.name,
-      url: buildExpediaHotelUrl(candidate.name, candidate.vicinity || ''),
+      url: website ?? buildExpediaHotelUrl(candidate.name, candidate.vicinity || ''),
       description: buildHotelDescription(candidate, park),
       latitude: hotelLat,
       longitude: hotelLng,
       distance_from_park_km: Math.round(distanceKm * 100) / 100,
     };
-  });
+  }));
 
   if (!dryRun) {
     const { error } = await supabaseAdmin.from('park_hotels').insert(hotels);

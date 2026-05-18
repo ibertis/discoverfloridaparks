@@ -30,6 +30,7 @@ import { fetchFloridaNpsParks } from './lib/nps-api.js';
 import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
 import { getRegionsForCoords, getManagingAgency } from './utils/florida-regions.js';
 import { buildExpediaHotelUrl } from './utils/expedia.js';
+import { getHotelWebsite } from './lib/google-places.js';
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
 
@@ -333,7 +334,7 @@ async function enrichHotels(park: ParkRecord): Promise<void> {
   await supabaseAdmin.from('park_hotels').delete().eq('park_id', park.id);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const hotels = candidates.map((candidate: any) => {
+  const hotels = await Promise.all(candidates.map(async (candidate: any) => {
     const hotelLat = candidate.geometry.location.lat;
     const hotelLng = candidate.geometry.location.lng;
     // Distance is always from the park itself, not the gateway
@@ -341,17 +342,18 @@ async function enrichHotels(park: ParkRecord): Promise<void> {
       Number(park.latitude), Number(park.longitude),
       hotelLat, hotelLng,
     );
+    const website = await getHotelWebsite(candidate.place_id);
 
     return {
       park_id: park.id,
       name: candidate.name,
-      url: buildExpediaHotelUrl(candidate.name, candidate.vicinity || ''),
+      url: website ?? buildExpediaHotelUrl(candidate.name, candidate.vicinity || ''),
       description: buildHotelDescription(candidate, park),
       latitude: hotelLat,
       longitude: hotelLng,
       distance_from_park_km: Math.round(distanceKm * 100) / 100,
     };
-  });
+  }));
 
   const { error } = await supabaseAdmin.from('park_hotels').insert(hotels);
   if (error) {

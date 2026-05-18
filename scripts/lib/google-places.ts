@@ -42,6 +42,17 @@ export async function findPark(query: string): Promise<string | null> {
   return data.candidates[0].place_id as string;
 }
 
+/** Fetches only the website field for a place — minimal cost Details call. */
+export async function getHotelWebsite(placeId: string): Promise<string | null> {
+  if (!API_KEY) throw new Error('Missing GOOGLE_PLACES_API_KEY in .env.local');
+  await sleep(200);
+  const url = `${BASE}/details/json?place_id=${placeId}&fields=website&key=${API_KEY}`;
+  const res = await fetch(url);
+  const data = await res.json() as any;
+  if (data.status !== 'OK' || !data.result) return null;
+  return data.result.website ?? null;
+}
+
 export async function getPlaceDetails(placeId: string): Promise<PlaceResult | null> {
   if (!API_KEY) throw new Error('Missing GOOGLE_PLACES_API_KEY in .env.local');
   await sleep(200);
