@@ -331,16 +331,11 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
 
   const experiencesSchema = catalogExperiences.length > 0 ? catalogExperiences.map(exp => ({
     '@context': 'https://schema.org',
-    '@type': 'Event',
+    '@type': 'Product',
     name: exp.name,
     description: exp.description ?? undefined,
     url: exp.affiliate_url ?? undefined,
-    location: {
-      '@type': 'Place',
-      name: park.name,
-      address: park.city ? { '@type': 'PostalAddress', addressLocality: park.city, addressRegion: 'FL', addressCountry: 'US' } : undefined,
-    },
-    organizer: exp.provider ? { '@type': 'Organization', name: exp.provider } : undefined,
+    brand: exp.provider ? { '@type': 'Organization', name: exp.provider } : undefined,
     ...(exp.rating && exp.review_count && {
       aggregateRating: { '@type': 'AggregateRating', ratingValue: exp.rating, reviewCount: exp.review_count, bestRating: 5 },
     }),
@@ -348,6 +343,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
       '@type': 'Offer',
       url: exp.affiliate_url ?? undefined,
       ...(exp.price_from && { price: exp.price_from, priceCurrency: 'USD' }),
+      priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
     },
   })) : null;
