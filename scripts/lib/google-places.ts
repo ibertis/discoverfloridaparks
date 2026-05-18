@@ -51,11 +51,21 @@ export async function getHotelWebsite(placeId: string): Promise<string | null> {
 export interface HotelInfo {
   website: string | null;
   petFriendly: boolean | null;
+  priceLevel: number | null;
 }
 
+const PRICE_LEVEL_MAP: Record<string, number> = {
+  PRICE_LEVEL_INEXPENSIVE: 1,
+  PRICE_LEVEL_MODERATE: 2,
+  PRICE_LEVEL_EXPENSIVE: 3,
+  PRICE_LEVEL_VERY_EXPENSIVE: 4,
+};
+
 /**
- * Fetches website + pet-friendly status using the new Places API v1.
+ * Fetches website, pet-friendly status, and price level using the new Places API v1.
+ * All three fields are fetched in a single API call.
  * `petFriendly` is true/false when Google knows, null when unknown.
+ * `priceLevel` is 1–4 ($–$$$$), null when unknown.
  */
 export async function getHotelInfo(placeId: string): Promise<HotelInfo> {
   if (!API_KEY) throw new Error('Missing GOOGLE_PLACES_API_KEY in .env.local');
@@ -64,14 +74,15 @@ export async function getHotelInfo(placeId: string): Promise<HotelInfo> {
   const res = await fetch(url, {
     headers: {
       'X-Goog-Api-Key': API_KEY,
-      'X-Goog-FieldMask': 'allowsDogs,websiteUri',
+      'X-Goog-FieldMask': 'allowsDogs,websiteUri,priceLevel',
     },
   });
-  if (!res.ok) return { website: null, petFriendly: null };
+  if (!res.ok) return { website: null, petFriendly: null, priceLevel: null };
   const data = await res.json() as any;
   return {
     website: data.websiteUri ?? null,
     petFriendly: typeof data.allowsDogs === 'boolean' ? data.allowsDogs : null,
+    priceLevel: PRICE_LEVEL_MAP[data.priceLevel] ?? null,
   };
 }
 

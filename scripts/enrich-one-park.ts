@@ -343,7 +343,7 @@ async function enrichHotels(park: ParkRecord): Promise<void> {
       Number(park.latitude), Number(park.longitude),
       hotelLat, hotelLng,
     );
-    const { website, petFriendly } = await getHotelInfo(candidate.place_id);
+    const { website, petFriendly, priceLevel } = await getHotelInfo(candidate.place_id);
 
     return {
       park_id: park.id,
@@ -354,6 +354,7 @@ async function enrichHotels(park: ParkRecord): Promise<void> {
       longitude: hotelLng,
       distance_from_park_km: Math.round(distanceKm * 100) / 100,
       pet_friendly: petFriendly,
+      price_level: priceLevel,
     };
   }));
 

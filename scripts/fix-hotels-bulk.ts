@@ -132,7 +132,7 @@ async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promi
     const lng = p.geometry.location.lng;
     // Distance is always measured from the park itself, not the gateway
     const distKm = haversineDistance(Number(park.latitude), Number(park.longitude), lat, lng);
-    const { website, petFriendly } = await getHotelInfo(p.place_id);
+    const { website, petFriendly, priceLevel } = await getHotelInfo(p.place_id);
     return {
       park_id: park.id,
       name: p.name,
@@ -142,6 +142,7 @@ async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promi
       longitude: lng,
       distance_from_park_km: Math.round(distKm * 100) / 100,
       pet_friendly: petFriendly,
+      price_level: priceLevel,
     };
   }));
 
