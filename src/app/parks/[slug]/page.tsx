@@ -342,7 +342,8 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
     name: exp.name,
     description: exp.description ?? undefined,
     url: exp.affiliate_url ?? undefined,
-    brand: exp.provider ? { '@type': 'Organization', name: exp.provider } : undefined,
+    image: park.featured_image_url ?? undefined,
+    brand: exp.provider ? { '@type': 'Brand', name: exp.provider } : undefined,
     ...(exp.rating && exp.review_count && {
       aggregateRating: { '@type': 'AggregateRating', ratingValue: exp.rating, reviewCount: exp.review_count, bestRating: 5 },
     }),
@@ -352,6 +353,21 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
       ...(exp.price_from && { price: exp.price_from, priceCurrency: 'USD' }),
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'US',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+      },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: { '@type': 'MonetaryAmount', value: '0', currency: 'USD' },
+        shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'US' },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' },
+          transitTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' },
+        },
+      },
     },
   })) : null;
 
