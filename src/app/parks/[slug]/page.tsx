@@ -866,23 +866,24 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                     <MapPin size={14} /> Get Directions
                   </a>
                 )}
-                {(() => {
-                  const bookingUrl = park.camping_url ?? park.reservation_url ?? null;
-                  if (!bookingUrl) return null;
+                {park.camping_url && (() => {
                   const isThemePark = park.park_types?.some(t => ['Theme Park', 'Water Park'].includes(t));
-                  const bookingLabel = isThemePark
-                    ? 'Book a Resort Stay'
-                    : park.reservation_required && park.camping_url
-                      ? 'Reserve a Campsite'
-                      : 'Book a Campsite';
+                  const label = isThemePark ? 'Book a Resort Stay' : park.reservation_required ? 'Reserve a Campsite' : 'Book a Campsite';
                   return (
-                    <a href={bookingUrl} target="_blank" rel="noopener noreferrer"
+                    <a href={park.camping_url} target="_blank" rel="noopener noreferrer"
                       style={{ background: 'transparent', color: '#413734', border: '2px solid #dfdfdf', borderRadius: '2.3em', padding: '11px 20px', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textDecoration: 'none' }}
                       className="hover:border-[#413734] transition-colors">
-                      <Tent size={14} /> {bookingLabel}
+                      <Tent size={14} /> {label}
                     </a>
                   );
                 })()}
+                {park.reservation_url && (
+                  <a href={park.reservation_url} target="_blank" rel="noopener noreferrer"
+                    style={{ background: 'transparent', color: '#413734', border: '2px solid #dfdfdf', borderRadius: '2.3em', padding: '11px 20px', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textDecoration: 'none' }}
+                    className="hover:border-[#413734] transition-colors">
+                    <Calendar size={14} /> Reserve Facilities
+                  </a>
+                )}
               </div>
             </div>
 
