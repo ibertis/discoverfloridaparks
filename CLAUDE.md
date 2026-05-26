@@ -250,7 +250,7 @@ public/
 | `park_seasonal_events` | Repeater — event_name, month, description, sort_order |
 | `park_nearby` | Junction — park_id ↔ nearby_park_id. Public read-only. |
 | `park_experiences` | Per-park direct/partner deals — managed via park edit form in admin. Renamed from old `experiences` table. |
-| `park_hotels` | Per-park Expedia affiliate hotel picks — managed via park edit form in admin. |
+| `park_hotels` | Per-park hotel picks sourced from Google Places — `url` = direct hotel website; Hotels.com CJ deeplink built at render time. Managed via park edit form in admin. Columns: `id, park_id, name, description, url, price_from, sort_order, distance_from_park_km, pet_friendly, price_level, latitude, longitude`. |
 | `experiences` | **Catalog** of Viator affiliate experiences — auto-matched to park pages by `activity_type` + `regions`. Managed via `/admin/experiences/`. |
 
 ### Hybrid Experiences Model
@@ -574,7 +574,7 @@ This ensures remote parks (WMAs, state forests, wilderness areas) still get hote
 - Section heading: **"Where to Stay Nearby"** when closest hotel ≤32km (~20 miles); **"Where to Stay"** when all hotels are >32km
 - Description shows: **bold street address** · regular-weight distance (e.g. "4735 Helen Hauser Blvd, Titusville · About 11 miles from [Park Name]")
 - Distance text: "Less than a mile" when <1 mile; "About X miles" otherwise (rounded to 1 decimal, drops `.0`)
-- If a park has 0 qualifying hotels after all three radius steps, the `park_hotels` section is omitted, but a fallback "Where to Stay" Expedia city-search CTA is shown instead (uses `buildExpediaCityUrl(park.city)` — see `src/app/parks/[slug]/page.tsx`)
+- If a park has 0 qualifying hotels after all three radius steps, the `park_hotels` section is omitted, but a fallback "Where to Stay" section is shown with both Expedia and Hotels.com city-search buttons (see `src/app/parks/[slug]/page.tsx` `buildExpediaCityUrl` / `buildHotelsComCityUrl`)
 
 ### Audit tool
 
@@ -607,8 +607,8 @@ This ensures remote parks (WMAs, state forests, wilderness areas) still get hote
 
 | Program | Status | Network | Commission | Notes |
 |---|---|---|---|---|
-| Expedia | ✅ Approved | CJ (CID 7957937) | 4% hotels | Primary hotel affiliate. All hotel URLs built via `buildExpediaHotelUrl()` in `scripts/utils/expedia.ts`. Env var: `EXPEDIA_CJ_BASE_URL=https://www.dpbolvw.net/click-101752120-14078545` |
-| Hotels.com | ✅ Approved | CJ (CID 7957937) | TBD | Product Feed requested — pending. Fold in when Feed arrives to provide structured property data (IDs, images, prices). Use Expedia in the meantime. |
+| Expedia | ✅ Active | CJ (CID 7957937) | 4% hotels | City-search CTA on zero-hotels fallback + secondary CTA on each hotel card. `buildExpediaCityUrl()` in `src/app/parks/[slug]/page.tsx`. Env var: `EXPEDIA_CJ_BASE_URL` |
+| Hotels.com | ✅ Active | CJ (CID 7957937) | TBD | "Book on Hotels.com →" pill on every hotel card; city fallback on zero-hotels. `buildHotelsComUrl()` / `buildHotelsComCityUrl()` in `src/app/parks/[slug]/page.tsx`. Deeplinks by hotel name + `latLong` coords. Env var: `HOTELS_COM_CJ_BASE_URL` |
 | Viator | ✅ Active | Direct | ~8% | Experiences only. `pid=P00300517&mcid=42383&medium=link&campaign=dfp-park-pages`. Links in `experiences.affiliate_url`. |
 | Booking.com | ❌ Not approved | — | N/A | `aid=2889331` in old DB records is **INVALID** — earns nothing. Do not use. Add `booking_url` column if/when formally approved. |
 | REI (Impact) | ⏳ Pending | Impact | ~5% | Gear links in `src/lib/gear.ts`. Replace `PENDING` with Impact ID when approved. |
@@ -616,16 +616,19 @@ This ensures remote parks (WMAs, state forests, wilderness areas) still get hote
 
 ### CJ deeplink format
 
-Expedia hotel links are tracked via CJ. The utility at `scripts/utils/expedia.ts` handles building these:
+Both Expedia and Hotels.com use the same CJ click-tracking pattern:
 
 ```
-{EXPEDIA_CJ_BASE_URL}?url={encoded_expedia_destination_url}
+{CJ_BASE_URL}?url={encoded_destination_url}
 ```
 
-- `dpbolvw.net/click-...` → **click tracking URL** (used in all `<a href>` links)
-- `awltovhc.com/image-...` / `lduhtrp.net/image-...` → **impression pixel** (1×1 img tag, never used by DFP)
+- `dpbolvw.net/click-...` → Expedia click tracker (`EXPEDIA_CJ_BASE_URL`)
+- `jdoqocy.com/click-...` → Hotels.com click tracker (`HOTELS_COM_CJ_BASE_URL`)
+- `awltovhc.com/image-...` / `lduhtrp.net/image-...` → **impression pixel** (1×1 img tag, never used)
 
-The env var stores the full click URL so code survives CJ domain rotation without changes.
+Both env vars store the full click URL (including publisher + ad IDs) so code survives CJ domain changes without code edits. Both fall back to plain untracked destination URLs when the env var is absent.
+
+`park_hotels.url` stores the **direct hotel website** from Google Places (not a CJ link). The Hotels.com affiliate CTA is built at render time — it is never stored in the DB.
 
 When in doubt, less is more. A page that feels editorial ranks better and converts better than one that feels commercial.
 
