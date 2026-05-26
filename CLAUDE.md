@@ -608,11 +608,11 @@ This ensures remote parks (WMAs, state forests, wilderness areas) still get hote
 | Program | Status | Network | Commission | Notes |
 |---|---|---|---|---|
 | Expedia | ✅ Active | CJ (CID 7957937) | 4% hotels | City-search CTA on zero-hotels fallback + secondary CTA on each hotel card. `buildExpediaCityUrl()` in `src/app/parks/[slug]/page.tsx`. Env var: `EXPEDIA_CJ_BASE_URL` |
-| Hotels.com | ✅ Active | CJ (CID 7957937) | TBD | "Book on Hotels.com →" pill on every hotel card; city fallback on zero-hotels. `buildHotelsComUrl()` / `buildHotelsComCityUrl()` in `src/app/parks/[slug]/page.tsx`. Deeplinks by hotel name + `latLong` coords. Env var: `HOTELS_COM_CJ_BASE_URL` |
+| Hotels.com | ✅ Active | CJ (CID 7957937) | 4% conventional lodging, 2% vacation rental | "Book on Hotels.com →" pill on every hotel card; city fallback on zero-hotels. `buildHotelsComUrl()` / `buildHotelsComCityUrl()` in `src/app/parks/[slug]/page.tsx`. Deeplinks by hotel name + `latLong` coords. Env var: `HOTELS_COM_CJ_BASE_URL` |
 | Viator | ✅ Active | Direct | ~8% | Experiences only. `pid=P00300517&mcid=42383&medium=link&campaign=dfp-park-pages`. Links in `experiences.affiliate_url`. |
 | Booking.com | ❌ Not approved | — | N/A | `aid=2889331` in old DB records is **INVALID** — earns nothing. Do not use. Add `booking_url` column if/when formally approved. |
-| REI (Impact) | ⏳ Pending | Impact | ~5% | Gear links in `src/lib/gear.ts`. Replace `PENDING` with Impact ID when approved. |
-| Amazon Associates | ✅ Active | Direct | ~3% | Gear fallback. Tag: `discoverflo00-20`. Used for fishing/hunting/equestrian gear. |
+| REI (Impact) | ❌ Not pursuing | Impact | ~5% | Approval too slow. All gear links migrated to Amazon instead. |
+| Amazon Associates | ✅ Active | Direct | ~3% | **All gear** — tag `discoverflo00-20`. Search-query URLs (`/s?k=...`) used throughout — never expire. Do NOT use `amzn.to` short links or product ASIN links (can 404 when discontinued). |
 
 ### CJ deeplink format
 

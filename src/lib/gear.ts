@@ -1,21 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // gear.ts — DFP Gear & What to Pack Configuration
 //
-// All REI URLs verified live against rei.com — May 2026
-//
-// AFFILIATE TRACKING:
-// REI links use Impact affiliate network (Publisher: DFP / info@discoverfloridaparks.com)
-// Amazon links use Associates tag: discoverflo00-20
-//
-// REI Impact deep link format (update IMPACT_ID when DFP account is approved):
-// https://www.avantlink.com/click.php?tt=cl&merchant_id=REI&website_id=[IMPACT_ID]&url=https://www.rei.com/[path]
-//
-// IMPACT_ID = 'PENDING' until Impact approves the DFP publisher account.
-// Once approved: update IMPACT_ID below and all REI links update automatically.
-//
-// NETWORK SPLIT:
-// REI via Impact — all outdoor gear (tents, paddles, boots, binoculars, etc.)
-// Amazon Associates — fishing gear, hunting gear, equestrian gear (REI does not sell these)
+// All gear links use Amazon Associates tag: discoverflo00-20
+// Search-query URLs (/s?k=...) are used throughout — they never expire or 404
+// unlike product-specific ASIN links. Do NOT use amzn.to short links.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface GearItem {
@@ -31,16 +19,7 @@ export interface GearCategory {
   items: GearItem[];
 }
 
-// ── Affiliate helpers ─────────────────────────────────────────────────────────
-
-const IMPACT_ID = 'PENDING'; // ← Update with DFP Impact Publisher ID when approved
-
-function rei(path: string): string {
-  if (IMPACT_ID === 'PENDING') {
-    return `https://www.rei.com/${path}`;
-  }
-  return `https://www.avantlink.com/click.php?tt=cl&merchant_id=REI&website_id=${IMPACT_ID}&url=https://www.rei.com/${path}`;
-}
+// ── Affiliate helper ──────────────────────────────────────────────────────────
 
 const AMAZON_TAG = 'discoverflo00-20';
 
@@ -50,34 +29,33 @@ function amz(searchQuery: string): string {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // UNIVERSAL ITEMS — shown on every park page regardless of amenities
-// All URLs verified ✅
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const UNIVERSAL_ITEMS: GearItem[] = [
   {
     name: 'Sunscreen SPF 50+',
     description: 'Reef-safe, broad spectrum — Florida sun is no joke',
-    url: rei('c/sunscreen'),
+    url: amz('reef safe sunscreen SPF 50 outdoor'),
   },
   {
     name: 'Insect Repellent',
     description: 'DEET-free, long-lasting — essential for Florida outdoors',
-    url: rei('c/insect-repellent'),
+    url: amz('DEET free insect repellent outdoor long lasting'),
   },
   {
     name: 'Insulated Water Bottle',
     description: 'Stay hydrated in Florida heat — 32oz minimum',
-    url: rei('c/water-bottles'),
+    url: amz('insulated water bottle 32oz stainless steel hiking'),
   },
   {
     name: 'Lightweight Rain Jacket',
     description: 'Florida afternoon storms arrive without warning',
-    url: rei('c/rain-jackets'),
+    url: amz('lightweight packable rain jacket hiking'),
   },
   {
     name: 'Polarized Sunglasses',
     description: 'Cut glare on water and trails — a Florida must-have',
-    url: rei('c/sunglasses'),
+    url: amz('polarized sunglasses UV400 outdoor'),
   },
 ];
 
@@ -97,27 +75,27 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: '2-Person Camping Tent',
         description: 'Lightweight & waterproof — Florida-rated',
-        url: rei('c/tents'),
+        url: amz('2 person camping tent lightweight waterproof'),
       },
       {
         name: 'Sleeping Bag (40°F rated)',
         description: 'Warm Florida nights still get cool in winter',
-        url: rei('c/sleeping-bags'),
+        url: amz('sleeping bag 40 degree camping'),
       },
       {
         name: 'Sleeping Pad',
         description: 'Insulated foam or self-inflating — essential comfort',
-        url: rei('c/sleeping-pads'),
+        url: amz('sleeping pad camping self inflating'),
       },
       {
         name: 'Camp Stove',
         description: 'Compact backpacking stove for campsite meals',
-        url: rei('c/camp-stoves'),
+        url: amz('backpacking camp stove compact'),
       },
       {
         name: 'Headlamp',
         description: 'Hands-free trail lighting — always bring a backup',
-        url: rei('c/headlamps'),
+        url: amz('headlamp camping rechargeable bright'),
       },
     ],
   },
@@ -131,22 +109,22 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Trail Shoes or Hiking Boots',
         description: 'Grip & support for Florida\'s sandy and root-covered trails',
-        url: rei('c/hiking-footwear'),
+        url: amz('trail hiking shoes boots outdoor'),
       },
       {
         name: 'Hydration Pack',
         description: 'Hands-free water carry — 2L minimum for Florida heat',
-        url: rei('c/hydration-packs'),
+        url: amz('hydration pack backpack 2L hiking'),
       },
       {
         name: 'Trekking Poles',
         description: 'Reduce knee strain on longer Florida trails',
-        url: rei('c/trekking-poles'),
+        url: amz('trekking poles lightweight collapsible'),
       },
       {
         name: 'Trail GPS',
         description: 'Florida trails can be disorienting — always navigate prepared',
-        url: rei('c/gps-devices'),
+        url: amz('handheld trail GPS hiking navigation'),
       },
     ],
   },
@@ -160,22 +138,22 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Kayak Paddle',
         description: 'Lightweight — less fatigue on long Florida water trails',
-        url: rei('c/kayak-paddles'),
+        url: amz('kayak paddle lightweight fiberglass'),
       },
       {
         name: 'Life Jacket (PFD)',
         description: 'Coast Guard approved — required on Florida waterways',
-        url: rei('c/pfds'),
+        url: amz('life jacket PFD Coast Guard approved kayaking'),
       },
       {
         name: 'Dry Bag (20L)',
         description: 'Keep gear waterproof — a necessity on the water',
-        url: rei('c/dry-bags'),
+        url: amz('dry bag 20L waterproof kayaking'),
       },
       {
         name: 'Waterproof Phone Case',
         description: 'Float-capable pouch for photos and navigation',
-        url: rei('c/waterproof-cases'),
+        url: amz('waterproof phone case float kayaking'),
       },
     ],
   },
@@ -194,12 +172,12 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Water Shoes',
         description: 'Grip on rocky spring shorelines and riverbeds',
-        url: rei('c/water-shoes'),
+        url: amz('water shoes beach river rocky'),
       },
       {
         name: 'Rash Guard',
         description: 'UPF 50+ sun protection in and out of the water',
-        url: rei('c/rashguards'),
+        url: amz('rash guard UPF 50 swimming'),
       },
       {
         name: 'Swim Fins',
@@ -210,8 +188,6 @@ export const GEAR_CATEGORIES: GearCategory[] = [
   },
 
   // ── Fishing ────────────────────────────────────────────────────────────────
-  // Note: REI does not sell fishing or hunting equipment.
-  // All fishing gear links use Amazon Associates.
   {
     label: 'Fishing Gear',
     amenityKey: 'fishing_allowed',
@@ -249,22 +225,22 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Bike Helmet',
         description: 'Non-negotiable — required for trail riding in Florida',
-        url: rei('c/bike-helmets'),
+        url: amz('bike helmet adult trail cycling'),
       },
       {
         name: 'Cycling Gloves',
         description: 'Grip and comfort on Florida\'s long paved trails',
-        url: rei('c/cycling-gloves'),
+        url: amz('cycling gloves padded mountain bike'),
       },
       {
         name: 'Bike Water Bottle & Cage',
         description: 'Hydration access without stopping on the trail',
-        url: rei('c/bike-water-bottles'),
+        url: amz('bike water bottle cage cycling'),
       },
       {
         name: 'Bike Repair Kit',
         description: 'Patch kit, tire levers, and multi-tool — don\'t get stranded',
-        url: rei('c/bike-tools'),
+        url: amz('bike repair kit patch tire lever multi tool'),
       },
     ],
   },
@@ -278,22 +254,22 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Binoculars',
         description: '8x42 magnification — the standard for Florida birding',
-        url: rei('c/binoculars'),
+        url: amz('binoculars 8x42 bird watching wildlife'),
       },
       {
         name: 'Field Guide: Florida',
         description: 'Curated Florida hiking and nature guides for every region',
-        url: 'https://www.rei.com/c/southeast-hiking-guidebooks?ir=category%3Acamping-and-hiking-guidebooks&r=category%3Acamping-and-hiking-guidebooks%7Csoutheast-hiking-guidebooks%3Bstate-province%3AFlorida',
+        url: amz('Florida birding wildlife field guide book'),
       },
       {
         name: 'Action Camera',
         description: 'Capture wildlife from a safe, respectful distance',
-        url: rei('c/action-cameras'),
+        url: amz('action camera waterproof outdoor'),
       },
       {
         name: 'Quick-Dry Hiking Pants',
         description: 'Lightweight, moisture-wicking for Florida\'s humid trails',
-        url: rei('c/mens-hiking-pants'),
+        url: amz('quick dry hiking pants lightweight'),
       },
     ],
   },
@@ -312,17 +288,17 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Packable Beach Chair',
         description: 'Lightweight and sand-proof for all-day beach visits',
-        url: rei('c/camp-chairs'),
+        url: amz('packable beach chair lightweight sand proof'),
       },
       {
         name: 'Dry Bag / Beach Bag',
         description: 'Keep sand and saltwater away from your gear',
-        url: rei('c/dry-bags'),
+        url: amz('dry bag beach waterproof tote'),
       },
       {
         name: 'Water Shoes',
         description: 'Protect feet on rocky and shell-covered Florida shorelines',
-        url: rei('c/water-shoes'),
+        url: amz('water shoes beach rocky shoreline'),
       },
     ],
   },
@@ -336,22 +312,22 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Life Jackets (PFDs)',
         description: 'Florida law requires one per person on board — Coast Guard approved',
-        url: rei('c/pfds'),
+        url: amz('life jacket PFD Coast Guard approved boating'),
       },
       {
         name: 'Dry Bag (30L+)',
         description: 'Keep gear dry on the water — larger capacity for boat trips',
-        url: rei('c/dry-bags'),
+        url: amz('dry bag 30L waterproof boating'),
       },
       {
         name: 'Waterproof Phone Case',
         description: 'Navigation and photos on the water — float-capable pouch',
-        url: rei('c/waterproof-cases'),
+        url: amz('waterproof phone case float boating'),
       },
       {
         name: 'Marine Cooler',
         description: 'Keep drinks and catch cold on Florida\'s warm water days',
-        url: rei('c/coolers'),
+        url: amz('marine cooler insulated boat'),
       },
     ],
   },
@@ -365,28 +341,27 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Dog Harness',
         description: 'Florida parks require leashes — padded harness for trail comfort',
-        url: rei('c/dog-harnesses'),
+        url: amz('dog harness padded trail hiking'),
       },
       {
         name: 'Dog Leash',
         description: '6ft max on Florida trails — durable and tangle-free',
-        url: rei('c/dog-leashes'),
+        url: amz('dog leash 6ft durable trail'),
       },
       {
         name: 'Dog Life Jacket',
         description: 'Essential for paddle trips and water parks with dogs',
-        url: rei('c/dog-pfds'),
+        url: amz('dog life jacket PFD kayaking'),
       },
       {
         name: 'Dog Gear & Accessories',
         description: 'Collapsible bowls, booties, and more for trail dogs',
-        url: rei('c/dog-gear'),
+        url: amz('dog trail gear collapsible bowl booties'),
       },
     ],
   },
 
   // ── Horseback Riding ───────────────────────────────────────────────────────
-  // Note: REI does not carry equestrian gear. Amazon Associates used.
   {
     label: 'Equestrian Gear',
     amenityKey: 'horseback_riding',
@@ -416,7 +391,6 @@ export const GEAR_CATEGORIES: GearCategory[] = [
   },
 
   // ── Hunting ────────────────────────────────────────────────────────────────
-  // Note: REI does not sell hunting equipment. Amazon Associates used.
   {
     label: 'Hunting Gear',
     amenityKey: 'hunting_allowed',
@@ -446,12 +420,3 @@ export const GEAR_CATEGORIES: GearCategory[] = [
   },
 
 ];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TO ACTIVATE IMPACT TRACKING:
-// 1. Log into app.impact.com with info@discoverfloridaparks.com
-// 2. Get your DFP Publisher ID from the dashboard
-// 3. Apply for REI's program from within that account
-// 4. Confirm the exact REI deep link format from Impact dashboard
-// 5. Update IMPACT_ID above — all REI links update automatically
-// ─────────────────────────────────────────────────────────────────────────────
