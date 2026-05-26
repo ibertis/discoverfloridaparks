@@ -690,3 +690,10 @@ ins.adsbygoogle[data-ad-status="unfilled"] {
 .ad-unit:has(> ins.adsbygoogle[data-ad-status="unfilled"]) {
   display: none !important;
 }
+
+/* ── Hotels.com ghost pill hover ─────────────────────────────────────────── */
+.hotels-pill:hover {
+  background: #f0ece6;
+  color: #726d6b !important;
+  border-color: #a6967c !important;
+}

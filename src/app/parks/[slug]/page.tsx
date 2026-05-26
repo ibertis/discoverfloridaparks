@@ -761,7 +761,8 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                           href={buildHotelsComUrl(hotel.name, hotel.latitude ?? null, hotel.longitude ?? null)}
                           target="_blank"
                           rel="nofollow sponsored noopener noreferrer"
-                          style={{ display: 'inline-block', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600, color: '#a6967c', textDecoration: 'none', borderRadius: '2.3em', border: '1px solid #c4bab3', padding: '3px 11px' }}
+                          className="hotels-pill"
+                          style={{ display: 'inline-block', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600, color: '#a6967c', textDecoration: 'none', borderRadius: '2.3em', border: '1px solid #c4bab3', padding: '3px 11px', transition: 'background 0.15s, color 0.15s, border-color 0.15s' }}
                         >
                           Book on Hotels.com →
                         </a>
