@@ -95,6 +95,21 @@ function buildExpediaCityUrl(city: string): string {
   return cjBase ? `${cjBase}?url=${encodeURIComponent(expediaUrl)}` : expediaUrl;
 }
 
+function buildHotelsComUrl(hotelName: string, lat: number | null, lng: number | null): string {
+  const cjBase = process.env.HOTELS_COM_CJ_BASE_URL;
+  const destination = encodeURIComponent(hotelName);
+  let hotelsUrl = `https://www.hotels.com/Hotel-Search?destination=${destination}`;
+  if (lat != null && lng != null) hotelsUrl += `&latLong=${lat},${lng}`;
+  return cjBase ? `${cjBase}?url=${encodeURIComponent(hotelsUrl)}` : hotelsUrl;
+}
+
+function buildHotelsComCityUrl(city: string): string {
+  const cjBase = process.env.HOTELS_COM_CJ_BASE_URL;
+  const destination = encodeURIComponent(`${city} FL`);
+  const hotelsUrl = `https://www.hotels.com/Hotel-Search?destination=${destination}`;
+  return cjBase ? `${cjBase}?url=${encodeURIComponent(hotelsUrl)}` : hotelsUrl;
+}
+
 function parseHotelAddress(description: string | null, hotelName: string): string {
   if (!description) return '';
   let addr = description;
@@ -136,7 +151,7 @@ function HotelStars({ rating }: { rating: number }) {
 async function getPark(slug: string): Promise<Park | null> {
   const { data, error } = await supabase
     .from('parks')
-    .select(`*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*), park_experiences(id, name, description, duration, price_from, href, source, business_name, sort_order), park_hotels(id, name, description, url, price_from, sort_order, distance_from_park_km, pet_friendly, price_level)`)
+    .select(`*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*), park_experiences(id, name, description, duration, price_from, href, source, business_name, sort_order), park_hotels(id, name, description, url, price_from, sort_order, distance_from_park_km, pet_friendly, price_level, latitude, longitude)`)
     .eq('slug', slug)
     .single();
   if (error || !data) return null;
@@ -664,21 +679,29 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
             {hotels.length === 0 && park.city && (
               <section>
                 <SectionHeading>Where to Stay</SectionHeading>
-                <a
-                  href={buildExpediaCityUrl(park.city)}
-                  target="_blank"
-                  rel="nofollow sponsored noopener noreferrer"
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 16, padding: '20px 24px', border: '1px solid #eeeeee', background: '#fff', textDecoration: 'none', gap: 12 }}
-                >
-                  <span>
-                    <span style={{ display: 'block', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', marginBottom: 4 }}>
-                      Search hotels near {park.name}
-                    </span>
-                    <span style={{ fontFamily: 'Glegoo, serif', fontWeight: 700, fontSize: '0.82rem', color: '#a6967c' }}>
-                      Find available rooms on Expedia →
-                    </span>
+                <div style={{ borderRadius: 16, padding: '20px 24px', border: '1px solid #eeeeee', background: '#fff' }}>
+                  <span style={{ display: 'block', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#333', marginBottom: 12 }}>
+                    Search hotels near {park.name}
                   </span>
-                </a>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <a
+                      href={buildExpediaCityUrl(park.city)}
+                      target="_blank"
+                      rel="nofollow sponsored noopener noreferrer"
+                      style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700, color: '#ff7044', textDecoration: 'none', borderRadius: '2.3em', border: '1.5px solid #ff7044', padding: '5px 14px' }}
+                    >
+                      Search on Expedia →
+                    </a>
+                    <a
+                      href={buildHotelsComCityUrl(park.city)}
+                      target="_blank"
+                      rel="nofollow sponsored noopener noreferrer"
+                      style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700, color: '#d4145a', textDecoration: 'none', borderRadius: '2.3em', border: '1.5px solid #d4145a', padding: '5px 14px' }}
+                    >
+                      Search on Hotels.com →
+                    </a>
+                  </div>
+                </div>
                 <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#c4bab3', marginTop: 12, lineHeight: 1.6 }}>
                   Hotel links are affiliate links. We earn a small commission at no extra cost to you.
                 </p>
@@ -733,6 +756,16 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                           {!address && distanceText && <span style={{ fontWeight: 400 }}>{distanceText}</span>}
                         </p>
                       )}
+                      <div style={{ marginTop: 12 }}>
+                        <a
+                          href={buildHotelsComUrl(hotel.name, hotel.latitude ?? null, hotel.longitude ?? null)}
+                          target="_blank"
+                          rel="nofollow sponsored noopener noreferrer"
+                          style={{ display: 'inline-block', fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', fontWeight: 700, color: '#d4145a', textDecoration: 'none', borderRadius: '2.3em', border: '1.5px solid #d4145a', padding: '4px 13px', transition: 'background 0.15s' }}
+                        >
+                          Book on Hotels.com →
+                        </a>
+                      </div>
                     </div>
                     );
                   })}
