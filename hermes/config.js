@@ -25,6 +25,9 @@ export const config = {
       'plantation.org',
       'sarasotacountyparks.com',
       'sunrisefl.gov',
+      'delraybeachfl.gov',   // Atlantic Dunes Park — confirmed valid, blocks bots
+      'sibfl.gov',           // Samson Oceanfront Park — confirmed valid, blocks bots
+      'coralsprings.gov',    // Sawgrass Trailhead at Atlantic Blvd — confirmed valid, blocks bots
     ],
   },
 
