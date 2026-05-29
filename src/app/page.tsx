@@ -79,6 +79,29 @@ export default async function HomePage() {
   );
   const typeCountMap = Object.fromEntries(TYPES.map((t, i) => [t.filterName, typeCounts[i]]));
 
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Discover Florida Parks',
+    url: 'https://discoverfloridaparks.com',
+    creator: {
+      '@type': 'Person',
+      name: 'Gabriel Ibertis',
+      url: 'https://gabrielibertis.com',
+    },
+  };
+
+  const personSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Gabriel Ibertis',
+    url: 'https://gabrielibertis.com',
+    sameAs: [
+      'https://gabrielibertis.com',
+      'https://discoverfloridaparks.com',
+    ],
+  };
+
   const itemListSchema = featuredParks && featuredParks.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -96,6 +119,8 @@ export default async function HomePage() {
 
   return (
     <div style={{ background: '#fff', color: '#413734' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
       {itemListSchema && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
       )}
