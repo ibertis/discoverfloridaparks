@@ -77,7 +77,7 @@ function buildHotelDescription(place: any, park: ParkRow): string {
 
 // ─── Core hotel enrichment (mirrors enrichHotels in enrich-one-park.ts) ───────
 
-const NOT_A_HOTEL = /\b(airboat|canoe|kayak|outfitter|outfitters|visitor cent(?:er|re)|chamber of commerce|fish camp(?! & rv| resort)|\brides?\b|guided tour|boat tour|nature tour|wildlife tour|group camp|scout(?:s)? (lodge|camp)|bsa\b|campsite|cave dive|tcas camping|swfwmd|water management district|chickee|canoe shelter|glamping(?! resort)|rv park|rv resort|campground|fish camp)\b|\bcamp$/i;
+const NOT_A_HOTEL = /\b(airboat|canoe|kayak|outfitter|outfitters|visitor cent(?:er|re)|chamber of commerce|fish camp(?! & rv| resort)|\brides?\b|guided tour|boat tour|nature tour|wildlife tour|group camp|scout(?:s)? (lodge|camp)|bsa\b|campsite|cave dive|tcas camping|swfwmd|water management district|chickee|canoe shelter|glamping(?! resort)|rv park|rv resort|campground|fish camp|mobile home|retirement|senior living|senior community|55\+|residential community)\b|\bcamp$/i;
 
 function isLikelyHotel(name: string): boolean {
   return !NOT_A_HOTEL.test(name);
