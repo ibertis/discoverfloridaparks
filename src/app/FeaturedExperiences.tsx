@@ -31,27 +31,35 @@ export default async function FeaturedExperiences() {
         {/* Right — sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-          {/* Ad placeholder */}
+          {/* Backcountry Summer Sale — affiliate card */}
           <div style={{ borderRadius: 16, overflow: 'hidden', background: '#362f35', minHeight: 300, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 28px', textAlign: 'center' }}>
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(145deg, #413734 0%, #1e1a1a 100%)', opacity: 0.9 }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(145deg, #1e3a2f 0%, #1a2e24 100%)', opacity: 1 }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
-              <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 600, color: '#a6967c', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 10px' }}>
-                Premium Placement
+              <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.68rem', fontWeight: 600, color: '#7dbf9e', textTransform: 'uppercase', letterSpacing: '0.14em', margin: '0 0 10px' }}>
+                Summer Sale · Sponsored
               </p>
-              <h3 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '2.2rem', color: '#fff', margin: '0 0 12px', letterSpacing: '-0.04em', lineHeight: 1 }}>
-                Advertise Here
+              <h3 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '2.4rem', color: '#fff', margin: '0 0 4px', letterSpacing: '-0.04em', lineHeight: 0.95 }}>
+                Up to 40% Off
               </h3>
-              <p style={{ fontFamily: 'Glegoo, serif', fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, margin: '0 0 24px' }}>
-                Reach thousands of Florida park visitors every month.
+              <p style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.3rem', color: '#7dbf9e', margin: '0 0 16px', letterSpacing: '-0.03em' }}>
+                Gear &amp; Apparel
+              </p>
+              <p style={{ fontFamily: 'Glegoo, serif', fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, margin: '0 0 24px' }}>
+                Tents, sleep systems, bikes, hiking gear &amp; more — shop Backcountry&apos;s biggest sale of the season.
               </p>
               <a
-                href="mailto:contact@discoverfloridaparks.com"
+                href="https://backcountry.tnu8.net/c/6182914/366477/5311"
+                rel="sponsored noopener noreferrer"
+                target="_blank"
                 style={{ display: 'inline-block', background: '#ff7044', color: '#fff', borderRadius: '2.3em', padding: '10px 28px', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.82rem', textDecoration: 'none' }}
                 className="hover:opacity-85 transition-opacity"
               >
-                Get in Touch →
+                Shop the Sale →
               </a>
             </div>
+            {/* Impact impression pixel — required for tracking */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img height={0} width={0} src="https://backcountry.tnu8.net/i/6182914/366477/5311" style={{ position: 'absolute', visibility: 'hidden', border: 0 }} alt="" />
           </div>
 
           {/* Newsletter card */}
