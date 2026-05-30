@@ -197,6 +197,16 @@ export const GEAR_CATEGORIES: GearCategory[] = [
         description: 'Extend your range in springs and coastal waters',
         url: bc('swim fins snorkeling'),
       },
+      {
+        name: 'Board Shorts / Swim Trunks',
+        description: 'Quick-dry — doubles as a hiking short on the trail',
+        url: bc('board shorts swim trunks quick dry'),
+      },
+      {
+        name: 'Swimsuit',
+        description: 'Chlorine & saltwater resistant for springs and coastal parks',
+        url: bc('womens swimsuit one piece bikini outdoor'),
+      },
     ],
   },
 
