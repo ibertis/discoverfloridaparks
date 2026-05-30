@@ -309,7 +309,7 @@ async function enrichHotels(park: ParkRecord): Promise<void> {
     const data = await res.json() as any;
     if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') throw new Error(`Places API: ${data.status}`);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const NOT_A_HOTEL = /\b(airboat|canoe|kayak|outfitter|outfitters|visitor cent(?:er|re)|chamber of commerce|fish camp(?! & rv| resort)|\brides?\b|guided tour|boat tour|nature tour|wildlife tour|group camp|scout(?:s)? (lodge|camp)|bsa\b|campsite|cave dive|tcas camping|swfwmd|water management district|chickee|canoe shelter|glamping(?! resort)|rv park|rv resort|campground|fish camp|mobile home|retirement|senior living|senior community|55\+|residential community)\b|\bcamp$/i;
+    const NOT_A_HOTEL = /\b(airboat|canoe|kayak|outfitter|outfitters|visitor cent(?:er|re)|chamber of commerce|fish camp(?! & rv| resort)|\brides?\b|guided tour|boat tour|nature tour|wildlife tour|group camp|scout(?:s)? (lodge|camp)|bsa\b|campsite|cave dive|tcas camping|swfwmd|water management district|chickee|canoe shelter|glamping(?! resort)|rv park|rv resort|campground|fish camp|mobile home|retirement|senior living|senior community|55\+|residential community|golf academy|golf club|golf center|services llc|management group|collection group|realty|real estate)\b|\bcamp$/i;
     return (data.results || []).filter((p: any) => (p.rating ?? 0) >= 3.8 && !NOT_A_HOTEL.test(p.name));
   }
 
