@@ -31,7 +31,7 @@ export default async function FeaturedExperiences() {
         {/* Right — sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-          {/* Backcountry Summer Sale — affiliate card */}
+          {/* Backcountry Summer Sale — affiliate card. TODO: swap out after 2026-08-31 (sale ends) */}
           <div style={{ borderRadius: 16, overflow: 'hidden', background: '#362f35', minHeight: 300, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 28px', textAlign: 'center' }}>
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(145deg, #1e3a2f 0%, #1a2e24 100%)', opacity: 1 }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
