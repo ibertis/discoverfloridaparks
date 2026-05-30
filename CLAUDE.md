@@ -611,8 +611,9 @@ This ensures remote parks (WMAs, state forests, wilderness areas) still get hote
 | Hotels.com | ✅ Active | CJ (CID 7957937) | 4% conventional lodging, 2% vacation rental | "Book on Hotels.com →" pill on every hotel card; city fallback on zero-hotels. `buildHotelsComUrl()` / `buildHotelsComCityUrl()` in `src/app/parks/[slug]/page.tsx`. Deeplinks by hotel name + `latLong` coords. Env var: `HOTELS_COM_CJ_BASE_URL` |
 | Viator | ✅ Active | Direct | ~8% | Experiences only. `pid=P00300517&mcid=42383&medium=link&campaign=dfp-park-pages`. Links in `experiences.affiliate_url`. |
 | Booking.com | ❌ Not approved | — | N/A | `aid=2889331` in old DB records is **INVALID** — earns nothing. Do not use. Add `booking_url` column if/when formally approved. |
-| REI (Impact) | ❌ Not pursuing | Impact | ~5% | Approval too slow. All gear links migrated to Amazon instead. |
-| Amazon Associates | ✅ Active | Direct | ~3% | **All gear** — tag `discoverflo00-20`. Search-query URLs (`/s?k=...`) used throughout — never expire. Do NOT use `amzn.to` short links or product ASIN links (can 404 when discontinued). |
+| Backcountry.com | ✅ Active | Impact (ID 6182914) | ~8% | **Primary outdoor gear** — camping, hiking, paddling, biking, wildlife, beach, boating, dog gear. Deeplinks via `bc()` in `src/lib/gear.ts`. Publisher 6182914, campaign 5311, ad 366476. Format: `https://backcountry.tnu8.net/c/6182914/366476/5311?url={encoded_search_url}` |
+| REI (Impact) | ❌ Not pursuing | Impact | ~5% | Approval too slow. Replaced by Backcountry. |
+| Amazon Associates | ✅ Active | Direct | ~3% | **Fishing, hunting, equestrian, books, consumables** (sunscreen, bug spray) — categories Backcountry doesn't carry. Tag `discoverflo00-20`. Search-query URLs (`/s?k=...`) — never expire. Do NOT use `amzn.to` short links or ASIN links. |
 
 ### CJ deeplink format
 
