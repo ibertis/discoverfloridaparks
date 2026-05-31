@@ -1,15 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Proxies Google Places v1 photo media to avoid exposing the API key client-side.
-// Usage: /api/hotel-photo?ref=places%2F{placeId}%2Fphotos%2F{photoId}
+// Proxies hotel photos to avoid exposing the Google API key client-side.
 //
-// Uses skipHttpRedirect=true to get the CDN URI first, then fetches the image.
-// This is more reliable than following the 302 redirect in a server environment.
+// Supports two modes based on the `ref` query param:
+//   1. Google Places reference (starts with "places/"):
+//        /api/hotel-photo?ref=places%2F{placeId}%2Fphotos%2F{photoId}
+//        Uses skipHttpRedirect=true to get the CDN URI, then streams the image.
+//   2. Direct HTTPS URL (user-provided / Supabase Storage):
+//        /api/hotel-photo?ref=https%3A%2F%2F...
+//        Fetches the URL directly and streams the image.
+
+const CACHE = 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600';
+
+async function streamUrl(url: string): Promise<NextResponse> {
+  const res = await fetch(url);
+  if (!res.ok) return new NextResponse('Image fetch failed', { status: 502 });
+  const buffer = await res.arrayBuffer();
+  const contentType = res.headers.get('content-type') ?? 'image/jpeg';
+  return new NextResponse(buffer, { status: 200, headers: { 'Content-Type': contentType, 'Cache-Control': CACHE } });
+}
 
 export async function GET(req: NextRequest) {
   const ref = req.nextUrl.searchParams.get('ref');
   if (!ref) {
     return new NextResponse('Missing ref', { status: 400 });
+  }
+
+  // Direct URL (user-provided photo stored in Supabase Storage or elsewhere)
+  if (ref.startsWith('https://')) {
+    return streamUrl(ref);
   }
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
@@ -39,14 +58,5 @@ export async function GET(req: NextRequest) {
     return new NextResponse('CDN fetch failed', { status: 502 });
   }
 
-  const contentType = imgRes.headers.get('content-type') ?? 'image/jpeg';
-  const buffer = await imgRes.arrayBuffer();
-
-  return new NextResponse(buffer, {
-    status: 200,
-    headers: {
-      'Content-Type': contentType,
-      'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600',
-    },
-  });
+  return streamUrl(photoUri);
 }
