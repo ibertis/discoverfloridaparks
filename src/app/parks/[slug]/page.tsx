@@ -729,20 +729,18 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                       ? `/api/hotel-photo?ref=${encodeURIComponent(hotel.photo_reference)}`
                       : null;
                     return (
-                    <div key={hotel.id} style={{ borderRadius: 16, border: '1px solid #eeeeee', background: '#fff', overflow: 'hidden' }}>
-                      {/* Photo thumbnail */}
+                    <div key={hotel.id} style={{ borderRadius: 16, border: '1px solid #eeeeee', background: '#fff', overflow: 'hidden', display: 'flex', alignItems: 'stretch' }}>
+                      {/* Left photo thumbnail */}
                       {photoSrc && (
-                        <div style={{ height: 160, overflow: 'hidden', background: '#f5f0ec' }}>
+                        <div style={{ width: 96, flexShrink: 0, overflow: 'hidden', background: '#f0ece6' }}>
                           <img
                             src={photoSrc}
-                            alt={hotel.name}
-                            width={600}
-                            height={160}
+                            alt=""
                             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                           />
                         </div>
                       )}
-                      <div style={{ padding: '16px 20px 18px' }}>
+                      <div style={{ padding: '16px 20px 18px', flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: (address || distanceText) ? 8 : 0 }}>
                           <a href={hotel.url} target="_blank" rel="nofollow sponsored noopener noreferrer"
                             style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', textDecoration: 'none' }}>
