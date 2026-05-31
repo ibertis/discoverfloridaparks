@@ -729,59 +729,52 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                       ? `/api/hotel-photo?ref=${encodeURIComponent(hotel.photo_reference)}`
                       : null;
                     return (
-                    <div key={hotel.id} style={{ borderRadius: 16, border: '1px solid #eeeeee', background: '#fff', overflow: 'hidden', display: 'flex', alignItems: 'stretch' }}>
-                      {/* Full-height left thumbnail */}
+                    <div key={hotel.id} className="hotel-card">
                       {photoSrc && (
-                        <div style={{ width: 96, flexShrink: 0, overflow: 'hidden', background: '#f0ece6' }}>
-                          <img
-                            src={photoSrc}
-                            alt=""
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                          />
+                        <div className="hotel-thumb">
+                          <img src={photoSrc} alt="" />
                         </div>
                       )}
-                      <div style={{ padding: '16px 20px 18px', flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: (address || distanceText) ? 8 : 0 }}>
-                          <a href={hotel.url} target="_blank" rel="nofollow sponsored noopener noreferrer"
-                            style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', textDecoration: 'none' }}>
-                            {hotel.name}
-                          </a>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
-                            {hotelRating && (
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                                <HotelStars rating={hotelRating.rating} />
-                                {hotel.place_id
-                                  ? <HotelReviewsModal placeId={hotel.place_id} hotelName={hotel.name} reviewCount={hotelRating.reviewCount} rating={hotelRating.rating} />
-                                  : <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', color: '#a6967c' }}>({hotelRating.reviewCount.toLocaleString()} reviews)</span>
-                                }
-                              </span>
-                            )}
-                            {hotel.pet_friendly === true && (
-                              <span style={{ background: '#e6f2ea', color: '#3d7a52', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>🐾 Pet-friendly</span>
-                            )}
-                            {hotel.price_level && (
-                              <span style={{ background: '#f0ece6', color: '#726d6b', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>{'$'.repeat(hotel.price_level)}</span>
-                            )}
-                          </div>
+                      <div className="hotel-body">
+                        {/* Name always on its own line */}
+                        <a href={hotel.url} target="_blank" rel="nofollow sponsored noopener noreferrer"
+                          style={{ display: 'block', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', textDecoration: 'none', marginBottom: 6 }}>
+                          {hotel.name}
+                        </a>
+                        {/* Stars + badges wrap freely */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 8px', marginBottom: (address || distanceText) ? 10 : 0 }}>
+                          {hotelRating && (
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                              <HotelStars rating={hotelRating.rating} />
+                              {hotel.place_id
+                                ? <HotelReviewsModal placeId={hotel.place_id} hotelName={hotel.name} reviewCount={hotelRating.reviewCount} rating={hotelRating.rating} />
+                                : <span style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', color: '#a6967c' }}>({hotelRating.reviewCount.toLocaleString()} reviews)</span>
+                              }
+                            </span>
+                          )}
+                          {hotel.pet_friendly === true && (
+                            <span style={{ background: '#e6f2ea', color: '#3d7a52', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>🐾 Pet-friendly</span>
+                          )}
+                          {hotel.price_level && (
+                            <span style={{ background: '#f0ece6', color: '#726d6b', borderRadius: '2.3em', padding: '3px 10px', fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', fontWeight: 700 }}>{'$'.repeat(hotel.price_level)}</span>
+                          )}
                         </div>
                         {(address || distanceText) && (
-                          <p style={{ fontFamily: 'Glegoo, serif', fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: 0 }}>
+                          <p style={{ fontFamily: 'Glegoo, serif', fontSize: '0.85rem', color: '#726d6b', lineHeight: 1.6, margin: '0 0 12px' }}>
                             {address && <strong>{address}</strong>}
                             {address && distanceText && <span style={{ fontWeight: 400 }}> · {distanceText}</span>}
                             {!address && distanceText && <span style={{ fontWeight: 400 }}>{distanceText}</span>}
                           </p>
                         )}
-                        <div style={{ marginTop: 12 }}>
-                          <a
-                            href={buildHotelsComUrl(hotel.name, hotel.latitude ?? null, hotel.longitude ?? null)}
-                            target="_blank"
-                            rel="nofollow sponsored noopener noreferrer"
-                            className="hotels-pill"
-                            style={{ display: 'inline-block', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600, color: '#a6967c', textDecoration: 'none', borderRadius: '2.3em', border: '1px solid #c4bab3', padding: '3px 11px', transition: 'background 0.15s, color 0.15s, border-color 0.15s' }}
-                          >
-                            Book on Hotels.com →
-                          </a>
-                        </div>
+                        <a
+                          href={buildHotelsComUrl(hotel.name, hotel.latitude ?? null, hotel.longitude ?? null)}
+                          target="_blank"
+                          rel="nofollow sponsored noopener noreferrer"
+                          className="hotels-pill"
+                          style={{ display: 'inline-block', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600, color: '#a6967c', textDecoration: 'none', borderRadius: '2.3em', border: '1px solid #c4bab3', padding: '3px 11px', transition: 'background 0.15s, color 0.15s, border-color 0.15s' }}
+                        >
+                          Book on Hotels.com →
+                        </a>
                       </div>
                     </div>
                     );

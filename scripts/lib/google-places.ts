@@ -75,14 +75,14 @@ export async function getHotelInfo(placeId: string): Promise<HotelInfo> {
   const res = await fetch(url, {
     headers: {
       'X-Goog-Api-Key': API_KEY,
-      'X-Goog-FieldMask': 'allowsDogs,websiteUri,priceLevel,photos',
+      'X-Goog-FieldMask': 'websiteUri,priceLevel,photos',
     },
   });
   if (!res.ok) return { website: null, petFriendly: null, priceLevel: null, photoReference: null };
   const data = await res.json() as any;
   return {
     website: data.websiteUri ?? null,
-    petFriendly: typeof data.allowsDogs === 'boolean' ? data.allowsDogs : null,
+    petFriendly: null, // allowsDogs removed — Enterprise tier ($40/1k); existing DB values preserved
     priceLevel: PRICE_LEVEL_MAP[data.priceLevel] ?? null,
     // photos[0].name = "places/{place_id}/photos/{photo_id}" — used by /api/hotel-photo proxy
     photoReference: data.photos?.[0]?.name ?? null,
