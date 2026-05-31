@@ -715,9 +715,9 @@ ins.adsbygoogle[data-ad-status="unfilled"] {
   .hotel-body { padding: 14px 16px 16px; }
 }
 
-/* Tablet / Desktop: photo on left */
+/* Tablet / Desktop: photo on left, landscape orientation */
 @media (min-width: 640px) {
   .hotel-card { display: flex; align-items: stretch; }
-  .hotel-thumb { width: 120px; }
+  .hotel-thumb { width: 160px; }
   .hotel-body { padding: 16px 20px 18px; flex: 1; min-width: 0; }
 }
