@@ -729,10 +729,10 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                       ? `/api/hotel-photo?ref=${encodeURIComponent(hotel.photo_reference)}`
                       : null;
                     return (
-                    <div key={hotel.id} style={{ borderRadius: 16, border: '1px solid #eeeeee', background: '#fff', overflow: 'hidden', display: 'flex', alignItems: 'center', padding: photoSrc ? '14px 20px 14px 14px' : '16px 20px 18px' }}>
-                      {/* Square left thumbnail */}
+                    <div key={hotel.id} style={{ borderRadius: 16, border: '1px solid #eeeeee', background: '#fff', overflow: 'hidden', display: 'flex', alignItems: 'stretch' }}>
+                      {/* Full-height left thumbnail */}
                       {photoSrc && (
-                        <div style={{ width: 80, height: 80, flexShrink: 0, overflow: 'hidden', background: '#f0ece6', borderRadius: 10, marginRight: 16 }}>
+                        <div style={{ width: 96, flexShrink: 0, overflow: 'hidden', background: '#f0ece6' }}>
                           <img
                             src={photoSrc}
                             alt=""
@@ -740,7 +740,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                           />
                         </div>
                       )}
-                      <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ padding: '16px 20px 18px', flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: (address || distanceText) ? 8 : 0 }}>
                           <a href={hotel.url} target="_blank" rel="nofollow sponsored noopener noreferrer"
                             style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', textDecoration: 'none' }}>
