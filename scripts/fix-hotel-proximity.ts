@@ -59,6 +59,8 @@ interface HotelInsert {
   distance_from_park_km: number;
   pet_friendly: boolean | null;
   price_level: number | null;
+  place_id: string | null;
+  photo_reference: string | null;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -162,7 +164,7 @@ async function enrichHotelsForPark(park: ParkRow, apiKey: string, dryRun = false
       Number(park.latitude), Number(park.longitude),
       hotelLat, hotelLng,
     );
-    const { website, petFriendly, priceLevel } = await getHotelInfo(candidate.place_id);
+    const { website, petFriendly, priceLevel, photoReference } = await getHotelInfo(candidate.place_id);
 
     return {
       park_id: park.id,
@@ -174,6 +176,8 @@ async function enrichHotelsForPark(park: ParkRow, apiKey: string, dryRun = false
       distance_from_park_km: Math.round(distanceKm * 100) / 100,
       pet_friendly: petFriendly,
       price_level: priceLevel,
+      place_id: candidate.place_id ?? null,
+      photo_reference: photoReference,
     };
   }));
 
