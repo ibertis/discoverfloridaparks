@@ -726,7 +726,9 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                     const address = parseHotelAddress(hotel.description, hotel.name);
                     const distanceText = formatHotelDistance(hotel.distance_from_park_km, park.name);
                     const photoSrc = hotel.photo_reference
-                      ? `/api/hotel-photo?ref=${encodeURIComponent(hotel.photo_reference)}`
+                      ? (hotel.photo_reference.startsWith('/') || hotel.photo_reference.startsWith('https://')
+                          ? hotel.photo_reference
+                          : `/api/hotel-photo?ref=${encodeURIComponent(hotel.photo_reference)}`)
                       : null;
                     return (
                     <div key={hotel.id} className="hotel-card">
