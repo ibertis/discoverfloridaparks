@@ -18,6 +18,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 import { supabaseAdmin } from './lib/supabase-admin.js';
 import { getHotelInfo } from './lib/google-places.js';
+import { resolveHotelPhoto } from './lib/hotel-photo.js';
 
 const DELAY_MS = 250;
 const PRICE_LEVEL_MAP: Record<string, number> = {
@@ -121,7 +122,7 @@ async function main() {
           .from('park_hotels')
           .update({
             place_id: placeId,
-            photo_reference: info.photoReference,
+            photo_reference: await resolveHotelPhoto(info.photoReference, placeId),
             ...(info.petFriendly !== null ? { pet_friendly: info.petFriendly } : {}),
             ...(info.priceLevel !== null ? { price_level: info.priceLevel } : {}),
           })
