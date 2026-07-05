@@ -374,7 +374,7 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
     await fetch('/admin/api/save-park', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: park!.id }),
+      body: JSON.stringify({ id: park!.id, slug: park!.slug }),
     });
     router.push('/admin/parks');
   }

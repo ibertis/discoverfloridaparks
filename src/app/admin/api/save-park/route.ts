@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import { getAdminUser, getUserRole } from '@/lib/supabase-server';
+
+// Refresh the cached pages a park appears on so admin edits show up immediately
+// instead of waiting on the ISR TTL. (Region hub pages refresh on their own TTL.)
+function revalidatePark(slug?: string | null) {
+  if (slug) revalidatePath(`/parks/${slug}`);
+  revalidatePath('/parks');
+  revalidatePath('/map');
+  revalidatePath('/');
+}
 
 export async function POST(req: NextRequest) {
   const user = await getAdminUser();
@@ -89,6 +99,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  revalidatePark(park.slug);
   return NextResponse.json({ id: parkId, slug: park.slug });
 }
 
@@ -102,8 +113,9 @@ export async function DELETE(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const { id } = await req.json();
+  const { id, slug } = await req.json();
   const { error } = await db.from('parks').delete().eq('id', id);
   if (error) { console.error('save-park delete:', error.message); return NextResponse.json({ error: 'Failed to delete park.' }, { status: 500 }); }
+  revalidatePark(slug);
   return NextResponse.json({ ok: true });
 }
