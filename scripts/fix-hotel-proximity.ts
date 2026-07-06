@@ -22,6 +22,7 @@ import { supabaseAdmin } from './lib/supabase-admin.js';
 import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
 import { buildExpediaHotelUrl } from './utils/expedia.js';
 import { getHotelInfo } from './lib/google-places.js';
+import { resolveHotelPhoto } from './lib/hotel-photo.js';
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
 
@@ -177,7 +178,7 @@ async function enrichHotelsForPark(park: ParkRow, apiKey: string, dryRun = false
       pet_friendly: petFriendly,
       price_level: priceLevel,
       place_id: candidate.place_id ?? null,
-      photo_reference: photoReference,
+      photo_reference: await resolveHotelPhoto(photoReference, candidate.place_id ?? candidate.name),
     };
   }));
 

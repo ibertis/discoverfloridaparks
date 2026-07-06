@@ -16,8 +16,6 @@ const OTHER_COLUMNS = [
     links: [
       { label: 'Destinations',   href: '/parks' },
       { label: 'Travel Trends',  href: '/travel-trends' },
-      { label: 'Our Deals',      href: '/experiences' },
-      { label: 'Upcoming Trips', href: '/experiences/featured' },
     ],
   },
   {

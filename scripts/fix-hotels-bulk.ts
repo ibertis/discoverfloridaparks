@@ -17,6 +17,7 @@ import { supabaseAdmin } from './lib/supabase-admin.js';
 import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
 import { buildExpediaHotelUrl } from './utils/expedia.js';
 import { getHotelInfo } from './lib/google-places.js';
+import { resolveHotelPhoto } from './lib/hotel-photo.js';
 
 const DELAY_MS = 300;
 
@@ -144,7 +145,7 @@ async function enrichPark(park: ParkRow, apiKey: string, dryRun: boolean): Promi
       pet_friendly: petFriendly,
       price_level: priceLevel,
       place_id: p.place_id ?? null,
-      photo_reference: photoReference,
+      photo_reference: await resolveHotelPhoto(photoReference, p.place_id ?? p.name),
     };
   }));
 
