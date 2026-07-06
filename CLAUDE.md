@@ -191,7 +191,8 @@ src/
 │   ├── ExperiencesSection.tsx             # Full-bleed experiences section on park pages (RPC match)
 │   ├── GearRecommendations.tsx            # Affiliate gear (blog + /parks + park detail)
 │   ├── AdUnit.tsx                         # AdSense unit
-│   ├── NewsletterSignup.tsx               # Reusable newsletter block
+│   ├── AffiliateLink.tsx                  # 'use client' — <a> that fires GA4 affiliate_click; use for ALL affiliate links
+│   ├── NewsletterSignup.tsx               # Reusable newsletter block (inline/card)
 │   ├── PreviewBanner.tsx                  # Blog draft-mode banner
 │   ├── WeCarePage.tsx                     # Shared conservation/preservation/our-efforts template
 │   ├── blog/                              # Blog rendering components
@@ -200,6 +201,7 @@ src/
 │   ├── supabase.ts / supabase-server.ts   # Clients + getAdminUser/getUserRole
 │   ├── blog.ts                            # Supabase blog_posts queries (replaced Sanity)
 │   ├── gear.ts                            # Affiliate gear catalog — bc() Backcountry, amz() Amazon
+│   ├── kit.ts                             # subscribeToKit() — shared Kit newsletter subscribe (all capture points)
 │   ├── news-feeds.ts                      # RSS aggregation for /news
 │   ├── slug.ts / utils.ts                 # Helpers
 └── middleware.ts                          # Protects /admin — checks app_metadata.role
@@ -413,10 +415,10 @@ Run with `npx tsx scripts/<name>.ts` from the project root (loads `.env.local`).
 
 ## Monetization
 
-- **Display ads:** Google AdSense via `AdUnit` component; slot IDs in `NEXT_PUBLIC_ADSENSE_SLOT_*`. Placed on blog posts, `/parks` directory footer, park-detail sidebar.
-- **Analytics:** Google Analytics (`NEXT_PUBLIC_GA_MEASUREMENT_ID`) + AdSense loaded via `@next/third-parties/google` in `layout.tsx`.
+- **Display ads:** Google AdSense via `AdUnit` component; slot IDs in `NEXT_PUBLIC_ADSENSE_SLOT_*`. Placed on blog posts, `/parks` directory footer, park-detail sidebar. **New ad units are intentionally held** until traffic nears premium-network eligibility (~50k sessions for Mediavine) — at low traffic they earn ~nothing and erode the park-first tone. Don't add ads without owner sign-off (see Affiliate Content Standards / brand restraint).
+- **Analytics + conversion tracking:** GA4 (`NEXT_PUBLIC_GA_MEASUREMENT_ID`) via `@next/third-parties/google` in `layout.tsx`. Conversions ARE tracked with `sendGAEvent` (client-only). **Every affiliate link MUST use `src/components/AffiliateLink.tsx`** — a drop-in `<a>` replacement (identical appearance) that fires a GA4 `affiliate_click` event `{ network, placement, park }`. Other events: `newsletter_signup` (newsletter forms) and `lead_magnet_download` (`/travel-trends`). Wrap any new affiliate CTA in `<AffiliateLink>` so it stays measurable.
 - **Affiliates:** see Affiliate Content Standards.
-- **Newsletter:** Kit (`/api/subscribe`, `KIT_API_KEY`) for list building.
+- **Newsletter (Kit):** shared helper `src/lib/kit.ts` → `subscribeToKit(email, source, firstName?)`, used by BOTH `/api/subscribe` and `/api/download-signup` (the lead magnet subscribes people to the list, not just emails the PDF) and the `/shop` waitlist. Capture via the `NewsletterSignup` component on homepage, park detail, region hubs, blog posts, blog index, and the `/parks` directory. Every capture point must flow through `subscribeToKit` so it grows the one list.
 
 ---
 
