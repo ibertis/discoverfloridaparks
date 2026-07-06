@@ -691,11 +691,11 @@ ins.adsbygoogle[data-ad-status="unfilled"] {
   display: none !important;
 }
 
-/* ── Hotels.com ghost pill hover ─────────────────────────────────────────── */
+/* ── Hotels.com pill hover (understated orange, not a loud button) ────────── */
 .hotels-pill:hover {
-  background: #f0ece6;
-  color: #726d6b !important;
-  border-color: #a6967c !important;
+  background: #fff3ee;
+  color: #ff7044 !important;
+  border-color: #ff7044 !important;
 }
 
 /* ── Hotel card — responsive thumbnail layout ────────────────────────────── */

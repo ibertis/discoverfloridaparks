@@ -19,7 +19,9 @@ export default function GearRecommendations({ amenities }: Props) {
     ...activeCategories,
   ];
 
-  const [openKey, setOpenKey] = useState<string | null>(null);
+  // Default-open the first category (always "Florida Essentials") so visitors see
+  // a helpful "what to pack" preview instead of a fully-collapsed accordion.
+  const [openKey, setOpenKey] = useState<string | null>(allCategories[0]?.amenityKey ?? null);
 
   return (
     <section>
