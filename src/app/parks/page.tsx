@@ -7,7 +7,10 @@ import FooterLinks from '../FooterLinks';
 import ParkCard from '@/components/ParkCard';
 import AdUnit from '@/components/AdUnit';
 
-export const dynamic = 'force-dynamic';
+// ISR instead of force-dynamic: the unfiltered /parks is cached (and refreshed
+// on-demand by save-park's revalidatePath); filtered variants that read
+// searchParams still render dynamically per request.
+export const revalidate = 3600;
 
 export async function generateMetadata(
   { searchParams }: { searchParams: Promise<SearchParams> }

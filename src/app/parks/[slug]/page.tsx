@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
@@ -149,7 +150,11 @@ function HotelStars({ rating }: { rating: number }) {
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
 
-async function getPark(slug: string): Promise<Park | null> {
+// cache() dedupes the call within a single render — getPark runs in both
+// generateMetadata and the page body. Our Supabase client sets cache:'no-store',
+// which disables Next's fetch-dedup, so React cache() is what prevents the
+// heavy joined query from running twice per request.
+const getPark = cache(async (slug: string): Promise<Park | null> => {
   const { data, error } = await supabase
     .from('parks')
     .select(`*, park_amenities(*), park_trails(*), park_fun_facts(*), park_seasonal_events(*), park_experiences(id, name, description, duration, price_from, href, source, business_name, sort_order), park_hotels(id, name, description, url, price_from, sort_order, distance_from_park_km, pet_friendly, price_level, latitude, longitude, place_id, photo_reference)`)
@@ -157,7 +162,7 @@ async function getPark(slug: string): Promise<Park | null> {
     .single();
   if (error || !data) return null;
   return data as Park;
-}
+});
 
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 3959;
@@ -734,7 +739,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                     <div key={hotel.id} className="hotel-card">
                       {photoSrc && (
                         <div className="hotel-thumb">
-                          <img src={photoSrc} alt="" />
+                          <img src={photoSrc} alt="" loading="lazy" decoding="async" />
                         </div>
                       )}
                       <div className="hotel-body">

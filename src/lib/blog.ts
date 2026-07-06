@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { cache } from 'react';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,7 +35,9 @@ export async function getPublishedPosts(): Promise<BlogPost[]> {
   return (data ?? []) as BlogPost[];
 }
 
-export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
+// cache() dedupes the call within a render — used in both generateMetadata and
+// the blog post page (Supabase client is cache:'no-store', so no fetch dedup).
+export const getPostBySlug = cache(async (slug: string): Promise<BlogPost | null> => {
   const { data } = await supabase
     .from('blog_posts')
     .select('*')
@@ -42,7 +45,7 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
     .eq('published', true)
     .maybeSingle();
   return data as BlogPost | null;
-}
+});
 
 export async function getPostsByCategory(category: string): Promise<BlogPost[]> {
   const { data } = await supabase
