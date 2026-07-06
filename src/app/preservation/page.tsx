@@ -3,6 +3,7 @@ import WeCarePage from '@/components/WeCarePage';
 export const metadata = {
   title: 'Preservation | Discover Florida Parks',
   description: "Florida's natural and cultural landmarks carry centuries of history. Learn how Discover Florida Parks supports preservation efforts across the state.",
+  alternates: { canonical: 'https://www.discoverfloridaparks.com/preservation' },
 };
 
 export default function PreservationPage() {

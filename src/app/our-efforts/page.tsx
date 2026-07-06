@@ -3,6 +3,7 @@ import WeCarePage from '@/components/WeCarePage';
 export const metadata = {
   title: 'Our Efforts | Discover Florida Parks',
   description: 'Discover Florida Parks is committed to connecting people with Florida\'s natural spaces and ensuring those spaces remain open, healthy, and accessible for generations to come.',
+  alternates: { canonical: 'https://www.discoverfloridaparks.com/our-efforts' },
 };
 
 export default function OurEffortsPage() {

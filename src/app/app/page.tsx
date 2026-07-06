@@ -6,6 +6,7 @@ import { CinematicHero } from '@/components/ui/cinematic-landing-hero';
 export const metadata: Metadata = {
   title: 'The DFP App — Coming Soon | Discover Florida Parks',
   description: 'Find parks near you, unlock exclusive deals, and discover experiences you can\'t get anywhere else. The Discover Florida Parks app is coming soon.',
+  alternates: { canonical: 'https://www.discoverfloridaparks.com/app' },
 };
 
 export default function AppPage() {

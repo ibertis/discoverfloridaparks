@@ -3,6 +3,7 @@ import WeCarePage from '@/components/WeCarePage';
 export const metadata = {
   title: 'Conservation | Discover Florida Parks',
   description: "Florida's ecosystems are among the most biodiverse in North America. Learn how Discover Florida Parks supports conservation efforts across the state.",
+  alternates: { canonical: 'https://www.discoverfloridaparks.com/conservation' },
 };
 
 export default function ConservationPage() {

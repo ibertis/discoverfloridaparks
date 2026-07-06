@@ -9,7 +9,8 @@ export const metadata: Metadata = {
     template: '%s | Discover Florida Parks',
   },
   description: 'Explore Florida\'s best state parks, national parks, nature preserves, and outdoor attractions.',
-  alternates: { canonical: 'https://www.discoverfloridaparks.com' },
+  // No canonical here — a root-layout canonical is inherited by every child page
+  // that doesn't set its own, mislabeling them as the homepage. Each page sets its own.
   robots: { index: true, follow: true },
   openGraph: {
     siteName: 'Discover Florida Parks',

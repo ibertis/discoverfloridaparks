@@ -5,6 +5,12 @@ import { categoryToSlug } from '@/lib/slug';
 
 const BASE = 'https://www.discoverfloridaparks.com';
 
+// Region hub slugs — keys of REGION_MAP in src/app/parks/region/[slug]/page.tsx.
+const REGION_SLUGS = [
+  'florida-panhandle', 'north-florida', 'northeast-florida', 'central-florida',
+  'tampa-bay-west-coast', 'southwest-florida', 'southeast-florida', 'south-florida', 'florida-keys',
+];
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [{ data: parks }, { data: blogPosts }, categories] = await Promise.all([
     supabase.from('parks').select('slug, updated_at'),
@@ -33,6 +39,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  const regionUrls: MetadataRoute.Sitemap = REGION_SLUGS.map(slug => ({
+    url: `${BASE}/parks/region/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
   return [
     { url: BASE,                   lastModified: new Date(), changeFrequency: 'weekly',  priority: 1   },
     { url: `${BASE}/parks`,        lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9 },
@@ -43,6 +56,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/preservation`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: `${BASE}/our-efforts`,  lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: `${BASE}/useful-links`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${BASE}/privacy`,      lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
+    ...regionUrls,
     ...parkUrls,
     ...blogUrls,
     ...categoryUrls,

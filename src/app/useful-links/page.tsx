@@ -6,6 +6,7 @@ import SiteFooter from '@/app/SiteFooter';
 export const metadata = {
   title: 'Useful Links | Discover Florida Parks',
   description: 'A curated collection of resources for planning your Florida park visits — reservations, trail maps, weather, wildlife, and conservation organizations.',
+  alternates: { canonical: 'https://www.discoverfloridaparks.com/useful-links' },
 };
 
 const CATEGORIES = [
