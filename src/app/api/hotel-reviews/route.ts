@@ -90,8 +90,11 @@ export async function GET(req: NextRequest) {
     { reviews, placeName: data.displayName?.text ?? null },
     {
       headers: {
-        // Short cache so rapid re-opens don't re-hit the API
-        'Cache-Control': 'public, max-age=300, s-maxage=300',
+        // Cache reviews at the edge for 6h — they change rarely, and this collapses
+        // repeat views of the same hotel into ONE billable Place Details call
+        // (reviews are Google's most expensive SKU). Still "temporary" per Google's
+        // caching guidance; served stale for a day while revalidating.
+        'Cache-Control': 'public, max-age=21600, s-maxage=21600, stale-while-revalidate=86400',
       },
     }
   );
