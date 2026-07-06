@@ -7,6 +7,7 @@ import SiteFooter from '@/app/SiteFooter';
 import FooterLinks from '@/app/FooterLinks';
 import { getPostsByCategory, getDistinctCategories } from '@/lib/blog';
 import { categoryToSlug, slugToCategory } from '@/lib/slug';
+import { notFound } from 'next/navigation';
 
 export const revalidate = 60;
 
@@ -38,6 +39,10 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ s
   const { slug } = await params;
   const category = slugToCategory(slug);
   const posts = await getPostsByCategory(category);
+
+  // No posts (or a bogus slug) → return a real 404 instead of a 200 "empty" page,
+  // which Google Search Console flags as a Soft 404.
+  if (posts.length === 0) notFound();
 
   const categoryUrl = `https://discoverfloridaparks.com/blog/category/${slug}`;
 
