@@ -49,7 +49,17 @@ export async function checkHotelCoverage() {
     return result
   }
 
-  logger.info(`Hotel coverage: ${uncovered.length} park(s) have no hotel entries — attempting enrichment`)
+  logger.info(`Hotel coverage: ${uncovered.length} park(s) have no hotel entries`)
+
+  // Report-only by default (same rationale as hotelProximity.js: buildHotelRows
+  // inserts hotels with no photo_reference/place_id, and it spends Google $).
+  // Opt in with HERMES_HOTEL_AUTOFIX=true; otherwise report and let the user run
+  // the photo-preserving script (scripts/fix-hotels-bulk.ts).
+  result.autofix = process.env.HERMES_HOTEL_AUTOFIX === 'true'
+  if (!result.autofix) {
+    logger.info('Hotel coverage: report-only (set HERMES_HOTEL_AUTOFIX=true to auto-enrich)')
+    return result
+  }
 
   for (const park of uncovered) {
     try {
@@ -84,11 +94,17 @@ export async function checkHotelCoverage() {
 export function buildHotelCoverageSection(result) {
   if (result.detected === 0) return ''
 
-  const lines = [
-    `🏨 Hotel Coverage`,
-    `  Parks with no hotels: ${result.detected}`,
-    `  Auto-enriched: ${result.fixed}  |  No lodging found: ${result.skipped}`,
-  ]
+  const lines = result.autofix
+    ? [
+        `🏨 Hotel Coverage`,
+        `  Parks with no hotels: ${result.detected}`,
+        `  Auto-enriched: ${result.fixed}  |  No lodging found: ${result.skipped}`,
+      ]
+    : [
+        `🏨 Hotel Coverage (report-only)`,
+        `  Parks with no hotels: ${result.detected}`,
+        `  Enrich (preserves photos): npx tsx scripts/fix-hotels-bulk.ts`,
+      ]
   if (result.affectedParks.length) {
     lines.push(`  Parks: ${result.affectedParks.join(', ')}`)
   }

@@ -39,6 +39,17 @@ export async function checkHotelProximity() {
 
   logger.info(`Hotel proximity: ${uniqueParks.length} park(s) with hotels >50km or missing distance`)
 
+  // Report-only by default. Auto-fix rebuilds park_hotels via buildHotelRows,
+  // which drops photo_reference + place_id — wiping migrated Supabase photos and
+  // reviews for that park — and spends Google Places $. Opt in explicitly with
+  // HERMES_HOTEL_AUTOFIX=true; otherwise just report and let the user run the
+  // photo-preserving script (scripts/fix-hotel-proximity.ts) when they choose.
+  result.autofix = process.env.HERMES_HOTEL_AUTOFIX === 'true'
+  if (!result.autofix) {
+    logger.info('Hotel proximity: report-only (set HERMES_HOTEL_AUTOFIX=true to auto-fix)')
+    return result
+  }
+
   for (const park of uniqueParks) {
     try {
       const baseRadius = getSearchRadius(park.city)
@@ -73,12 +84,19 @@ export async function checkHotelProximity() {
 export function buildHotelProximitySection(result) {
   if (result.detected === 0) return ''
 
-  const lines = [
-    `🏨 Hotel Proximity Auto-Fix`,
-    `  Detected: ${result.detected} park(s) with missing or out-of-range hotel distances (>50km)`,
-    `  Fixed: ${result.fixed}  |  Skipped: ${result.skipped} (no nearby lodging found)`,
-    `  Parks: ${result.affectedParks.join(', ')}`,
-  ]
+  const lines = result.autofix
+    ? [
+        `🏨 Hotel Proximity Auto-Fix`,
+        `  Detected: ${result.detected} park(s) with missing or out-of-range hotel distances (>50km)`,
+        `  Fixed: ${result.fixed}  |  Skipped: ${result.skipped} (no nearby lodging found)`,
+        `  Parks: ${result.affectedParks.join(', ')}`,
+      ]
+    : [
+        `🏨 Hotel Proximity (report-only)`,
+        `  Detected: ${result.detected} park(s) with missing or out-of-range hotel distances (>50km)`,
+        `  Parks: ${result.affectedParks.join(', ')}`,
+        `  Fix (preserves photos): npx tsx scripts/fix-hotel-proximity.ts`,
+      ]
   if (result.errors.length) {
     lines.push(`  Errors (${result.errors.length}): ${result.errors.join('; ')}`)
   }

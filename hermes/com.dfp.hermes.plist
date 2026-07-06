@@ -15,9 +15,11 @@
     <string>/Users/gabrielibertis/Sites/discoverfloridaparks/hermes/index.js</string>
   </array>
 
-<!-- Run daily at 9:00 AM -->
+<!-- Run weekly on Monday at 9:00 AM (Weekday 1 = Monday) -->
 <key>StartCalendarInterval</key>
 <dict>
+  <key>Weekday</key>
+  <integer>1</integer>
   <key>Hour</key>
   <integer>9</integer>
   <key>Minute</key>
