@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
-export default function PhotoGallery({ urls }: { urls: string[] }) {
+export default function PhotoGallery({ urls, parkName }: { urls: string[]; parkName: string }) {
   const [selected, setSelected] = useState<number | null>(null);
 
   function prev() { setSelected(i => i === null ? null : (i - 1 + urls.length) % urls.length); }
@@ -22,7 +22,7 @@ export default function PhotoGallery({ urls }: { urls: string[] }) {
           >
             <Image
               src={url}
-              alt=""
+              alt={`${parkName} — photo ${i + 1}`}
               fill
               sizes="(max-width: 640px) 50vw, 33vw"
               style={{ objectFit: 'cover', transition: 'transform 0.4s' }}
@@ -50,7 +50,7 @@ export default function PhotoGallery({ urls }: { urls: string[] }) {
           >
             <Image
               src={urls[selected]}
-              alt=""
+              alt={`${parkName} — photo ${selected + 1}`}
               width={1200}
               height={800}
               style={{ maxWidth: '90vw', maxHeight: '90vh', width: 'auto', height: 'auto', display: 'block' }}

@@ -543,7 +543,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
             {park.gallery_urls?.length > 0 && (
               <section>
                 <SectionHeading>Photos</SectionHeading>
-                <PhotoGallery urls={park.gallery_urls} />
+                <PhotoGallery urls={park.gallery_urls} parkName={park.name} />
               </section>
             )}
 

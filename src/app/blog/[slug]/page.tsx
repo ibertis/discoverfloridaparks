@@ -79,6 +79,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     },
   };
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.discoverfloridaparks.com' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://www.discoverfloridaparks.com/blog' },
+      { '@type': 'ListItem', position: 3, name: post.title, item: postUrl },
+    ],
+  };
+
   return (
     <div style={{ background: '#fff', color: '#413734', minHeight: '100vh' }}>
       <SiteHeader />
@@ -86,6 +96,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
       <article style={{ maxWidth: 800, margin: '0 auto', padding: '48px 24px 80px' }}>
