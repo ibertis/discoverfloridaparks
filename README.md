@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Discover Florida Parks
 
-## Getting Started
+A fast, SEO-focused directory of Florida's parks, preserves, and outdoor attractions — built with Next.js + Supabase and monetized through affiliate links, display ads, and future products. Live at **[www.discoverfloridaparks.com](https://www.discoverfloridaparks.com)**.
 
-First, run the development server:
+> **AI assistants:** read [`CLAUDE.md`](./CLAUDE.md) first — it's the canonical project reference (architecture, design system, schema, conventions, gotchas).
+
+## Stack
+
+- **Next.js** (App Router, TypeScript, Tailwind v4)
+- **Supabase** — Postgres, Auth (`@supabase/ssr`), Storage
+- **Vercel** — hosting; production auto-deploys from `main`
+- **Mapbox GL** (maps) · **Resend** (email) · **Kit** (newsletter) · **Google Places** (hotel data)
+- **Google AdSense + Analytics** via `@next/third-parties`
+- Fonts: Shrikhand / Glegoo / Archivo (the "Birdily" design system)
+
+## Quick start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create `.env.local` with the variables listed in [`CLAUDE.md`](./CLAUDE.md#environment-variables) (Supabase URL + keys, Mapbox token, Google Places key, Resend/Kit keys, affiliate CJ URLs, AdSense/GA IDs).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build      # production build
+npm run lint       # eslint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project layout
 
-## Learn More
+```
+src/app/          Routes (public pages, /admin, /api)
+src/components/    Shared UI (ParkCard, GearRecommendations, AdUnit, …)
+src/lib/          Supabase clients, blog, gear, news-feeds
+supabase/         Schema + rls.sql (single source of truth for RLS/GRANTs)
+scripts/          Data enrichment / maintenance (npx tsx scripts/<name>.ts)
+hermes/           Standalone weekly monitoring agent
+docs/             Deep-dive references
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Key workflows
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Add a park:** see [`PARK-ONBOARDING.md`](./PARK-ONBOARDING.md)
+- **Data enrichment / fixes:** `npx tsx scripts/<name>.ts` (see the Scripts table in `CLAUDE.md`)
+- **Monitoring:** `hermes/` runs weekly via launchd; manual: `cd hermes && node index.js --dry-run`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy
 
-## Deploy on Vercel
+Push to `main` → Vercel builds and deploys production. Preview deploys are created for other branches / PRs.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Documentation index: [`CLAUDE.md`](./CLAUDE.md) (reference) · [`PARK-ONBOARDING.md`](./PARK-ONBOARDING.md) (onboarding) · [`docs/experiences-system-as-built.md`](./docs/experiences-system-as-built.md) (experiences deep-dive) · [`DFP-Monetization-Brief.md`](./DFP-Monetization-Brief.md) (strategy brief).

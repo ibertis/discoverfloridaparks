@@ -1,5 +1,7 @@
 # Discover Florida Parks — Monetization Strategy Brief
 
+> **Status:** Point-in-time strategy brief (May 2026, pre-monetization planning). Several items here are now live — Google AdSense, the affiliate programs (Expedia / Hotels.com / Viator / Backcountry / Amazon), and the Kit newsletter. Treat this as historical planning context; **`CLAUDE.md` reflects the current implemented state.**
+
 ## Purpose of This Document
 
 This is a briefing document for Claude Chat. I'm the owner of **Discover Florida Parks** (discoverfloridaparks.com) and I need help building an actionable monetization plan. The site is live, growing in search, and well-built — I want to activate revenue streams as quickly as possible, prioritizing speed-to-income over long-horizon plays.

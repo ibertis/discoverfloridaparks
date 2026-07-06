@@ -4,6 +4,23 @@ Step-by-step workflow for adding a new park to Discover Florida Parks. Follow th
 
 ---
 
+## Quick checklist (TL;DR)
+
+Replace `[slug]` each time. Full detail for each step is in the sections below.
+
+```bash
+# 1. One-command onboard: enrich → validate → hotel-proximity fix
+npx tsx scripts/onboard-park.ts --slug [slug]
+```
+2. **Review amenities** in Supabase — correct anything enrichment got wrong (boat-access → `hiking_available=false`; springs → confirm `swimming_allowed`/`paddling_available`; beach without "beach" in name → `beach_access=true`; equestrian → `horseback_riding=true`; day-use → `camping_available=false`).
+3. **Add redirect** if the slug was shortened (see Step 6) and **publish** (Step 7).
+4. **Check the live page** `https://www.discoverfloridaparks.com/parks/[slug]` — hero image, amenity badges, gear categories, hotels in the right area, all sections populated, nearby parks showing.
+5. **Hermes** picks it up automatically on its next weekly run (report-only; verify hotel proximity shows `detected: 0`).
+
+> `onboard-park.ts` chains `enrich-one-park.ts` → `validate-park.ts` → `fix-hotel-proximity.ts`. Run the individual scripts (below) when you need to re-do a single step.
+
+---
+
 ## Overview
 
 Adding a new park has two phases:

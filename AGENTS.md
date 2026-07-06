@@ -1,3 +1,7 @@
+# Agent instructions
+
+**Primary reference: [CLAUDE.md](./CLAUDE.md)** — canonical project architecture, design system, schema, conventions, and gotchas. Read it before writing any code.
+
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
