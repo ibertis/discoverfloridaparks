@@ -22,6 +22,16 @@ export const maxDuration = 10;
 const CACHE = 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600';
 const FETCH_TIMEOUT_MS = 6000;
 
+// Direct-URL (https) mode may only fetch our own Supabase Storage host — otherwise
+// this public endpoint is an open SSRF proxy to arbitrary/internal hosts. (The
+// places/ mode fetches only Google-returned CDN URIs, which are not user-controlled.)
+const ALLOWED_DIRECT_HOSTS = new Set(
+  [(() => { try { return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).host; } catch { return ''; } })()].filter(Boolean),
+);
+function isAllowedDirectHost(url: string): boolean {
+  try { return ALLOWED_DIRECT_HOSTS.has(new URL(url).host); } catch { return false; }
+}
+
 // In-memory rate limiter: max 60 image requests per IP per minute.
 // (A single park page loads at most ~3 hotel photos, so this only bites bots.)
 const rateLimitMap = new Map<string, number[]>();
@@ -88,8 +98,11 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Direct URL (user-provided photo stored in Supabase Storage or elsewhere)
+    // Direct URL — restricted to our own Supabase Storage host (SSRF guard).
     if (ref.startsWith('https://')) {
+      if (!isAllowedDirectHost(ref)) {
+        return new NextResponse('Forbidden ref host', { status: 400 });
+      }
       const out = await streamUrl(ref);
       if (out.status === 502) markFailed(ref);
       return out;

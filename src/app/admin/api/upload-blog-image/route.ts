@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getAdminUser } from '@/lib/supabase-server';
+import { getAdminUser, getUserRole } from '@/lib/supabase-server';
 
 const VALID_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const user = await getAdminUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (getUserRole(user) !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { url } = await req.json() as { url?: string };
   if (!url) return NextResponse.json({ error: 'Missing url' }, { status: 400 });
