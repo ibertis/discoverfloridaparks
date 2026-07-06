@@ -21,7 +21,7 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#x27;');
 }
 
-const PDF_URL = 'https://discoverfloridaparks.com/downloads/2026-florida-travel-trends.pdf';
+const PDF_URL = 'https://www.discoverfloridaparks.com/downloads/2026-florida-travel-trends.pdf';
 
 export async function POST(req: Request) {
   const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || '127.0.0.1';
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
             <hr style="border: none; border-top: 1px solid #eeeeee; margin: 32px 0;" />
 
             <p style="font-size: 13px; color: #a6967c; line-height: 1.6; margin: 0;">
-              You're receiving this because you signed up at <a href="https://discoverfloridaparks.com/travel-trends" style="color: #ff7044;">discoverfloridaparks.com</a>. We'll never share your email or send you spam.
+              You're receiving this because you signed up at <a href="https://www.discoverfloridaparks.com/travel-trends" style="color: #ff7044;">discoverfloridaparks.com</a>. We'll never share your email or send you spam.
             </p>
           </div>
         </div>

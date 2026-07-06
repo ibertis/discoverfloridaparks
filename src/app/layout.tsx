@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: '%s | Discover Florida Parks',
   },
   description: 'Explore Florida\'s best state parks, national parks, nature preserves, and outdoor attractions.',
-  alternates: { canonical: 'https://discoverfloridaparks.com' },
+  alternates: { canonical: 'https://www.discoverfloridaparks.com' },
   robots: { index: true, follow: true },
   openGraph: {
     siteName: 'Discover Florida Parks',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     images: [
       {
-        url: 'https://discoverfloridaparks.com/hero-1.jpg',
+        url: 'https://www.discoverfloridaparks.com/hero-1.jpg',
         width: 1280,
         height: 853,
         alt: 'Discover Florida Parks',
@@ -40,12 +40,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             '@context': 'https://schema.org',
             '@type': 'WebSite',
             name: 'Discover Florida Parks',
-            url: 'https://discoverfloridaparks.com',
+            url: 'https://www.discoverfloridaparks.com',
             potentialAction: {
               '@type': 'SearchAction',
               target: {
                 '@type': 'EntryPoint',
-                urlTemplate: 'https://discoverfloridaparks.com/parks?q={search_term_string}',
+                urlTemplate: 'https://www.discoverfloridaparks.com/parks?q={search_term_string}',
               },
               'query-input': 'required name=search_term_string',
             },
@@ -56,10 +56,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Organization',
-            '@id': 'https://discoverfloridaparks.com/#organization',
+            '@id': 'https://www.discoverfloridaparks.com/#organization',
             name: 'Discover Florida Parks',
-            url: 'https://discoverfloridaparks.com',
-            logo: 'https://discoverfloridaparks.com/dfp-logo.png',
+            url: 'https://www.discoverfloridaparks.com',
+            logo: 'https://www.discoverfloridaparks.com/dfp-logo.png',
             description: 'Your all-in-one guide to Florida\'s best parks, beaches, and outdoor adventures.',
             sameAs: [
               'https://www.facebook.com/flparks101',

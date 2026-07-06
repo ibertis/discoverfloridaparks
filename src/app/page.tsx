@@ -11,16 +11,16 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Discover Florida Parks',
     description: 'Your all-in-one guide to Florida\'s best parks, beaches, and outdoor adventures.',
-    url: 'https://discoverfloridaparks.com',
-    images: [{ url: 'https://discoverfloridaparks.com/hero-1.jpg', width: 1280, height: 853, alt: 'Discover Florida Parks' }],
+    url: 'https://www.discoverfloridaparks.com',
+    images: [{ url: 'https://www.discoverfloridaparks.com/hero-1.jpg', width: 1280, height: 853, alt: 'Discover Florida Parks' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Discover Florida Parks',
     description: 'Your all-in-one guide to Florida\'s best parks, beaches, and outdoor adventures.',
-    images: ['https://discoverfloridaparks.com/hero-1.jpg'],
+    images: ['https://www.discoverfloridaparks.com/hero-1.jpg'],
   },
-  alternates: { canonical: 'https://discoverfloridaparks.com' },
+  alternates: { canonical: 'https://www.discoverfloridaparks.com' },
   other: { 'impact-site-verification': '9e0ab2e7-f008-4f4c-85ff-5f2a070d4442' },
 };
 import { ArrowRight, Map as MapIcon } from 'lucide-react';
@@ -83,7 +83,7 @@ export default async function HomePage() {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Discover Florida Parks',
-    url: 'https://discoverfloridaparks.com',
+    url: 'https://www.discoverfloridaparks.com',
     creator: {
       '@type': 'Person',
       name: 'Gabriel Ibertis',
@@ -98,7 +98,7 @@ export default async function HomePage() {
     url: 'https://gabrielibertis.com',
     sameAs: [
       'https://gabrielibertis.com',
-      'https://discoverfloridaparks.com',
+      'https://www.discoverfloridaparks.com',
     ],
   };
 
@@ -106,13 +106,13 @@ export default async function HomePage() {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'Featured Florida Parks — Editor\'s Picks',
-    url: 'https://discoverfloridaparks.com',
+    url: 'https://www.discoverfloridaparks.com',
     numberOfItems: featuredParks.length,
     itemListElement: featuredParks.map((park, i) => ({
       '@type': 'ListItem',
       position: i + 1,
       name: park.name,
-      url: `https://discoverfloridaparks.com/parks/${park.slug}`,
+      url: `https://www.discoverfloridaparks.com/parks/${park.slug}`,
       ...(park.featured_image_url && { image: park.featured_image_url }),
     })),
   } : null;

@@ -23,13 +23,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: category,
     description,
-    alternates: { canonical: `https://discoverfloridaparks.com/blog/category/${slug}` },
+    alternates: { canonical: `https://www.discoverfloridaparks.com/blog/category/${slug}` },
     openGraph: {
       title: `${category} | Discover Florida Parks`,
       description,
-      url: `https://discoverfloridaparks.com/blog/category/${slug}`,
+      url: `https://www.discoverfloridaparks.com/blog/category/${slug}`,
       type: 'website',
-      images: [{ url: 'https://discoverfloridaparks.com/hero-1.jpg', width: 1280, height: 853, alt: `${category} — Discover Florida Parks` }],
+      images: [{ url: 'https://www.discoverfloridaparks.com/hero-1.jpg', width: 1280, height: 853, alt: `${category} — Discover Florida Parks` }],
     },
     twitter: { card: 'summary_large_image' },
   };
@@ -44,14 +44,14 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ s
   // which Google Search Console flags as a Soft 404.
   if (posts.length === 0) notFound();
 
-  const categoryUrl = `https://discoverfloridaparks.com/blog/category/${slug}`;
+  const categoryUrl = `https://www.discoverfloridaparks.com/blog/category/${slug}`;
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://discoverfloridaparks.com' },
-      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://discoverfloridaparks.com/blog' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.discoverfloridaparks.com' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://www.discoverfloridaparks.com/blog' },
       { '@type': 'ListItem', position: 3, name: category, item: categoryUrl },
     ],
   };
@@ -62,7 +62,7 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ s
     name: `${category} — Florida Parks Blog`,
     description: `Browse all ${category} posts on the Discover Florida Parks blog.`,
     url: categoryUrl,
-    isPartOf: { '@type': 'WebSite', url: 'https://discoverfloridaparks.com', name: 'Discover Florida Parks' },
+    isPartOf: { '@type': 'WebSite', url: 'https://www.discoverfloridaparks.com', name: 'Discover Florida Parks' },
   };
 
   return (

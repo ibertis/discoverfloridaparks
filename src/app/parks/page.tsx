@@ -35,16 +35,16 @@ export async function generateMetadata(
     openGraph: {
       title,
       description,
-      url: 'https://discoverfloridaparks.com/parks',
-      images: [{ url: 'https://discoverfloridaparks.com/hero-2.jpg', width: 1280, height: 853, alt: 'Florida Parks Directory' }],
+      url: 'https://www.discoverfloridaparks.com/parks',
+      images: [{ url: 'https://www.discoverfloridaparks.com/hero-2.jpg', width: 1280, height: 853, alt: 'Florida Parks Directory' }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['https://discoverfloridaparks.com/hero-2.jpg'],
+      images: ['https://www.discoverfloridaparks.com/hero-2.jpg'],
     },
-    alternates: { canonical: 'https://discoverfloridaparks.com/parks' },
+    alternates: { canonical: 'https://www.discoverfloridaparks.com/parks' },
   };
 }
 

@@ -29,6 +29,6 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: 'DataForSeoBot',   disallow: '/' },
       { userAgent: 'Bytespider',      disallow: '/' },
     ],
-    sitemap: 'https://discoverfloridaparks.com/sitemap.xml',
+    sitemap: 'https://www.discoverfloridaparks.com/sitemap.xml',
   };
 }

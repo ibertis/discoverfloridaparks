@@ -69,11 +69,6 @@ const nextConfig: NextConfig = {
         hostname: 'images.unsplash.com',
       },
       {
-        protocol: 'https',
-        hostname: 'cdn.sanity.io',
-        pathname: '/images/**',
-      },
-      {
         protocol: 'http',
         hostname: 'discoverfloridaparks.local',
       },

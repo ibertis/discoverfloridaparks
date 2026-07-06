@@ -199,8 +199,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const title = park.seo_title || park.name;
   const description = park.seo_description || park.short_description;
-  const url = `https://discoverfloridaparks.com/parks/${park.slug}`;
-  const image = park.featured_image_url || 'https://discoverfloridaparks.com/hero-1.jpg';
+  const url = `https://www.discoverfloridaparks.com/parks/${park.slug}`;
+  const image = park.featured_image_url || 'https://www.discoverfloridaparks.com/hero-1.jpg';
 
   return {
     title,
@@ -285,7 +285,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
     { label: 'Accessible',        icon: ParkingCircle, active: amenities.wheelchair_accessible },
   ].filter(a => a.active);
 
-  const parkUrl = `https://discoverfloridaparks.com/parks/${park.slug}`;
+  const parkUrl = `https://www.discoverfloridaparks.com/parks/${park.slug}`;
 
   const mapSrc = park.latitude && park.longitude
     ? `https://www.openstreetmap.org/export/embed.html?bbox=${park.longitude - 0.03}%2C${park.latitude - 0.03}%2C${park.longitude + 0.03}%2C${park.latitude + 0.03}&layer=mapnik&marker=${park.latitude}%2C${park.longitude}`
@@ -346,8 +346,8 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://discoverfloridaparks.com' },
-      { '@type': 'ListItem', position: 2, name: 'Parks', item: 'https://discoverfloridaparks.com/parks' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.discoverfloridaparks.com' },
+      { '@type': 'ListItem', position: 2, name: 'Parks', item: 'https://www.discoverfloridaparks.com/parks' },
       { '@type': 'ListItem', position: 3, name: park.name, item: parkUrl },
     ],
   };

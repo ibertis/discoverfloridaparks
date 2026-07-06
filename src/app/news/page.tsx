@@ -11,11 +11,11 @@ export const revalidate = 7200;
 export const metadata: Metadata = {
   title: 'Florida Parks & Conservation News',
   description: 'The latest news on Florida state parks, wildlife conservation, the Everglades, coral reef restoration, and more — aggregated from partner organizations and top news sources.',
-  alternates: { canonical: 'https://discoverfloridaparks.com/news' },
+  alternates: { canonical: 'https://www.discoverfloridaparks.com/news' },
   openGraph: {
     title: 'Florida Parks & Conservation News',
     description: 'Stay informed on Florida parks, wildlife, and conservation efforts.',
-    url: 'https://discoverfloridaparks.com/news',
+    url: 'https://www.discoverfloridaparks.com/news',
   },
 };
 

@@ -26,16 +26,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const title = post.seo_title ?? post.title;
   const description = post.seo_description ?? post.excerpt ?? '';
-  const ogImage = post.featured_image_url ?? 'https://discoverfloridaparks.com/hero-1.jpg';
+  const ogImage = post.featured_image_url ?? 'https://www.discoverfloridaparks.com/hero-1.jpg';
 
   return {
     title,
     description,
-    alternates: { canonical: `https://discoverfloridaparks.com/blog/${slug}` },
+    alternates: { canonical: `https://www.discoverfloridaparks.com/blog/${slug}` },
     openGraph: {
       title,
       description,
-      url: `https://discoverfloridaparks.com/blog/${slug}`,
+      url: `https://www.discoverfloridaparks.com/blog/${slug}`,
       type: 'article',
       images: [{ url: ogImage, width: 1280, height: 720, alt: title }],
       ...(post.published_at && { publishedTime: post.published_at }),
@@ -52,7 +52,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   const recentPosts = await getRecentPosts(3, slug);
 
-  const postUrl = `https://discoverfloridaparks.com/blog/${slug}`;
+  const postUrl = `https://www.discoverfloridaparks.com/blog/${slug}`;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -69,10 +69,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     publisher: {
       '@type': 'Organization',
       name: 'Discover Florida Parks',
-      url: 'https://discoverfloridaparks.com',
+      url: 'https://www.discoverfloridaparks.com',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://discoverfloridaparks.com/dfp-logo.png',
+        url: 'https://www.discoverfloridaparks.com/dfp-logo.png',
         width: 200,
         height: 60,
       },

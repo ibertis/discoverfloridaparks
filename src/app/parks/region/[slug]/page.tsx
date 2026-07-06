@@ -166,7 +166,7 @@ export async function generateMetadata(
       images: [{ url: heroUrl, alt: region.headline }],
     },
     alternates: {
-      canonical: `https://discoverfloridaparks.com/parks/region/${slug}`,
+      canonical: `https://www.discoverfloridaparks.com/parks/region/${slug}`,
     },
   };
 }
@@ -209,9 +209,9 @@ export default async function RegionHubPage(
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home',  item: 'https://discoverfloridaparks.com' },
-      { '@type': 'ListItem', position: 2, name: 'Parks', item: 'https://discoverfloridaparks.com/parks' },
-      { '@type': 'ListItem', position: 3, name: region.title, item: `https://discoverfloridaparks.com/parks/region/${slug}` },
+      { '@type': 'ListItem', position: 1, name: 'Home',  item: 'https://www.discoverfloridaparks.com' },
+      { '@type': 'ListItem', position: 2, name: 'Parks', item: 'https://www.discoverfloridaparks.com/parks' },
+      { '@type': 'ListItem', position: 3, name: region.title, item: `https://www.discoverfloridaparks.com/parks/region/${slug}` },
     ],
   };
 

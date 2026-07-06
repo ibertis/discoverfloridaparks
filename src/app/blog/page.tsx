@@ -13,13 +13,13 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: 'Florida Parks Blog',
   description: 'Stories, guides, and inspiration for exploring Florida\'s best parks, beaches, and outdoor adventures.',
-  alternates: { canonical: 'https://discoverfloridaparks.com/blog' },
+  alternates: { canonical: 'https://www.discoverfloridaparks.com/blog' },
   openGraph: {
     title: 'Florida Parks Blog',
     description: 'Stories, guides, and inspiration for exploring Florida\'s best parks, beaches, and outdoor adventures.',
-    url: 'https://discoverfloridaparks.com/blog',
+    url: 'https://www.discoverfloridaparks.com/blog',
     type: 'website',
-    images: [{ url: 'https://discoverfloridaparks.com/hero-1.jpg', width: 1280, height: 853, alt: 'Florida Parks Blog — Discover Florida Parks' }],
+    images: [{ url: 'https://www.discoverfloridaparks.com/hero-1.jpg', width: 1280, height: 853, alt: 'Florida Parks Blog — Discover Florida Parks' }],
   },
   twitter: { card: 'summary_large_image' },
 };

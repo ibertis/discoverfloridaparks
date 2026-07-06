@@ -6,7 +6,7 @@ import SiteFooter from '../SiteFooter';
 export const metadata = {
   title: 'Privacy Policy | Discover Florida Parks',
   description: 'Privacy policy for Discover Florida Parks — how we collect, use, and protect your information.',
-  alternates: { canonical: 'https://discoverfloridaparks.com/privacy' },
+  alternates: { canonical: 'https://www.discoverfloridaparks.com/privacy' },
 };
 
 const s = {

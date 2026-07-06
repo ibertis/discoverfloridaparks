@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { getDistinctCategories } from '@/lib/blog';
 import { categoryToSlug } from '@/lib/slug';
 
-const BASE = 'https://discoverfloridaparks.com';
+const BASE = 'https://www.discoverfloridaparks.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [{ data: parks }, { data: blogPosts }, categories] = await Promise.all([
