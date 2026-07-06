@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { sendGAEvent } from '@next/third-parties/google';
 import Link from 'next/link';
 import SiteHeader from '@/app/SiteHeader';
 import FooterLinks from '@/app/FooterLinks';
@@ -76,6 +77,7 @@ export default function TravelTrendsPage() {
         setStatus('error');
         return;
       }
+      sendGAEvent('event', 'lead_magnet_download', { magnet: '2026-travel-trends' });
       setStatus('success');
     } catch {
       setErrorMsg('Something went wrong — please try again.');

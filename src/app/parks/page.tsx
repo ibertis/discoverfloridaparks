@@ -6,6 +6,7 @@ import SiteFooter from '../SiteFooter';
 import FooterLinks from '../FooterLinks';
 import ParkCard from '@/components/ParkCard';
 import AdUnit from '@/components/AdUnit';
+import NewsletterSignup from '@/components/NewsletterSignup';
 
 // ISR instead of force-dynamic: the unfiltered /parks is cached (and refreshed
 // on-demand by save-park's revalidatePath); filtered variants that read
@@ -176,6 +177,11 @@ export default async function ParksPage({ searchParams }: { searchParams: Promis
             </div>
           )}
         </main>
+      </div>
+
+      {/* Newsletter capture on the directory hub */}
+      <div style={{ maxWidth: 1278, margin: '4rem auto 0', padding: '0 24px' }}>
+        <NewsletterSignup variant="card" source="parks-directory" />
       </div>
 
       {/* Directory footer ad — full-width above footer */}

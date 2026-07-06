@@ -19,14 +19,10 @@ export default function ShopComingSoon() {
     setEmailError('');
     setStatus('submitting');
     try {
-      const res = await fetch('/api/contact', {
+      const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'Shop Launch Notification',
-          email,
-          message: `${email} wants to be notified when the DFP Shop launches.`,
-        }),
+        body: JSON.stringify({ email, source: 'shop-waitlist' }),
       });
       if (!res.ok) throw new Error();
       setStatus('success');

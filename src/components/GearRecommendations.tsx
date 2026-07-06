@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { GEAR_CATEGORIES, UNIVERSAL_ITEMS } from '@/lib/gear';
+import AffiliateLink from '@/components/AffiliateLink';
 
 interface Props {
   amenities: Record<string, unknown>;
@@ -54,8 +55,10 @@ export default function GearRecommendations({ amenities }: Props) {
               {isOpen && (
                 <div style={{ borderTop: '1px solid #f2eeeb' }}>
                   {category.items.map((item, j) => (
-                    <a
+                    <AffiliateLink
                       key={item.name}
+                      network={item.url.includes('amazon.') ? 'amazon' : 'backcountry'}
+                      placement="park-gear"
                       href={item.url}
                       target="_blank"
                       rel="nofollow sponsored noopener noreferrer"
@@ -72,7 +75,7 @@ export default function GearRecommendations({ amenities }: Props) {
                       <span style={{ fontFamily: 'Glegoo, serif', fontSize: '0.78rem', fontWeight: 400, color: '#a6967c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {item.description}
                       </span>
-                    </a>
+                    </AffiliateLink>
                   ))}
                 </div>
               )}

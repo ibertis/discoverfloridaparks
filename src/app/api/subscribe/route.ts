@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { subscribeToKit } from '@/lib/kit';
 
 // In-memory rate limiter: max 3 attempts per IP per hour.
 // Each serverless instance tracks its own state — good enough for basic bot protection.
@@ -43,43 +44,16 @@ export async function POST(req: Request) {
     );
   }
 
-  const apiKey = process.env.KIT_API_KEY;
+  const result = await subscribeToKit(email, source ?? 'unknown', firstName);
 
-  if (!apiKey) {
-    console.error('[subscribe] Missing KIT_API_KEY');
+  if (result.ok) {
+    return NextResponse.json({ success: true });
+  }
+  if (result.error === 'missing_api_key') {
     return NextResponse.json({ success: false, error: 'Service unavailable.' }, { status: 503 });
   }
-
-  try {
-    const kitRes = await fetch('https://api.kit.com/v4/subscribers', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Kit-Api-Key': apiKey,
-      },
-      body: JSON.stringify({
-        email_address: email.trim(),
-        ...(firstName?.trim() && { first_name: firstName.trim() }),
-        fields: { source: source ?? 'unknown' },
-      }),
-    });
-
-    // Kit returns 200/201 for new subscribers and handles duplicates gracefully
-    if (kitRes.ok) {
-      return NextResponse.json({ success: true });
-    }
-
-    const data = await kitRes.json().catch(() => ({}));
-    console.error('[subscribe] Kit API error', kitRes.status, data);
-    return NextResponse.json(
-      { success: false, error: 'Could not subscribe. Please try again.' },
-      { status: 502 },
-    );
-  } catch (err) {
-    console.error('[subscribe] Unexpected error:', err);
-    return NextResponse.json(
-      { success: false, error: 'Something went wrong. Please try again.' },
-      { status: 500 },
-    );
-  }
+  return NextResponse.json(
+    { success: false, error: 'Could not subscribe. Please try again.' },
+    { status: 502 },
+  );
 }

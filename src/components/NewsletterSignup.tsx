@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { sendGAEvent } from '@next/third-parties/google';
 
 interface Props {
   variant: 'inline' | 'card';
@@ -30,6 +31,7 @@ export default function NewsletterSignup({ variant, source }: Props) {
       });
       const data = await res.json();
       if (data.success) {
+        sendGAEvent('event', 'newsletter_signup', { source });
         setStatus('success');
       } else {
         setErrorMsg(data.error ?? 'Something went wrong — try again.');

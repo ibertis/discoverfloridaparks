@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { subscribeToKit } from '@/lib/kit';
 
 // In-memory rate limiter: max 3 downloads per IP per hour.
 const rateLimitMap = new Map<string, number[]>();
@@ -82,6 +83,11 @@ export async function POST(req: Request) {
       console.error('Resend delivery error:', deliveryError);
       return NextResponse.json({ error: 'Failed to send email.' }, { status: 500 });
     }
+
+    // Also add the lead to the Kit newsletter list (fire-and-forget — never block
+    // the PDF delivery on a Kit failure). This is what makes the lead magnet
+    // actually grow the list.
+    subscribeToKit(email, 'lead-magnet', name.trim().split(' ')[0]).catch(() => {});
 
     // Notify site owner of new lead
     await resend.emails.send({

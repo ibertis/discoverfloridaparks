@@ -22,6 +22,7 @@ import GearRecommendations from '@/components/GearRecommendations';
 import ExperiencesSection from '@/components/ExperiencesSection';
 import type { CatalogExperience } from '@/components/ExperienceCard';
 import NewsletterSignup from '@/components/NewsletterSignup';
+import AffiliateLink from '@/components/AffiliateLink';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -571,10 +572,11 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                     <div key={exp.id} style={{ borderRadius: 16, padding: '20px 24px', border: '1px solid #eeeeee', background: '#fff' }}>
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
                         <div>
-                          <a href={exp.href} target="_blank" rel="nofollow sponsored noopener noreferrer"
+                          <AffiliateLink network={exp.source ?? 'partner'} placement="park-experience-manual" park={park.slug}
+                            href={exp.href} target="_blank" rel="nofollow sponsored noopener noreferrer"
                             style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', textDecoration: 'none' }}>
                             {exp.name}
-                          </a>
+                          </AffiliateLink>
                           {exp.business_name && (
                             <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.78rem', color: '#a6967c', margin: '2px 0 0' }}>{exp.business_name}</p>
                           )}
@@ -690,22 +692,24 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                     Search hotels near {park.name}
                   </span>
                   <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    <a
+                    <AffiliateLink
+                      network="expedia" placement="park-hotel-fallback" park={park.slug}
                       href={buildExpediaCityUrl(park.city)}
                       target="_blank"
                       rel="nofollow sponsored noopener noreferrer"
                       style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700, color: '#ff7044', textDecoration: 'none', borderRadius: '2.3em', border: '1.5px solid #ff7044', padding: '5px 14px' }}
                     >
                       Search on Expedia →
-                    </a>
-                    <a
+                    </AffiliateLink>
+                    <AffiliateLink
+                      network="hotels.com" placement="park-hotel-fallback" park={park.slug}
                       href={buildHotelsComCityUrl(park.city)}
                       target="_blank"
                       rel="nofollow sponsored noopener noreferrer"
                       style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.82rem', fontWeight: 700, color: '#d4145a', textDecoration: 'none', borderRadius: '2.3em', border: '1.5px solid #d4145a', padding: '5px 14px' }}
                     >
                       Search on Hotels.com →
-                    </a>
+                    </AffiliateLink>
                   </div>
                 </div>
                 <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#c4bab3', marginTop: 12, lineHeight: 1.6 }}>
@@ -773,7 +777,8 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                             {!address && distanceText && <span style={{ fontWeight: 400 }}>{distanceText}</span>}
                           </p>
                         )}
-                        <a
+                        <AffiliateLink
+                          network="hotels.com" placement="park-hotel-card" park={park.slug}
                           href={buildHotelsComUrl(hotel.name, hotel.latitude ?? null, hotel.longitude ?? null)}
                           target="_blank"
                           rel="nofollow sponsored noopener noreferrer"
@@ -781,7 +786,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                           style={{ display: 'inline-block', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600, color: '#a6967c', textDecoration: 'none', borderRadius: '2.3em', border: '1px solid #c4bab3', padding: '3px 11px', transition: 'background 0.15s, color 0.15s, border-color 0.15s' }}
                         >
                           Book on Hotels.com →
-                        </a>
+                        </AffiliateLink>
                       </div>
                     </div>
                     );

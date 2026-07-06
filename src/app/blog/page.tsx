@@ -7,6 +7,7 @@ import SiteFooter from '../SiteFooter';
 import FooterLinks from '../FooterLinks';
 import { getPublishedPosts } from '@/lib/blog';
 import { categoryToSlug } from '@/lib/slug';
+import NewsletterSignup from '@/components/NewsletterSignup';
 
 export const revalidate = 60;
 
@@ -118,6 +119,11 @@ export default async function BlogPage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Newsletter capture on the blog hub */}
+      <div style={{ maxWidth: 1278, margin: '4rem auto 0', padding: '0 24px' }}>
+        <NewsletterSignup variant="card" source="blog-index" />
       </div>
 
       <FooterLinks />

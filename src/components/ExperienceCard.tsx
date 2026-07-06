@@ -1,4 +1,5 @@
 import { Star, Clock } from 'lucide-react';
+import AffiliateLink from '@/components/AffiliateLink';
 
 export interface CatalogExperience {
   id: string;
@@ -110,7 +111,9 @@ export default function ExperienceCard({ experience: e }: { experience: CatalogE
       )}
 
       {/* CTA */}
-      <a
+      <AffiliateLink
+        network={e.affiliate_source ?? 'viator'}
+        placement="park-experience-catalog"
         href={e.affiliate_url}
         target="_blank"
         rel="noopener nofollow sponsored"
@@ -130,7 +133,7 @@ export default function ExperienceCard({ experience: e }: { experience: CatalogE
         className="hover:opacity-90 transition-opacity"
       >
         Book This Experience →
-      </a>
+      </AffiliateLink>
 
       {/* Attribution */}
       <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.72rem', color: '#a6967c', textAlign: 'center', margin: 0 }}>
