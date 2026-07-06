@@ -101,7 +101,7 @@ async function placesSearch(
   if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
     throw new Error(`Places API: ${data.status}`);
   }
-  return (data.results || []).filter((p: any) => (p.rating ?? 0) >= 3.8 && isLikelyHotel(p.name));
+  return (data.results || []).filter((p: { rating?: number; name: string }) => (p.rating ?? 0) >= 3.8 && isLikelyHotel(p.name));
 }
 
 async function enrichHotelsForPark(park: ParkRow, apiKey: string, dryRun = false): Promise<{

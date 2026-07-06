@@ -14,7 +14,7 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 import { supabaseAdmin } from './lib/supabase-admin.js';
-import { haversineDistance, getSearchRadius, MAX_FALLBACK_RADIUS } from './utils/geo.js';
+import { haversineDistance, getSearchRadius } from './utils/geo.js';
 import { buildExpediaHotelUrl } from './utils/expedia.js';
 import { getHotelInfo } from './lib/google-places.js';
 import { resolveHotelPhoto } from './lib/hotel-photo.js';

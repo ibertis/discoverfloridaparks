@@ -96,6 +96,11 @@ export function buildHotelRows(candidates, park) {
     return {
       park_id: park.id,
       name: h.name,
+      // Carry place_id so any auto-fixed hotel still gets its reviews modal (the
+      // park page gates reviews on hotel.place_id). Photo is intentionally left
+      // null — the nearbysearch token is a legacy ref that /api/hotel-photo can't
+      // use; photos come from the Places v1 flow (resolveHotelPhoto) elsewhere.
+      place_id: h.place_id ?? null,
       url: buildBookingUrl(h.name, h.vicinity, park.slug),
       description: buildHotelDescription(h, park.name),
       latitude: h.geometry.location.lat,

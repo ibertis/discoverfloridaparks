@@ -21,12 +21,6 @@ import { getHotelInfo } from './lib/google-places.js';
 import { resolveHotelPhoto } from './lib/hotel-photo.js';
 
 const DELAY_MS = 250;
-const PRICE_LEVEL_MAP: Record<string, number> = {
-  PRICE_LEVEL_INEXPENSIVE: 1,
-  PRICE_LEVEL_MODERATE: 2,
-  PRICE_LEVEL_EXPENSIVE: 3,
-  PRICE_LEVEL_VERY_EXPENSIVE: 4,
-};
 
 const c = {
   reset: '\x1b[0m', bold: '\x1b[1m',
