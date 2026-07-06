@@ -75,3 +75,31 @@ export async function resolveHotelPhoto(
     return photoRef;
   }
 }
+
+/**
+ * Fetch a FRESH photo reference from a live Place Details call, then download +
+ * store it. Needed for the backfill of existing hotels, whose stored refs have
+ * expired (Google Places New photo refs rot → HTTP 400 INVALID_ARGUMENT).
+ *
+ * Uses a photos-only field mask to stay in the cheapest Place Details SKU tier
+ * that still returns photos. Returns the stored Supabase URL, or null on failure.
+ */
+export async function resolveHotelPhotoByPlaceId(placeId: string | null | undefined): Promise<string | null> {
+  if (!placeId || !API_KEY) return null;
+  try {
+    const detailsUrl = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`;
+    const dRes = await fetch(detailsUrl, {
+      headers: { 'X-Goog-Api-Key': API_KEY, 'X-Goog-FieldMask': 'photos' },
+    });
+    if (!dRes.ok) return null;
+    const dJson = await dRes.json() as { photos?: { name?: string }[] };
+    const freshRef = dJson.photos?.[0]?.name;
+    if (!freshRef) return null;
+    // Hand the fresh ref to the normal download+upload path.
+    const stored = await resolveHotelPhoto(freshRef, placeId);
+    return stored && stored.startsWith('https://') ? stored : null;
+  } catch (err) {
+    console.error(`  resolveHotelPhotoByPlaceId error (${placeId}):`, err instanceof Error ? err.message : err);
+    return null;
+  }
+}

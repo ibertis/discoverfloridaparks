@@ -26,7 +26,7 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 import { supabaseAdmin } from './lib/supabase-admin.js';
-import { resolveHotelPhoto } from './lib/hotel-photo.js';
+import { resolveHotelPhotoByPlaceId } from './lib/hotel-photo.js';
 
 const DELAY_MS = 200;
 
@@ -39,6 +39,7 @@ const c = {
 interface HotelRow {
   id: string;
   name: string;
+  place_id: string | null;
   photo_reference: string | null;
 }
 
@@ -58,10 +59,12 @@ async function main() {
   console.log(`${c.gray}Mode: ${dryRun ? 'DRY RUN (no writes)' : 'LIVE'}${refresh ? ' · refreshing https rows too' : ''}${c.reset}\n`);
 
   // Rows still on a raw Google ref (or all rows with any photo, when --refresh).
+  // Need place_id: stored photo refs expire, so we fetch a FRESH ref per hotel.
   let query = supabaseAdmin
     .from('park_hotels')
-    .select('id, name, photo_reference')
-    .not('photo_reference', 'is', null);
+    .select('id, name, place_id, photo_reference')
+    .not('photo_reference', 'is', null)
+    .not('place_id', 'is', null);
   if (!refresh) query = query.like('photo_reference', 'places/%');
 
   const { data, error } = await query;
@@ -88,7 +91,8 @@ async function main() {
     }
 
     await sleep(DELAY_MS);
-    const resolved = await resolveHotelPhoto(hotel.photo_reference, hotel.id);
+    // Fetch a FRESH photo ref via place_id (stored refs have expired), then store.
+    const resolved = await resolveHotelPhotoByPlaceId(hotel.place_id);
 
     // Success = we got a Supabase https URL back that differs from what's stored.
     if (resolved && resolved.startsWith('https://') && resolved !== hotel.photo_reference) {
