@@ -122,8 +122,8 @@ export default function PrivacyPage() {
               <ul style={{ ...s.p, paddingLeft: '1.4rem', margin: '0 0 1rem' }}>
                 <li style={s.li}><strong>Hotels &amp; Travel:</strong> Booking.com, Hotels.com, Expedia</li>
                 <li style={s.li}><strong>Experiences &amp; Tours:</strong> Viator</li>
-                <li style={s.li}><strong>Outdoor Gear:</strong> REI (via Impact), L.L. Bean (via CJ Affiliate)</li>
-                <li style={s.li}><strong>General Retail:</strong> Amazon Associates</li>
+                <li style={s.li}><strong>Outdoor Gear &amp; General Retail:</strong> Amazon Associates</li>
+                <li style={s.li}><strong>Sponsored Placements:</strong> Backcountry (via Impact)</li>
               </ul>
               <p style={s.p}>
                 When you click an affiliate link, the relevant network may set a tracking cookie to attribute
@@ -149,7 +149,7 @@ export default function PrivacyPage() {
                 </li>
                 <li style={s.li}>
                   <strong>Impact.</strong> Tracking pixels may load on pages containing Impact affiliate
-                  links (e.g., REI).
+                  links (e.g., Backcountry).
                 </li>
                 <li style={s.li}>
                   <strong>Amazon Associates.</strong> Amazon may track clicks from this Site in accordance

@@ -59,7 +59,7 @@ export default function GearRecommendations({ amenities }: Props) {
                   {category.items.map((item, j) => (
                     <AffiliateLink
                       key={item.name}
-                      network={item.url.includes('amazon.') ? 'amazon' : 'backcountry'}
+                      network="amazon"
                       placement="park-gear"
                       href={item.url}
                       target="_blank"

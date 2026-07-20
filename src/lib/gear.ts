@@ -1,15 +1,17 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // gear.ts — DFP Gear & What to Pack Configuration
 //
-// Outdoor gear (camping, hiking, paddling, biking, wildlife, beach, boating,
-// dog, snorkeling): Backcountry.com via Impact affiliate
-//   Publisher: 6182914  Campaign: 5311  Ad: 366476
-//   Deeplink: BC_BASE + ?url=encoded_backcountry_search_url
+// All "What to Pack" links are Amazon Associates search URLs (tag: discoverflo00-20).
+// Consolidated to Amazon-only (2026-07): widest catalog, best conversion for a
+// general park-visitor audience, one network to maintain, and search URLs never
+// expire.
 //
-// Fishing, hunting, equestrian, consumables (sunscreen, bug spray): Amazon
-//   Tag: discoverflo00-20
-//   Use search query URLs (/s?k=...) — they never expire.
-//   Do NOT use amzn.to short links or ASIN-specific URLs.
+// Rules:
+//   Use search query URLs (/s?k=...) only — they never expire.
+//   Do NOT use amzn.to short links or ASIN-specific URLs (those can go stale).
+//
+// Note: the homepage "Backcountry Summer Sale" card (FeaturedExperiences.tsx) is a
+// separate, time-boxed paid placement via Impact — not part of this module.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface GearItem {
@@ -28,16 +30,9 @@ export interface GearCategory {
 // ── Affiliate helpers ─────────────────────────────────────────────────────────
 
 const AMAZON_TAG = 'discoverflo00-20';
-// Impact publisher 6182914, campaign 5311, ad 366476 (homepage / general deeplink)
-const BC_BASE = 'https://backcountry.tnu8.net/c/6182914/366476/5311';
 
 function amz(searchQuery: string): string {
   return `https://www.amazon.com/s?k=${encodeURIComponent(searchQuery)}&tag=${AMAZON_TAG}`;
-}
-
-function bc(searchQuery: string): string {
-  const bcUrl = `https://www.backcountry.com/search?q=${encodeURIComponent(searchQuery)}`;
-  return `${BC_BASE}?url=${encodeURIComponent(bcUrl)}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -58,17 +53,17 @@ export const UNIVERSAL_ITEMS: GearItem[] = [
   {
     name: 'Insulated Water Bottle',
     description: 'Stay hydrated in Florida heat — 32oz minimum',
-    url: bc('insulated water bottle 32oz hiking'),
+    url: amz('insulated water bottle 32oz hiking'),
   },
   {
     name: 'Lightweight Rain Jacket',
     description: 'Florida afternoon storms arrive without warning',
-    url: bc('lightweight packable rain jacket hiking'),
+    url: amz('lightweight packable rain jacket hiking'),
   },
   {
     name: 'Polarized Sunglasses',
     description: 'Cut glare on water and trails — a Florida must-have',
-    url: bc('polarized sunglasses UV400 outdoor'),
+    url: amz('polarized sunglasses UV400 outdoor'),
   },
 ];
 
@@ -88,27 +83,27 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: '2-Person Camping Tent',
         description: 'Lightweight & waterproof — Florida-rated',
-        url: bc('2 person camping tent lightweight waterproof'),
+        url: amz('2 person camping tent lightweight waterproof'),
       },
       {
         name: 'Sleeping Bag (40°F rated)',
         description: 'Warm Florida nights still get cool in winter',
-        url: bc('sleeping bag 40 degree camping'),
+        url: amz('sleeping bag 40 degree camping'),
       },
       {
         name: 'Sleeping Pad',
         description: 'Insulated foam or self-inflating — essential comfort',
-        url: bc('sleeping pad camping self inflating'),
+        url: amz('sleeping pad camping self inflating'),
       },
       {
         name: 'Camp Stove',
         description: 'Compact backpacking stove for campsite meals',
-        url: bc('backpacking camp stove compact'),
+        url: amz('backpacking camp stove compact'),
       },
       {
         name: 'Headlamp',
         description: 'Hands-free trail lighting — always bring a backup',
-        url: bc('headlamp camping rechargeable bright'),
+        url: amz('headlamp camping rechargeable bright'),
       },
     ],
   },
@@ -122,22 +117,22 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Trail Shoes or Hiking Boots',
         description: 'Grip & support for Florida\'s sandy and root-covered trails',
-        url: bc('trail hiking shoes boots outdoor'),
+        url: amz('trail hiking shoes boots outdoor'),
       },
       {
         name: 'Hydration Pack',
         description: 'Hands-free water carry — 2L minimum for Florida heat',
-        url: bc('hydration pack backpack 2L hiking'),
+        url: amz('hydration pack backpack 2L hiking'),
       },
       {
         name: 'Trekking Poles',
         description: 'Reduce knee strain on longer Florida trails',
-        url: bc('trekking poles lightweight collapsible'),
+        url: amz('trekking poles lightweight collapsible'),
       },
       {
         name: 'Trail GPS',
         description: 'Florida trails can be disorienting — always navigate prepared',
-        url: bc('handheld trail GPS hiking navigation'),
+        url: amz('handheld trail GPS hiking navigation'),
       },
     ],
   },
@@ -151,22 +146,22 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Kayak Paddle',
         description: 'Lightweight — less fatigue on long Florida water trails',
-        url: bc('kayak paddle lightweight fiberglass'),
+        url: amz('kayak paddle lightweight fiberglass'),
       },
       {
         name: 'Life Jacket (PFD)',
         description: 'Coast Guard approved — required on Florida waterways',
-        url: bc('life jacket PFD Coast Guard approved kayaking'),
+        url: amz('life jacket PFD Coast Guard approved kayaking'),
       },
       {
         name: 'Dry Bag (20L)',
         description: 'Keep gear waterproof — a necessity on the water',
-        url: bc('dry bag 20L waterproof kayaking'),
+        url: amz('dry bag 20L waterproof kayaking'),
       },
       {
         name: 'Waterproof Phone Case',
         description: 'Float-capable pouch for photos and navigation',
-        url: bc('waterproof phone case float kayaking'),
+        url: amz('waterproof phone case float kayaking'),
       },
     ],
   },
@@ -180,32 +175,32 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Snorkel Mask Set',
         description: 'Anti-fog wide view — Florida springs are crystal clear',
-        url: bc('snorkel mask set anti-fog wide view'),
+        url: amz('snorkel mask set anti-fog wide view'),
       },
       {
         name: 'Water Shoes',
         description: 'Grip on rocky spring shorelines and riverbeds',
-        url: bc('water shoes beach river rocky'),
+        url: amz('water shoes beach river rocky'),
       },
       {
         name: 'Rash Guard',
         description: 'UPF 50+ sun protection in and out of the water',
-        url: bc('rash guard UPF 50 swimming'),
+        url: amz('rash guard UPF 50 swimming'),
       },
       {
         name: 'Swim Fins',
         description: 'Extend your range in springs and coastal waters',
-        url: bc('swim fins snorkeling'),
+        url: amz('swim fins snorkeling'),
       },
       {
         name: 'Board Shorts / Swim Trunks',
         description: 'Quick-dry — doubles as a hiking short on the trail',
-        url: bc('board shorts swim trunks quick dry'),
+        url: amz('board shorts swim trunks quick dry'),
       },
       {
         name: 'Swimsuit',
         description: 'Chlorine & saltwater resistant for springs and coastal parks',
-        url: bc('womens swimsuit one piece bikini outdoor'),
+        url: amz('womens swimsuit one piece bikini outdoor'),
       },
     ],
   },
@@ -248,22 +243,22 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Bike Helmet',
         description: 'Non-negotiable — required for trail riding in Florida',
-        url: bc('bike helmet adult trail cycling'),
+        url: amz('bike helmet adult trail cycling'),
       },
       {
         name: 'Cycling Gloves',
         description: 'Grip and comfort on Florida\'s long paved trails',
-        url: bc('cycling gloves padded mountain bike'),
+        url: amz('cycling gloves padded mountain bike'),
       },
       {
         name: 'Bike Water Bottle & Cage',
         description: 'Hydration access without stopping on the trail',
-        url: bc('bike water bottle cage cycling'),
+        url: amz('bike water bottle cage cycling'),
       },
       {
         name: 'Bike Repair Kit',
         description: 'Patch kit, tire levers, and multi-tool — don\'t get stranded',
-        url: bc('bike repair kit patch tire lever multi tool'),
+        url: amz('bike repair kit patch tire lever multi tool'),
       },
     ],
   },
@@ -277,7 +272,7 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Binoculars',
         description: '8x42 magnification — the standard for Florida birding',
-        url: bc('binoculars 8x42 bird watching wildlife'),
+        url: amz('binoculars 8x42 bird watching wildlife'),
       },
       {
         name: 'Field Guide: Florida',
@@ -287,12 +282,12 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Action Camera',
         description: 'Capture wildlife from a safe, respectful distance',
-        url: bc('action camera waterproof outdoor'),
+        url: amz('action camera waterproof outdoor'),
       },
       {
         name: 'Quick-Dry Hiking Pants',
         description: 'Lightweight, moisture-wicking for Florida\'s humid trails',
-        url: bc('quick dry hiking pants lightweight'),
+        url: amz('quick dry hiking pants lightweight'),
       },
     ],
   },
@@ -306,22 +301,22 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Beach Umbrella & Shelter',
         description: 'UPF 50+ shade — essential for Florida beach days',
-        url: bc('beach umbrella UPF 50 sand anchor'),
+        url: amz('beach umbrella UPF 50 sand anchor'),
       },
       {
         name: 'Packable Beach Chair',
         description: 'Lightweight and sand-proof for all-day beach visits',
-        url: bc('packable beach chair lightweight'),
+        url: amz('packable beach chair lightweight'),
       },
       {
         name: 'Dry Bag / Beach Bag',
         description: 'Keep sand and saltwater away from your gear',
-        url: bc('dry bag beach waterproof tote'),
+        url: amz('dry bag beach waterproof tote'),
       },
       {
         name: 'Water Shoes',
         description: 'Protect feet on rocky and shell-covered Florida shorelines',
-        url: bc('water shoes beach rocky shoreline'),
+        url: amz('water shoes beach rocky shoreline'),
       },
     ],
   },
@@ -335,22 +330,22 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Life Jackets (PFDs)',
         description: 'Florida law requires one per person on board — Coast Guard approved',
-        url: bc('life jacket PFD Coast Guard approved boating'),
+        url: amz('life jacket PFD Coast Guard approved boating'),
       },
       {
         name: 'Dry Bag (30L+)',
         description: 'Keep gear dry on the water — larger capacity for boat trips',
-        url: bc('dry bag 30L waterproof boating'),
+        url: amz('dry bag 30L waterproof boating'),
       },
       {
         name: 'Waterproof Phone Case',
         description: 'Navigation and photos on the water — float-capable pouch',
-        url: bc('waterproof phone case float boating'),
+        url: amz('waterproof phone case float boating'),
       },
       {
         name: 'Marine Cooler',
         description: 'Keep drinks and catch cold on Florida\'s warm water days',
-        url: bc('marine cooler insulated boat'),
+        url: amz('marine cooler insulated boat'),
       },
     ],
   },
@@ -364,22 +359,22 @@ export const GEAR_CATEGORIES: GearCategory[] = [
       {
         name: 'Dog Harness',
         description: 'Florida parks require leashes — padded harness for trail comfort',
-        url: bc('dog harness padded trail hiking'),
+        url: amz('dog harness padded trail hiking'),
       },
       {
         name: 'Dog Leash',
         description: '6ft max on Florida trails — durable and tangle-free',
-        url: bc('dog leash 6ft durable trail'),
+        url: amz('dog leash 6ft durable trail'),
       },
       {
         name: 'Dog Life Jacket',
         description: 'Essential for paddle trips and water parks with dogs',
-        url: bc('dog life jacket PFD kayaking'),
+        url: amz('dog life jacket PFD kayaking'),
       },
       {
         name: 'Dog Gear & Accessories',
         description: 'Collapsible bowls, booties, and more for trail dogs',
-        url: bc('dog trail gear collapsible bowl booties'),
+        url: amz('dog trail gear collapsible bowl booties'),
       },
     ],
   },
