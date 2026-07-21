@@ -48,3 +48,8 @@ hermes/gsc-credentials.json
 *.tsbuildinfo
 next-env.d.ts
 hermes/logs/
+
+# supabase (local CLI state — not for the repo)
+supabase/.temp/
+supabase/.branches/
+supabase/.env
