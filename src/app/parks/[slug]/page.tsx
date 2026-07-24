@@ -113,6 +113,43 @@ function buildHotelsComCityUrl(city: string): string {
   return cjBase ? `${cjBase}?url=${encodeURIComponent(hotelsUrl)}` : hotelsUrl;
 }
 
+// Resolve the single best booking destination for a curated hotel: prefer the
+// hand-picked affiliate deep-link (usually a Booking.com link straight to the
+// exact property — our strongest converter). Fall back to a Hotels.com search by
+// name only when no curated URL exists, so the CTA is never dead. Network is
+// derived from the actual host so GA4 attribution and the button label stay honest.
+function hotelBookingTarget(hotel: {
+  url?: string | null;
+  name: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}): { href: string; network: string; label: string } {
+  const curated = typeof hotel.url === 'string' ? hotel.url.trim() : '';
+  if (curated) {
+    let network = 'booking.com';
+    try {
+      const host = new URL(curated).hostname.replace(/^www\./, '');
+      if (host.includes('booking.com')) network = 'booking.com';
+      else if (host.includes('hotels.com')) network = 'hotels.com';
+      else if (host.includes('expedia')) network = 'expedia';
+      else network = host;
+    } catch {
+      /* malformed URL — keep default network but still use the curated href */
+    }
+    const label =
+      network === 'booking.com' ? 'Book on Booking.com →'
+      : network === 'hotels.com' ? 'Book on Hotels.com →'
+      : network === 'expedia' ? 'Book on Expedia →'
+      : 'Book your stay →';
+    return { href: curated, network, label };
+  }
+  return {
+    href: buildHotelsComUrl(hotel.name, hotel.latitude ?? null, hotel.longitude ?? null),
+    network: 'hotels.com',
+    label: 'Book on Hotels.com →',
+  };
+}
+
 function parseHotelAddress(description: string | null, hotelName: string): string {
   if (!description) return '';
   let addr = description;
@@ -739,6 +776,7 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                           ? hotel.photo_reference
                           : `/api/hotel-photo?ref=${encodeURIComponent(hotel.photo_reference)}`)
                       : null;
+                    const booking = hotelBookingTarget(hotel);
                     return (
                     <div key={hotel.id} className="hotel-card">
                       {photoSrc && (
@@ -747,11 +785,13 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                         </div>
                       )}
                       <div className="hotel-body">
-                        {/* Name always on its own line */}
-                        <a href={hotel.url} target="_blank" rel="nofollow sponsored noopener noreferrer"
+                        {/* Name always on its own line — links to the best (curated) booking target, tracked */}
+                        <AffiliateLink
+                          network={booking.network} placement="park-hotel-name" park={park.slug}
+                          href={booking.href} target="_blank" rel="nofollow sponsored noopener noreferrer"
                           style={{ display: 'block', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#ff7044', textDecoration: 'none', marginBottom: 6 }}>
                           {hotel.name}
-                        </a>
+                        </AffiliateLink>
                         {/* Stars + badges wrap freely */}
                         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 8px', marginBottom: (address || distanceText) ? 10 : 0 }}>
                           {hotelRating && (
@@ -778,14 +818,14 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
                           </p>
                         )}
                         <AffiliateLink
-                          network="hotels.com" placement="park-hotel-card" park={park.slug}
-                          href={buildHotelsComUrl(hotel.name, hotel.latitude ?? null, hotel.longitude ?? null)}
+                          network={booking.network} placement="park-hotel-card" park={park.slug}
+                          href={booking.href}
                           target="_blank"
                           rel="nofollow sponsored noopener noreferrer"
                           className="hotels-pill"
                           style={{ display: 'inline-block', fontFamily: 'Archivo, sans-serif', fontSize: '0.75rem', fontWeight: 600, color: '#ff7044', textDecoration: 'none', borderRadius: '2.3em', border: '1px solid #ffcbb8', padding: '3px 11px', transition: 'background 0.15s, color 0.15s, border-color 0.15s' }}
                         >
-                          Book on Hotels.com →
+                          {booking.label}
                         </AffiliateLink>
                       </div>
                     </div>
