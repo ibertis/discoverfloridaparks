@@ -31,3 +31,8 @@ ALTER TABLE experiences ADD COLUMN IF NOT EXISTS source     text DEFAULT 'viator
 ALTER TABLE experiences ADD COLUMN IF NOT EXISTS price_from text;
 
 CREATE INDEX IF NOT EXISTS experiences_park_id_idx ON experiences(park_id);
+
+-- Data API grants (required for tables created after 2026-10-30).
+-- Read-only for site visitors; writes go through the admin API using service_role.
+GRANT SELECT ON experiences TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON experiences TO service_role;

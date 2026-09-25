@@ -35,3 +35,10 @@ drop trigger if exists update_blog_posts_updated_at on blog_posts;
 create trigger update_blog_posts_updated_at
   before update on blog_posts
   for each row execute function update_updated_at_column();
+
+-- Data API grants (required for tables created after 2026-10-30).
+-- Public reads posts; the admin edits from the browser as an authenticated user;
+-- service_role covers server-side scripts. service_role bypasses RLS but still
+-- needs table grants.
+grant select on blog_posts to anon;
+grant select, insert, update, delete on blog_posts to authenticated, service_role;

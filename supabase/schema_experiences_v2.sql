@@ -39,6 +39,12 @@ CREATE INDEX IF NOT EXISTS experiences_activity_type_idx ON experiences(activity
 CREATE INDEX IF NOT EXISTS experiences_regions_idx       ON experiences USING GIN(regions);
 CREATE INDEX IF NOT EXISTS experiences_active_idx        ON experiences(is_active) WHERE is_active = true;
 
+-- Data API grants (required for tables created after 2026-10-30).
+-- Read-only for site visitors; writes go through the admin API using service_role,
+-- which bypasses RLS but still needs table grants.
+GRANT SELECT ON experiences TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON experiences TO service_role;
+
 CREATE OR REPLACE TRIGGER update_experiences_updated_at
   BEFORE UPDATE ON experiences
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
