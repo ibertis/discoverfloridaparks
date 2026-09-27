@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import NewsletterForm from './NewsletterForm';
 import FeaturedExperiencesList from './FeaturedExperiencesList';
+import AffiliateLink from '@/components/AffiliateLink';
 
 export default async function FeaturedExperiences() {
   const { data: listings } = await supabase
@@ -31,35 +32,39 @@ export default async function FeaturedExperiences() {
         {/* Right — sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-          {/* Backcountry Summer Sale — affiliate card. TODO: swap out after 2026-08-31 (sale ends) */}
+          {/* Backcountry evergreen affiliate card (Impact ad 366476 → backcountry.com homepage).
+              Replaced the Summer Sale card (ad 366477) after that sale ended 2026-08-31.
+              Keep this copy date-free so it never goes stale. */}
           <div style={{ borderRadius: 16, overflow: 'hidden', background: '#362f35', minHeight: 300, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 28px', textAlign: 'center' }}>
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(145deg, #1e3a2f 0%, #1a2e24 100%)', opacity: 1 }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
               <p style={{ fontFamily: 'Archivo, sans-serif', fontSize: '0.68rem', fontWeight: 600, color: '#7dbf9e', textTransform: 'uppercase', letterSpacing: '0.14em', margin: '0 0 10px' }}>
-                Summer Sale · Sponsored
+                Gear Up · Sponsored
               </p>
               <h3 style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '2.4rem', color: '#fff', margin: '0 0 4px', letterSpacing: '-0.04em', lineHeight: 0.95 }}>
-                Up to 40% Off
+                Outfitted for Florida
               </h3>
               <p style={{ fontFamily: 'Shrikhand, cursive', fontWeight: 400, fontSize: '1.3rem', color: '#7dbf9e', margin: '0 0 16px', letterSpacing: '-0.03em' }}>
-                Gear &amp; Apparel
+                Camp, Hike &amp; Paddle
               </p>
               <p style={{ fontFamily: 'Glegoo, serif', fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, margin: '0 0 24px' }}>
-                Tents, sleep systems, bikes, hiking gear &amp; more — shop Backcountry&apos;s biggest sale of the season.
+                Tents, packs, paddling and trail essentials from Backcountry, ready for your next park day.
               </p>
-              <a
-                href="https://backcountry.tnu8.net/c/6182914/366477/5311"
+              <AffiliateLink
+                network="backcountry"
+                placement="home-featured-card"
+                href="https://backcountry.tnu8.net/c/6182914/366476/5311"
                 rel="sponsored noopener noreferrer"
                 target="_blank"
                 style={{ display: 'inline-block', background: '#ff7044', color: '#fff', borderRadius: '2.3em', padding: '10px 28px', fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: '0.82rem', textDecoration: 'none' }}
                 className="hover:opacity-85 transition-opacity"
               >
-                Shop the Sale →
-              </a>
+                Shop Backcountry →
+              </AffiliateLink>
             </div>
-            {/* Impact impression pixel — required for tracking */}
+            {/* Impact impression pixel — required for tracking (must match the ad ID above) */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img height={0} width={0} src="https://backcountry.tnu8.net/i/6182914/366477/5311" style={{ position: 'absolute', visibility: 'hidden', border: 0 }} alt="" />
+            <img height={0} width={0} src="https://backcountry.tnu8.net/i/6182914/366476/5311" style={{ position: 'absolute', visibility: 'hidden', border: 0 }} alt="" />
           </div>
 
           {/* Newsletter card */}
