@@ -29,6 +29,9 @@ export const config = {
       'sibfl.gov',           // Samson Oceanfront Park — confirmed valid, blocks bots
       'coralsprings.gov',    // Sawgrass Trailhead at Atlantic Blvd — confirmed valid, blocks bots
       'sjrwmd.com',          // St. Johns River WMD (Blue Cypress, Fort Drum, River Lakes, Three Forks) — confirmed valid, returns 403 to bots
+      'broward.org',         // Broward County Parks: Cloudflare blocks bots site-wide (homepage 403). New ?park=slug URLs verified in a browser 2026-10-19
+      'davie-fl.gov',        // Town of Davie (Bergeron, East Davie, Robbins, Wolf Lake): Cloudflare blocks bots site-wide (homepage 403)
+      'markhampark.com',     // Loads fine in browsers/curl; Node's fetch gets "socket hang up" from this host
     ],
   },
 
