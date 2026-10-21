@@ -371,11 +371,17 @@ export default function ParkEditForm({ park, role }: { park: Park | null; role?:
   async function handleDelete() {
     if (!confirm(`Delete "${form.name}"? This cannot be undone.`)) return;
     setDeleting(true);
-    await fetch('/admin/api/save-park', {
+    const res = await fetch('/admin/api/save-park', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: park!.id, slug: park!.slug }),
     });
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      setDeleting(false);
+      showToast(res.status === 403 ? 'Only admins can delete parks.' : (json.error ?? 'Delete failed.'), false);
+      return;
+    }
     router.push('/admin/parks');
   }
 
