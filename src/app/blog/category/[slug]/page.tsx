@@ -6,7 +6,7 @@ import SiteHeader from '@/app/SiteHeader';
 import SiteFooter from '@/app/SiteFooter';
 import FooterLinks from '@/app/FooterLinks';
 import { getPostsByCategory, getDistinctCategories } from '@/lib/blog';
-import { categoryToSlug, slugToCategory } from '@/lib/slug';
+import { categoryToSlug, findCategoryBySlug } from '@/lib/slug';
 import { notFound } from 'next/navigation';
 
 export const revalidate = 60;
@@ -18,7 +18,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const category = slugToCategory(slug);
+  const category = findCategoryBySlug(slug, await getDistinctCategories());
+  if (!category) return { title: 'Not Found' };
   const description = `Browse all ${category} posts on the Discover Florida Parks blog.`;
   return {
     title: category,
@@ -37,7 +38,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogCategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const category = slugToCategory(slug);
+  const category = findCategoryBySlug(slug, await getDistinctCategories());
+  if (!category) notFound();
   const posts = await getPostsByCategory(category);
 
   // No posts (or a bogus slug) → return a real 404 instead of a 200 "empty" page,
