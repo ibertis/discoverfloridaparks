@@ -6,6 +6,9 @@ import { getAdminUser, getUserRole } from '@/lib/supabase-server';
 export async function POST(req: NextRequest) {
   const user = await getAdminUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // The proxy (src/proxy.ts) gates /admin, but this route uses the service role (bypasses RLS), so check here too.
+  const role = getUserRole(user);
+  if (role !== 'admin' && role !== 'editor') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const db = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,11 +31,13 @@ export async function POST(req: NextRequest) {
     const { error } = await db.from('experiences').update(payload).eq('id', id);
     if (error) { console.error('save-experience update:', error.message); return NextResponse.json({ error: 'Failed to save experience.' }, { status: 500 }); }
     revalidatePath('/');
+    revalidatePath('/parks/[slug]', 'page'); // experiences also appear on park pages
     return NextResponse.json({ id });
   } else {
     const { data, error } = await db.from('experiences').insert(payload).select('id').single();
     if (error) { console.error('save-experience insert:', error.message); return NextResponse.json({ error: 'Failed to save experience.' }, { status: 500 }); }
     revalidatePath('/');
+    revalidatePath('/parks/[slug]', 'page'); // experiences also appear on park pages
     return NextResponse.json({ id: data.id });
   }
 }

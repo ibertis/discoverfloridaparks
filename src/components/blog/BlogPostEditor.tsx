@@ -64,12 +64,12 @@ function SidebarCard({ children }: { children: React.ReactNode }) {
 
 export default function BlogPostEditor({ postId }: { postId?: string }) {
   const router = useRouter();
-  const supabase = useRef(
+  const [supabase] = useState(() =>
     createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
-  ).current;
+  );
 
   const [form, setForm] = useState<FormState>(DEFAULTS);
   const [postLoaded, setPostLoaded] = useState(!postId);
@@ -82,7 +82,7 @@ export default function BlogPostEditor({ postId }: { postId?: string }) {
   const slugEdited = useRef(!!postId);
   const formRef = useRef(form);
   const currentPostId = useRef(postId);
-  formRef.current = form;
+  useEffect(() => { formRef.current = form; }, [form]);
 
   async function handleImageRemove() {
     const url = formRef.current.featured_image_url;
@@ -222,7 +222,8 @@ export default function BlogPostEditor({ postId }: { postId?: string }) {
     const id = currentPostId.current ?? form.id;
     if (!id) return;
     if (!window.confirm(`Delete "${form.title}"? This cannot be undone.`)) return;
-    await supabase.from('blog_posts').delete().eq('id', id);
+    const { error: err } = await supabase.from('blog_posts').delete().eq('id', id);
+    if (err) { setError(`Delete failed: ${err.message}`); return; }
     router.push('/admin/blog');
   }
 
@@ -474,7 +475,7 @@ export default function BlogPostEditor({ postId }: { postId?: string }) {
           </div>
 
           {/* Danger zone */}
-          {(currentPostId.current || form.id) && (
+          {(postId || form.id) && (
             <div style={{ paddingTop: 4 }}>
               <button
                 type="button"

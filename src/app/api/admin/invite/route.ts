@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   }
 
   // Roles live in app_metadata (only the service role can write it); the
-  // middleware, admin layout and RLS policies all read it from there.
+  // proxy, admin layout and RLS policies all read it from there.
   const { error: roleError } = await db.auth.admin.updateUserById(data.user.id, { app_metadata: { role } });
   if (roleError) return NextResponse.json({ error: `Invite sent, but setting the role failed: ${roleError.message}` }, { status: 500 });
 

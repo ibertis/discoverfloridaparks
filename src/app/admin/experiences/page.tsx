@@ -15,14 +15,12 @@ export default async function AdminExperiencesPage({ searchParams }: Props) {
 
   let query = supabase
     .from('experiences')
-    .select('id, name, activity_type, price_from, rating, review_count, affiliate_source, is_active, is_featured')
-    .order('activity_type')
-    .order('name');
+    .select('id, name, activity_type, price_from, rating, review_count, affiliate_source, is_active, is_featured');
 
-  if (q) query = (query as any).ilike('name', `%${q}%`);
-  if (type) query = (query as any).eq('activity_type', type);
+  if (q) query = query.ilike('name', `%${q}%`);
+  if (type) query = query.eq('activity_type', type);
 
-  const { data: experiences } = await query;
+  const { data: experiences } = await query.order('activity_type').order('name');
 
   return (
     <div className="p-8">
@@ -79,7 +77,7 @@ export default async function AdminExperiencesPage({ searchParams }: Props) {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#eeeeee]">
-              {experiences.map((exp: any) => (
+              {experiences.map(exp => (
                 <tr key={exp.id} className="bg-white hover:bg-[#fafafa] transition">
                   <td className="px-4 py-3">
                     <span className="font-medium text-[#362f35]">{exp.name}</span>

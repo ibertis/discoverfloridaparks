@@ -258,9 +258,19 @@ DROP POLICY IF EXISTS "blog_posts_public_read"   ON blog_posts;
 DROP POLICY IF EXISTS "blog_posts_editor_insert" ON blog_posts;
 DROP POLICY IF EXISTS "blog_posts_editor_update" ON blog_posts;
 DROP POLICY IF EXISTS "blog_posts_editor_delete" ON blog_posts;
+DROP POLICY IF EXISTS "blog_posts_editor_read"   ON blog_posts;
 
 CREATE POLICY "blog_posts_public_read" ON blog_posts
   FOR SELECT USING (published = true);
+
+-- Admins/editors must also read drafts: the admin list and editor load posts
+-- with this client, and inserting a new draft reads the row back
+-- (.select('id')). Without this, drafts were invisible and couldn't be created.
+-- Added to the live DB 2026-10-21.
+CREATE POLICY "blog_posts_editor_read" ON blog_posts
+  FOR SELECT USING (
+    ((auth.jwt() -> 'app_metadata') ->> 'role') IN ('admin', 'editor')
+  );
 
 CREATE POLICY "blog_posts_editor_insert" ON blog_posts
   FOR INSERT WITH CHECK (

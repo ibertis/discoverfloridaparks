@@ -28,7 +28,7 @@ export default async function AdminDashboard() {
         <h1 className="text-lg font-bold text-[#362f35]" style={{ fontFamily: 'Shrikhand, cursive', letterSpacing: '-0.04em' }}>
           Dashboard
         </h1>
-        {role === 'admin' && (
+        {(role === 'admin' || role === 'editor') && (
           <Link
             href="/admin/parks/new"
             className="flex items-center gap-2 bg-[#ff7044] hover:bg-[#e85a2e] text-white text-sm font-semibold px-4 py-2 rounded-lg transition"

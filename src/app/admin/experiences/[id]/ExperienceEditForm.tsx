@@ -49,7 +49,7 @@ interface Experience {
 
 const inputCls = 'w-full border border-[#dfdfdf] rounded-lg px-3 py-2.5 text-sm text-[#413734] outline-none focus:border-[#ff7044] transition bg-white';
 
-export default function ExperienceEditForm({ experience }: { experience: Experience | null }) {
+export default function ExperienceEditForm({ experience, canDelete = false }: { experience: Experience | null; canDelete?: boolean }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
@@ -318,7 +318,7 @@ export default function ExperienceEditForm({ experience }: { experience: Experie
       {/* Actions */}
       <div className="flex items-center justify-between pb-8">
         <div>
-          {experience?.id && (
+          {experience?.id && canDelete && (
             <button onClick={handleDelete} disabled={deleting}
               className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-700 transition disabled:opacity-50">
               <Trash2 size={14} />

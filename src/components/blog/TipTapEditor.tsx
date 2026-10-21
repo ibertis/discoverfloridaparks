@@ -26,6 +26,8 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Start w
   const [sourceMode, setSourceMode] = useState(false);
   // Uncontrolled ref — avoids re-rendering on every keystroke in source mode
   const sourceRef = useRef(content);
+  // Snapshot shown when source mode opens (refs can't be read during render)
+  const [sourceSnapshot, setSourceSnapshot] = useState(content);
 
   const editor = useEditor({
     extensions: [
@@ -54,6 +56,7 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Start w
     if (!sourceMode) {
       // Visual → Source: snapshot current editor HTML
       sourceRef.current = editor?.getHTML() ?? sourceRef.current;
+      setSourceSnapshot(sourceRef.current);
       setSourceMode(true);
     } else {
       // Source → Visual: parse raw HTML back into TipTap
@@ -69,7 +72,7 @@ export default function TipTapEditor({ content, onChange, placeholder = 'Start w
       {sourceMode ? (
         <textarea
           key="source"
-          defaultValue={sourceRef.current}
+          defaultValue={sourceSnapshot}
           onChange={e => { sourceRef.current = e.target.value; onChange(e.target.value); }}
           style={{
             width: '100%',

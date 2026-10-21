@@ -8,6 +8,9 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 export async function POST(req: NextRequest) {
   const user = await getAdminUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // The proxy (src/proxy.ts) gates /admin, but this route uses the service role (bypasses RLS), so check here too.
+  const role = getUserRole(user);
+  if (role !== 'admin' && role !== 'editor') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const serviceClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

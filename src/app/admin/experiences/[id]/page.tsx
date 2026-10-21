@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { createSupabaseServerClient, getAdminUser, getUserRole } from '@/lib/supabase-server';
 import ExperienceEditForm from './ExperienceEditForm';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -17,6 +17,7 @@ export default async function ExperienceEditPage({ params }: Props) {
 
   const { data } = await supabase.from('experiences').select('*').eq('id', id).single();
   if (!data) notFound();
+  const canDelete = getUserRole(await getAdminUser()) === 'admin';
 
   return (
     <div className="p-8 max-w-2xl">
@@ -28,7 +29,7 @@ export default async function ExperienceEditPage({ params }: Props) {
         <span className="text-[#dfdfdf]">/</span>
         <span className="text-sm text-[#362f35] font-medium">{data.name}</span>
       </div>
-      <ExperienceEditForm experience={data} />
+      <ExperienceEditForm experience={data} canDelete={canDelete} />
     </div>
   );
 }

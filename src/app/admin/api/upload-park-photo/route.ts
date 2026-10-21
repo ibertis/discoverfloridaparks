@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getAdminUser } from '@/lib/supabase-server';
+import { getAdminUser, getUserRole } from '@/lib/supabase-server';
 
 export async function POST(req: NextRequest) {
   const user = await getAdminUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // The proxy (src/proxy.ts) gates /admin, but this route uses the service role (bypasses RLS), so check here too.
+  const role = getUserRole(user);
+  if (role !== 'admin' && role !== 'editor') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const serviceClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,7 +44,7 @@ export async function POST(req: NextRequest) {
 
   const { error } = await serviceClient.storage
     .from('park-photos')
-    .upload(safeName, buffer, { upsert: true, contentType: file.type });
+    .upload(safeName, buffer, { upsert: false, contentType: file.type });
 
   if (error) { console.error('upload-park-photo:', error.message); return NextResponse.json({ error: 'Upload failed.' }, { status: 500 }); }
 

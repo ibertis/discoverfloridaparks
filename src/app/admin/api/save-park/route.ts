@@ -36,7 +36,7 @@ async function syncChildren(
 export async function POST(req: NextRequest) {
   const user = await getAdminUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  // Middleware already gates /admin, but this route writes with the service role
+  // The proxy (src/proxy.ts) already gates /admin, but this route writes with the service role
   // (bypassing RLS), so check the role here too.
   const role = getUserRole(user);
   if (role !== 'admin' && role !== 'editor') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
