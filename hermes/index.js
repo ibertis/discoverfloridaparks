@@ -3,7 +3,7 @@
 //   node index.js           → full run
 //   node index.js --dry-run → check URLs only, no email sent
 
-import 'dotenv/config'
+import './env.js'
 import { fetchParkURLs } from './modules/db.js'
 import { checkAllURLs } from './modules/checker.js'
 import { checkAffiliateLinks } from './modules/affiliateChecker.js'

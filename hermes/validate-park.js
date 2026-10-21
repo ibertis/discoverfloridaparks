@@ -2,7 +2,7 @@
 // Usage:
 //   node validate-park.js <slug>          — validate one park
 //   node validate-park.js --all           — validate every park, print summary
-import 'dotenv/config'
+import './env.js'
 import fetch from 'node-fetch'
 import { createClient } from '@supabase/supabase-js'
 import { config } from './config.js'

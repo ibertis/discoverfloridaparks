@@ -5,7 +5,7 @@
 // After running this once, Hermes uses the stored token automatically.
 // You should NOT need to run this again unless the token is revoked.
 
-import 'dotenv/config'
+import './env.js'
 import { google } from 'googleapis'
 import { readFileSync, writeFileSync } from 'fs'
 import * as readline from 'readline'
