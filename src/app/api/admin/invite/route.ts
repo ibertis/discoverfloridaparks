@@ -1,46 +1,35 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { getAdminUser, getUserRole } from '@/lib/supabase-server';
-
-const VALID_ROLES = ['admin', 'editor'] as const;
-type Role = typeof VALID_ROLES[number];
+import { isRole, requireAdmin, supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: Request) {
-  const user = await getAdminUser();
-  const role = getUserRole(user);
+  if (!(await requireAdmin())) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  if (!user || role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  let email: string, role: unknown;
+  try { ({ email, role } = await request.json()); }
+  catch { return NextResponse.json({ error: 'Invalid request body' }, { status: 400 }); }
 
-  let email: string;
-  let inviteRole: Role;
-
-  try {
-    const body = await request.json();
-    email = body.email;
-    inviteRole = body.role;
-  } catch {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-  }
-
-  if (!email || !inviteRole || !VALID_ROLES.includes(inviteRole)) {
+  email = (email ?? '').trim().toLowerCase();
+  if (!email || !isRole(role)) {
     return NextResponse.json({ error: 'email and role (admin|editor) are required' }, { status: 400 });
   }
 
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
-
-  const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-    data: { role: inviteRole },
+  const db = supabaseAdmin();
+  const origin = new URL(request.url).origin;
+  const { data, error } = await db.auth.admin.inviteUserByEmail(email, {
+    redirectTo: `${origin}/admin/reset-password`,
   });
-
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    const exists = /already (been )?registered|already exists/i.test(error.message);
+    return NextResponse.json(
+      { error: exists ? 'That email already has an account. Change its role in the list below.' : error.message },
+      { status: exists ? 409 : 400 },
+    );
   }
+
+  // Roles live in app_metadata (only the service role can write it); the
+  // middleware, admin layout and RLS policies all read it from there.
+  const { error: roleError } = await db.auth.admin.updateUserById(data.user.id, { app_metadata: { role } });
+  if (roleError) return NextResponse.json({ error: `Invite sent, but setting the role failed: ${roleError.message}` }, { status: 500 });
 
   return NextResponse.json({ ok: true });
 }

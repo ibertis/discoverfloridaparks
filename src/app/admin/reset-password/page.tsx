@@ -14,6 +14,8 @@ export default function ResetPasswordPage() {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [invite, setInvite] = useState(false);
+  const [linkError, setLinkError] = useState('');
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,9 +23,26 @@ export default function ResetPasswordPage() {
   );
 
   useEffect(() => {
+    // Password-reset links fire PASSWORD_RECOVERY. Invite links land with tokens
+    // in the URL hash (#access_token=…&type=invite), which this PKCE client
+    // doesn't pick up on its own, so hand them to setSession.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setReady(true);
     });
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const access_token = hash.get('access_token');
+    const refresh_token = hash.get('refresh_token');
+    const hashError = hash.get('error_description');
+    if (hashError) {
+      queueMicrotask(() => setLinkError(hashError.replace(/\+/g, ' ')));
+    } else if (access_token && refresh_token) {
+      supabase.auth.setSession({ access_token, refresh_token }).then(({ error }) => {
+        if (error) { setLinkError(error.message); return; }
+        if (hash.get('type') === 'invite') setInvite(true);
+        window.history.replaceState(null, '', window.location.pathname);
+        setReady(true);
+      });
+    }
     return () => subscription.unsubscribe();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -51,7 +70,9 @@ export default function ResetPasswordPage() {
       <div className="min-h-screen flex items-center justify-center bg-[#f7f5f2]">
         <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-[#eeeeee] p-8 text-center">
           <span style={{ fontFamily: 'Shrikhand, cursive', color: '#ff7044', fontSize: '1.6rem' }}>DFP Admin</span>
-          <p className="text-sm text-[#726d6b] mt-4" style={font}>Verifying reset link…</p>
+          <p className={`text-sm mt-4 ${linkError ? 'text-red-600' : 'text-[#726d6b]'}`} style={font}>
+            {linkError ? `This link didn’t work: ${linkError}. Ask an admin to resend your invite, or use “Forgot password” on the sign-in page.` : 'Verifying link…'}
+          </p>
         </div>
       </div>
     );
@@ -62,7 +83,7 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-[#eeeeee] p-8">
         <div className="mb-8 text-center">
           <span style={{ fontFamily: 'Shrikhand, cursive', color: '#ff7044', fontSize: '1.6rem' }}>DFP Admin</span>
-          <p className="text-sm text-[#726d6b] mt-1" style={font}>Set a new password</p>
+          <p className="text-sm text-[#726d6b] mt-1" style={font}>{invite ? 'Welcome! Choose a password to finish setting up your account' : 'Set a new password'}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,7 +111,7 @@ export default function ResetPasswordPage() {
             className="w-full bg-[#ff7044] hover:bg-[#e85a2e] text-white font-semibold rounded-lg py-2.5 text-sm transition disabled:opacity-50"
             style={font}
           >
-            {loading ? 'Saving…' : 'Set new password'}
+            {loading ? 'Saving…' : invite ? 'Set password and continue' : 'Set new password'}
           </button>
         </form>
       </div>
