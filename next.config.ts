@@ -48,6 +48,12 @@ const nextConfig: NextConfig = {
         destination: '/parks/gamble-rogers-state-park',
         permanent: true,
       },
+      // Duplicate listing removed 2026-10-21: the park was renamed in 2016
+      {
+        source: '/parks/john-u-lloyd-beach-state-park',
+        destination: '/parks/dr-von-d-mizell-eula-johnson-state-park',
+        permanent: true,
+      },
     ];
   },
   async headers() {
