@@ -108,8 +108,9 @@ export async function GET(req: NextRequest) {
       return out;
     }
 
-    // Only allow Places photo references — never let this route fetch arbitrary schemes.
-    if (!ref.startsWith('places/')) {
+    // Only allow exact Places photo names (places/{id}/photos/{ref}). Anything else could turn
+    // this billable call into another (pricier) Places endpoint via query strings or ../ segments.
+    if (!/^places\/[A-Za-z0-9_-]+\/photos\/[A-Za-z0-9_-]+$/.test(ref)) {
       return new NextResponse('Invalid ref', { status: 400 });
     }
 

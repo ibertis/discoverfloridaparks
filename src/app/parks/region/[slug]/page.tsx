@@ -1,3 +1,4 @@
+import { jsonLd } from '@/lib/jsonld';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -217,7 +218,7 @@ export default async function RegionHubPage(
 
   return (
     <div style={{ background: '#fff', color: '#413734' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbSchema) }} />
 
       <SiteHeader />
 

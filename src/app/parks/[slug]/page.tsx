@@ -1,3 +1,4 @@
+import { jsonLd } from '@/lib/jsonld';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import type { Metadata } from 'next';
@@ -448,11 +449,11 @@ export default async function ParkPage({ params }: { params: Promise<{ slug: str
 
   return (
     <div style={{ background: '#fff', color: '#413734', minHeight: '100vh' }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(touristAttractionSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(touristAttractionSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbSchema) }} />
+      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(faqSchema) }} />}
       {experiencesSchema && experiencesSchema.map((s, i) => (
-        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(s) }} />
       ))}
 
       <SiteHeader />

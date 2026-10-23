@@ -1,3 +1,4 @@
+import { jsonLd as toJsonLd } from '@/lib/jsonld';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -95,11 +96,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: toJsonLd(jsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: toJsonLd(breadcrumbLd) }}
       />
 
       <article style={{ maxWidth: 800, margin: '0 auto', padding: '48px 24px 80px' }}>

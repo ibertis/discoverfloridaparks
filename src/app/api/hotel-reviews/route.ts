@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
 // Returns up to 5 Google Places reviews for a given place_id.
 // Usage: /api/hotel-reviews?placeId={place_id}
@@ -41,6 +42,15 @@ export async function GET(req: NextRequest) {
   const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || '127.0.0.1';
   if (!checkRateLimit(ip)) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
+  // Only look up hotels listed on the site, so bots can't bill us for arbitrary places
+  if (!/^[A-Za-z0-9_-]{10,300}$/.test(placeId)) {
+    return NextResponse.json({ error: 'Invalid placeId' }, { status: 400 });
+  }
+  const { data: known } = await supabase.from('park_hotels').select('id').eq('place_id', placeId).limit(1);
+  if (!known?.length) {
+    return NextResponse.json({ error: 'Unknown place' }, { status: 404 });
   }
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
